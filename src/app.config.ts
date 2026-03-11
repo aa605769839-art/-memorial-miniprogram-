@@ -3,7 +3,8 @@ export default defineAppConfig({
     'pages/index/index',
     'pages/detail/index',
     'pages/ranking/index',
-    'pages/profile/index'
+    'pages/profile/index',
+    'pages/profile/form'
   ],
   window: {
     backgroundTextStyle: 'light',

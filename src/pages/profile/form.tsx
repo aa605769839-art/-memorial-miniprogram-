@@ -282,6 +282,21 @@ const FormPage = () => {
         });
 
         if (updateRes.data?.code === 200) {
+          // 删除所有旧照片，然后重新添加所有照片
+          await Network.request({
+            url: `/api/photos/memorial/${id}`,
+            method: 'DELETE'
+          });
+
+          // 如果有照片，重新添加
+          if (photos.length > 0) {
+            await Network.request({
+              url: `/api/photos/batch/${id}`,
+              method: 'POST',
+              data: { urls: photos }
+            });
+          }
+
           Taro.showToast({
             title: '保存成功',
             icon: 'success'

@@ -32,4 +32,10 @@ export class PhotosController {
     const result = await this.photosService.remove(id);
     return { code: 200, msg: 'success', data: result };
   }
+
+  @Delete('memorial/:memorialId')
+  async removeByMemorialId(@Param('memorialId') memorialId: string) {
+    const result = await this.photosService.removeByMemorialId(memorialId);
+    return { code: 200, msg: 'success', data: result };
+  }
 }

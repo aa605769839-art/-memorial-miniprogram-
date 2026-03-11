@@ -38,7 +38,7 @@ const ProfilePage = () => {
 
     setIsGenerating(true);
     try {
-      const prompt = `Generate a warm, cartoon-style portrait of a deceased person named ${formData.name}. ${formData.description ? `They were ${formData.description}.` : ''} ${formData.achievements ? `Known for: ${formData.achievements}.` : ''} Style: gentle, peaceful, warm colors, soft lighting, like a memorial portrait. 2K resolution.`;
+      const prompt = `Create a vibrant, expressive cartoon-style portrait of ${formData.name}. ${formData.description ? `Their personality: ${formData.description}.` : ''} ${formData.achievements ? `Proud achievements: ${formData.achievements}.` : ''} Style: exaggerated facial features, warm and cheerful colors (orange, amber, warm yellow), gentle smile, kind eyes, surrounded by soft glowing light and colorful flower petals, joyful and peaceful atmosphere, like a heartwarming memorial portrait. High saturation, rich colors, soft brush strokes. 2K resolution.`;
 
       const res = await Network.request({
         url: '/api/generate-avatar',

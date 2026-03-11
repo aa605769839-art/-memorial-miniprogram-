@@ -312,19 +312,13 @@ tabBar: {
   color: '#a8a29e',          // 未选中 - stone-400
   selectedColor: '#f97316',  // 选中 - orange-500
   backgroundColor: '#ffffff',
-  borderStyle: 'white',
+  borderStyle: 'black',
   list: [
     {
       pagePath: 'pages/index/index',
-      text: '故人',
-      iconPath: './assets/tabbar/heart.png',
-      selectedIconPath: './assets/tabbar/heart-active.png',
-    },
-    {
-      pagePath: 'pages/ranking/index',
-      text: '排行',
-      iconPath: './assets/tabbar/award.png',
-      selectedIconPath: './assets/tabbar/award-active.png',
+      text: '首页',
+      iconPath: './assets/tabbar/home.png',
+      selectedIconPath: './assets/tabbar/home-active.png',
     },
     {
       pagePath: 'pages/profile/index',

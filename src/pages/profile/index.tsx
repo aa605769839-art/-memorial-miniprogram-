@@ -148,6 +148,14 @@ const ProfilePage = () => {
     setTempAvatar(null); // 清空临时头像
   };
 
+  // 点击遮罩层关闭弹窗
+  const handleMaskClick = (e: any) => {
+    // 阻止事件冒泡，避免点击弹窗内容时关闭
+    if (e.target === e.currentTarget) {
+      handleCancel();
+    }
+  };
+
   const handleAddMemorial = () => {
     Taro.navigateTo({
       url: '/pages/profile/form'
@@ -159,7 +167,48 @@ const ProfilePage = () => {
       {/* 名片区域 */}
       <View className="px-4 py-6">
         <View className="bg-white rounded-2xl p-6 shadow-sm">
-          {isEditing ? (
+          <View
+            className="flex items-center gap-4 cursor-pointer"
+            onClick={handleEdit}
+          >
+            <View className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {userProfile.avatar ? (
+                <Image
+                  src={userProfile.avatar}
+                  className="w-full h-full"
+                  mode="aspectFill"
+                />
+              ) : (
+                <User color="#94a3b8" size={40} />
+              )}
+            </View>
+            <View className="flex-1">
+              <Text className="block text-xl font-bold text-blue-900 mb-1">
+                {userProfile.name}
+              </Text>
+              <Text className="block text-sm text-slate-500 line-clamp-2">
+                {userProfile.bio}
+              </Text>
+            </View>
+            <ChevronRight color="#94a3b8" size={20} />
+          </View>
+        </View>
+      </View>
+
+      {/* 编辑弹窗 */}
+      {isEditing && (
+        <View
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={handleMaskClick}
+        >
+          <View
+            className="bg-white rounded-2xl p-6 mx-4 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Text className="block text-lg font-bold text-blue-900 mb-4 text-center">
+              编辑个人信息
+            </Text>
             <View className="flex flex-col gap-4">
               {/* 头像上传 */}
               <View>
@@ -225,35 +274,9 @@ const ProfilePage = () => {
                 </Button>
               </View>
             </View>
-          ) : (
-            <View
-              className="flex items-center gap-4 cursor-pointer"
-              onClick={handleEdit}
-            >
-              <View className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                {userProfile.avatar ? (
-                  <Image
-                    src={userProfile.avatar}
-                    className="w-full h-full"
-                    mode="aspectFill"
-                  />
-                ) : (
-                  <User color="#94a3b8" size={40} />
-                )}
-              </View>
-              <View className="flex-1">
-                <Text className="block text-xl font-bold text-blue-900 mb-1">
-                  {userProfile.name}
-                </Text>
-                <Text className="block text-sm text-slate-500 line-clamp-2">
-                  {userProfile.bio}
-                </Text>
-              </View>
-              <ChevronRight color="#94a3b8" size={20} />
-            </View>
-          )}
+          </View>
         </View>
-      </View>
+      )}
 
       {/* 功能入口 */}
       <View className="px-4">

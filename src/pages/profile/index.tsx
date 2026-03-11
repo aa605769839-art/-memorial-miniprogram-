@@ -1,7 +1,7 @@
 import { View, Text, Button, Input, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
-import { Plus, Heart, User, ChevronRight } from 'lucide-react-taro';
+import { Heart, User, ChevronRight } from 'lucide-react-taro';
 import { Network } from '@/network';
 
 interface UserProfile {
@@ -158,15 +158,16 @@ const ProfilePage = () => {
 
   const handleAddMemorial = () => {
     Taro.navigateTo({
-      url: '/pages/profile/form'
+      url: '/pages/profile/memorials'
     });
   };
 
   return (
     <View className="min-h-screen bg-blue-50 pb-6">
-      {/* 名片区域 */}
+      {/* 名片区域（包含统计信息） */}
       <View className="px-4 py-6">
         <View className="bg-white rounded-2xl p-6 shadow-sm">
+          {/* 用户信息 */}
           <View
             className="flex items-center gap-4 cursor-pointer"
             onClick={handleEdit}
@@ -191,6 +192,28 @@ const ProfilePage = () => {
               </Text>
             </View>
             <ChevronRight color="#94a3b8" size={20} />
+          </View>
+
+          {/* 统计信息 */}
+          <View className="grid grid-cols-2 gap-4 mt-6">
+            <View className="bg-blue-50 rounded-xl p-4 text-center">
+              <Heart color="#3b82f6" size={24} />
+              <Text className="block text-2xl font-bold text-blue-500 mt-2">
+                {stats.mourningCount}
+              </Text>
+              <Text className="block text-xs text-slate-500 mt-1">
+                悼念次数
+              </Text>
+            </View>
+            <View className="bg-blue-50 rounded-xl p-4 text-center">
+              <User color="#94a3b8" size={24} />
+              <Text className="block text-2xl font-bold text-slate-600 mt-2">
+                {stats.visitCount}
+              </Text>
+              <Text className="block text-xs text-slate-500 mt-1">
+                拜访次数
+              </Text>
+            </View>
           </View>
         </View>
       </View>
@@ -287,40 +310,11 @@ const ProfilePage = () => {
           >
             <View className="flex items-center gap-3">
               <View className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <Plus color="#3b82f6" size={20} />
+                <Heart color="#3b82f6" size={20} />
               </View>
-              <Text className="text-base text-slate-700">添加故人</Text>
+              <Text className="text-base text-slate-700">我的故友</Text>
             </View>
             <ChevronRight color="#94a3b8" size={20} />
-          </View>
-        </View>
-      </View>
-
-      {/* 统计信息 */}
-      <View className="px-4 mt-6">
-        <View className="bg-white rounded-2xl p-6 shadow-sm">
-          <Text className="block text-lg font-semibold text-blue-900 mb-4">
-            我的统计
-          </Text>
-          <View className="grid grid-cols-2 gap-4">
-            <View className="bg-blue-50 rounded-xl p-4 text-center">
-              <Heart color="#3b82f6" size={24} />
-              <Text className="block text-2xl font-bold text-blue-500 mt-2">
-                {stats.mourningCount}
-              </Text>
-              <Text className="block text-xs text-slate-500 mt-1">
-                悼念次数
-              </Text>
-            </View>
-            <View className="bg-blue-50 rounded-xl p-4 text-center">
-              <User color="#94a3b8" size={24} />
-              <Text className="block text-2xl font-bold text-slate-600 mt-2">
-                {stats.visitCount}
-              </Text>
-              <Text className="block text-xs text-slate-500 mt-1">
-                拜访次数
-              </Text>
-            </View>
           </View>
         </View>
       </View>

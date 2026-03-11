@@ -4,7 +4,8 @@ export default defineAppConfig({
     'pages/detail/index',
     'pages/ranking/index',
     'pages/profile/index',
-    'pages/profile/form'
+    'pages/profile/form',
+    'pages/profile/memorials'
   ],
   window: {
     backgroundTextStyle: 'light',

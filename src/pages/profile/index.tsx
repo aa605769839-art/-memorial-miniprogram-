@@ -10,20 +10,11 @@ interface UserProfile {
   bio: string;
 }
 
-interface Stats {
-  mourningCount: number;
-  visitCount: number;
-}
-
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>({
     name: '访客',
     avatar: null,
     bio: '还没有简介'
-  });
-  const [stats, setStats] = useState<Stats>({
-    mourningCount: 0,
-    visitCount: 0
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -34,7 +25,6 @@ const ProfilePage = () => {
 
   useEffect(() => {
     loadUserProfile();
-    loadStats();
   }, []);
 
   const loadUserProfile = () => {
@@ -45,13 +35,6 @@ const ProfilePage = () => {
         name: saved.name,
         bio: saved.bio
       });
-    }
-  };
-
-  const loadStats = () => {
-    const saved = Taro.getStorageSync('userStats');
-    if (saved) {
-      setStats(saved);
     }
   };
 
@@ -164,10 +147,9 @@ const ProfilePage = () => {
 
   return (
     <View className="min-h-screen bg-blue-50 pb-6">
-      {/* 名片区域（包含统计信息） */}
+      {/* 名片区域 */}
       <View className="px-4 py-6">
         <View className="bg-white rounded-2xl p-6 shadow-sm">
-          {/* 用户信息 */}
           <View
             className="flex items-center gap-4 cursor-pointer"
             onClick={handleEdit}
@@ -192,28 +174,6 @@ const ProfilePage = () => {
               </Text>
             </View>
             <ChevronRight color="#94a3b8" size={20} />
-          </View>
-
-          {/* 统计信息 */}
-          <View className="grid grid-cols-2 gap-4 mt-6">
-            <View className="bg-blue-50 rounded-xl p-4 text-center">
-              <Heart color="#3b82f6" size={24} />
-              <Text className="block text-2xl font-bold text-blue-500 mt-2">
-                {stats.mourningCount}
-              </Text>
-              <Text className="block text-xs text-slate-500 mt-1">
-                悼念次数
-              </Text>
-            </View>
-            <View className="bg-blue-50 rounded-xl p-4 text-center">
-              <User color="#94a3b8" size={24} />
-              <Text className="block text-2xl font-bold text-slate-600 mt-2">
-                {stats.visitCount}
-              </Text>
-              <Text className="block text-xs text-slate-500 mt-1">
-                拜访次数
-              </Text>
-            </View>
           </View>
         </View>
       </View>

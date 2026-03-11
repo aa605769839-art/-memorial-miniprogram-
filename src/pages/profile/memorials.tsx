@@ -1,7 +1,7 @@
 import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react-taro';
+import { Plus, Heart, User } from 'lucide-react-taro';
 import { Network } from '@/network';
 
 interface Memorial {
@@ -12,6 +12,7 @@ interface Memorial {
   deathDate: string;
   description: string;
   mourningCount: number;
+  visitCount: number;
 }
 
 const MyMemorialsPage = () => {
@@ -117,10 +118,19 @@ const MyMemorialsPage = () => {
                 <Text className="block text-xs text-slate-500 mt-1 truncate">
                   {memorial.description || '暂无描述'}
                 </Text>
-                <View className="flex items-center gap-1 mt-2">
-                  <Text className="text-xs text-slate-400">
-                    悼念 {memorial.mourningCount}
-                  </Text>
+                <View className="flex items-center justify-between gap-2 mt-2">
+                  <View className="flex items-center gap-1">
+                    <Heart size={14} color="#3b82f6" />
+                    <Text className="text-xs text-slate-400">
+                      {memorial.mourningCount}
+                    </Text>
+                  </View>
+                  <View className="flex items-center gap-1">
+                    <User size={14} color="#94a3b8" />
+                    <Text className="text-xs text-slate-400">
+                      {memorial.visitCount}
+                    </Text>
+                  </View>
                 </View>
               </View>
             ))}

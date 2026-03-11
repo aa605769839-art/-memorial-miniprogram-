@@ -68,7 +68,7 @@ const IndexPage = () => {
   return (
     <View className="min-h-screen bg-blue-50">
       {/* 导航栏占位 */}
-      <View style={{ height: '88px', backgroundColor: '#fff' }} />
+      <View style={{ height: '44px', backgroundColor: '#fff' }} />
 
       {/* 头部 */}
       <View className="bg-white px-4 py-5 border-b border-blue-100">

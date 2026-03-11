@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react';
 import { Network } from '@/network';
 import { Heart, User, Calendar, Award, Send, Flower2, Trash2 } from 'lucide-react-taro';
 
+interface Photo {
+  id: string;
+  memorial_id: string;
+  url: string;
+  order_index: number;
+  created_at: string;
+}
+
 interface Memorial {
   id: string;
   name: string;
@@ -14,6 +22,7 @@ interface Memorial {
   achievements: string[] | null;
   mourning_count: number;
   visit_count: number;
+  photos?: Photo[];
 }
 
 interface Comment {
@@ -33,6 +42,7 @@ const DetailPage = () => {
   const [visitorName, setVisitorName] = useState('');
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
+  const [showAllPhotos, setShowAllPhotos] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -367,6 +377,36 @@ const DetailPage = () => {
           </Text>
         )}
       </View>
+
+      {/* 生活照片 */}
+      {memorial.photos && memorial.photos.length > 0 && (
+        <View className="bg-white mt-4 px-6 py-4">
+          <View className="flex items-center justify-between mb-3">
+            <Text className="block text-lg font-semibold text-blue-900">
+              生活照片
+            </Text>
+            {memorial.photos.length > 3 && (
+              <Text
+                className="text-sm text-blue-500 cursor-pointer"
+                onClick={() => setShowAllPhotos(!showAllPhotos)}
+              >
+                {showAllPhotos ? '收起' : `展开全部${memorial.photos.length}张`}
+              </Text>
+            )}
+          </View>
+          <View className="grid grid-cols-3 gap-2">
+            {(showAllPhotos ? memorial.photos : memorial.photos.slice(0, 3)).map((photo) => (
+              <View key={photo.id} className="aspect-square rounded-lg overflow-hidden">
+                <Image
+                  src={photo.url}
+                  className="w-full h-full"
+                  mode="aspectFill"
+                />
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
 
       {/* 主要成就 */}
       {memorial.achievements && memorial.achievements.length > 0 && (

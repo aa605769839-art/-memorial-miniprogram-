@@ -21,6 +21,7 @@ const FormPage = () => {
     achievements: ''
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -107,6 +108,64 @@ const FormPage = () => {
     }
   };
 
+  const handleUploadPhotos = () => {
+    Taro.chooseImage({
+      count: 9 - photos.length,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: async (res) => {
+        const tempFilePaths = res.tempFilePaths;
+        const uploadPromises = tempFilePaths.map(filePath =>
+          Network.uploadFile({
+            url: '/api/upload',
+            filePath,
+            name: 'file'
+          })
+        );
+
+        try {
+          const results = await Promise.all(uploadPromises);
+          const uploadedUrls: string[] = [];
+          
+          results.forEach(result => {
+            if (result.statusCode === 200) {
+              const data = JSON.parse(result.data);
+              if (data.code === 200) {
+                uploadedUrls.push(data.data);
+              }
+            }
+          });
+
+          if (uploadedUrls.length > 0) {
+            setPhotos(prev => [...prev, ...uploadedUrls]);
+            Taro.showToast({
+              title: `成功上传${uploadedUrls.length}张照片`,
+              icon: 'success'
+            });
+          }
+        } catch (error) {
+          console.error('Failed to upload photos:', error);
+          Taro.showToast({
+            title: '上传失败',
+            icon: 'none'
+          });
+        }
+      }
+    });
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    Taro.showModal({
+      title: '确认删除',
+      content: '确定要删除这张照片吗？',
+      success: (res) => {
+        if (res.confirm) {
+          setPhotos(prev => prev.filter((_, i) => i !== index));
+        }
+      }
+    });
+  };
+
   const handleSubmit = async () => {
     if (!formData.name) {
       Taro.showToast({
@@ -172,6 +231,16 @@ const FormPage = () => {
       });
 
       if (res.data?.code === 200) {
+        // 如果有照片，上传照片
+        if (photos.length > 0) {
+          const memorialId = res.data.data.id;
+          await Network.request({
+            url: `/api/photos/batch/${memorialId}`,
+            method: 'POST',
+            data: { urls: photos }
+          });
+        }
+
         Taro.showToast({
           title: '保存成功',
           icon: 'success'
@@ -241,6 +310,39 @@ const FormPage = () => {
             <Text className="block text-xs text-slate-400 mt-2 text-center">
               {avatarUrl ? '点击更换头像' : '点击生成或上传头像'}
             </Text>
+          </View>
+
+          {/* 照片上传 */}
+          <View className="mb-6">
+            <Text className="block text-sm font-medium text-slate-700 mb-2">
+              生活照片（可选，最多9张）
+            </Text>
+            <View className="grid grid-cols-3 gap-2">
+              {photos.map((photo, index) => (
+                <View key={index} className="relative aspect-square">
+                  <Image
+                    src={photo}
+                    className="w-full h-full rounded-lg"
+                    mode="aspectFill"
+                  />
+                  <View
+                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                    onClick={() => handleRemovePhoto(index)}
+                  >
+                    <Text className="text-white text-xs font-bold">×</Text>
+                  </View>
+                </View>
+              ))}
+              {photos.length < 9 && (
+                <View
+                  className="aspect-square bg-blue-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-blue-200"
+                  onClick={handleUploadPhotos}
+                >
+                  <Text className="text-3xl text-blue-300 font-light">+</Text>
+                  <Text className="text-xs text-slate-400 mt-1">添加照片</Text>
+                </View>
+              )}
+            </View>
           </View>
 
           {/* 表单字段 */}

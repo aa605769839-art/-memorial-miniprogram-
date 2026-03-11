@@ -34,6 +34,26 @@ export class MemorialsService {
     return data;
   }
 
+  async findPhotos(memorialId: string) {
+    const { data, error } = await this.client
+      .from('photos')
+      .select('*')
+      .eq('memorial_id', memorialId)
+      .order('order_index', { ascending: true });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async findOneWithPhotos(id: string) {
+    const memorial = await this.findOne(id);
+    const photos = await this.findPhotos(id);
+    return {
+      ...memorial,
+      photos
+    };
+  }
+
   async findComments(memorialId: string) {
     const { data, error } = await this.client
       .from('comments')

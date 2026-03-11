@@ -1,10 +1,14 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { MemorialsService } from './memorials.service';
+import { PhotosService } from '../photos/photos.service';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
 
 @Controller('memorials')
 export class MemorialsController {
-  constructor(private readonly memorialsService: MemorialsService) {}
+  constructor(
+    private readonly memorialsService: MemorialsService,
+    private readonly photosService: PhotosService
+  ) {}
 
   @Get()
   async findAll(@Query('userId') userId?: string) {
@@ -14,7 +18,7 @@ export class MemorialsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const result = await this.memorialsService.findOne(id);
+    const result = await this.memorialsService.findOneWithPhotos(id);
     return { code: 200, msg: 'success', data: result };
   }
 

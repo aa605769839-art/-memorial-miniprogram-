@@ -1,54 +1,54 @@
-# 电子墓碑小程序设计指南
+# 温故小程序设计指南
 
 ## 品牌定位
 
-**应用名称**：永恒纪念（Eternal Memorial）
+**应用名称**：温故（Remember & Cherish）
 
 **品牌定位**：
-- 庄重肃穆的数字纪念空间
-- 温暖而敬重的追思平台
-- 永不消逝的生命记录
+- 温暖怀念的追思空间
+- 传递温暖与敬意的平台
+- 让记忆永不消逝
 
 **设计风格**：
-- 简约庄重，避免过度装饰
-- 情感化设计，传递温暖与敬意
-- 沉浸式体验，营造宁静氛围
+- 温暖柔和的色调
+- 简约亲和的界面
+- 轻松温馨的氛围
 
 **目标用户**：
 - 需要为逝者创建纪念空间的亲属
 - 希望远程表达思念的朋友
 - 追求数字化纪念的年轻一代
 
-## 配色方案
+## 配色方案（暖色调）
 
 ### 主色板（Tailwind 类名）
 
 ```css
-/* 主色调 - 庄重深蓝 */
---primary: #2c3e50;       /* slate-700 */
---primary-dark: #1a252f;  /* slate-900 */
---primary-light: #475569; /* slate-600 */
+/* 主色调 - 温暖橙色 */
+--primary: #f97316;        /* orange-500 */
+--primary-dark: #ea580c;   /* orange-600 */
+--primary-light: #fb923c;  /* orange-400 */
 
-/* 辅色调 - 暖金色（象征永恒之光） */
---accent: #d4af37;        /* amber-600 */
---accent-light: #fbbf24;  /* amber-400 */
+/* 辅色调 - 温暖黄色 */
+--accent: #fbbf24;         /* amber-400 */
+--accent-light: #fde047;   /* yellow-300 */
 
-/* 中性色 - 柔和灰白 */
---bg-primary: #f8fafc;    /* slate-50 */
---bg-secondary: #ffffff;  /* white */
---bg-tertiary: #f1f5f9;   /* slate-100 */
+/* 中性色 - 柔和米白 */
+--bg-primary: #fff7ed;     /* orange-50 */
+--bg-secondary: #ffffff;   /* white */
+--bg-tertiary: #ffedd5;    /* orange-100 */
 
 /* 文字颜色 */
---text-primary: #1e293b;   /* slate-800 */
---text-secondary: #64748b; /* slate-500 */
---text-muted: #94a3b8;     /* slate-400 */
+--text-primary: #1c1917;   /* stone-900 */
+--text-secondary: #57534e; /* stone-600 */
+--text-muted: #a8a29e;     /* stone-400 */
 ```
 
 ### 语义色
 
 ```css
 /* 成功/完成 */
---success: #10b981;        /* emerald-500 */
+--success: #22c55e;        /* green-500 */
 
 /* 警告/注意 */
 --warning: #f59e0b;        /* amber-500 */
@@ -66,22 +66,22 @@
 
 ```tsx
 // H1 - 页面标题
-<Text className="block text-3xl font-bold text-slate-800">
+<Text className="block text-3xl font-bold text-stone-900">
   主标题
 </Text>
 
 // H2 - 区块标题
-<Text className="block text-2xl font-semibold text-slate-800">
+<Text className="block text-2xl font-semibold text-stone-900">
   区块标题
 </Text>
 
 // H3 - 卡片标题
-<Text className="block text-xl font-medium text-slate-800">
+<Text className="block text-xl font-medium text-stone-900">
   卡片标题
 </Text>
 
 // H4 - 小标题
-<Text className="block text-lg font-medium text-slate-700">
+<Text className="block text-lg font-medium text-stone-800">
   小标题
 </Text>
 ```
@@ -90,17 +90,17 @@
 
 ```tsx
 // Body Large - 重要正文
-<Text className="block text-base text-slate-700 leading-relaxed">
+<Text className="block text-base text-stone-700 leading-relaxed">
   重要正文内容
 </Text>
 
 // Body - 普通正文
-<Text className="block text-sm text-slate-600 leading-normal">
+<Text className="block text-sm text-stone-600 leading-normal">
   普通正文内容
 </Text>
 
 // Caption - 辅助文字
-<Text className="block text-xs text-slate-500">
+<Text className="block text-xs text-stone-500">
   辅助说明文字
 </Text>
 ```
@@ -108,19 +108,19 @@
 ### 特殊文字
 
 ```tsx
-// 姓名/标题（金色强调）
-<Text className="block text-xl font-bold text-amber-600">
+// 姓名/标题（橙色强调）
+<Text className="block text-xl font-bold text-orange-500">
   张三
 </Text>
 
 // 日期时间
-<Text className="block text-xs text-slate-400">
+<Text className="block text-xs text-stone-500">
   1950-01-01 ~ 2020-12-31
 </Text>
 
 // 引用/悼词
-<Text className="block text-sm text-slate-600 italic leading-relaxed">
-  "他的精神永远激励着我们"
+<Text className="block text-sm text-stone-600 italic leading-relaxed">
+  "你的温暖永远留在我们心中"
 </Text>
 ```
 
@@ -170,63 +170,53 @@
 ### 按钮组件
 
 ```tsx
-// 主按钮（悼念/拜访）
+// 主按钮（悼念/拜访/上传）
 <View className="w-full">
-  <Button className="w-full bg-amber-500 text-white rounded-full py-3 shadow-md">
+  <Button className="w-full bg-orange-500 text-white rounded-full py-3 shadow-md">
     悼念
   </Button>
 </View>
 
 // 次按钮（留言/查看更多）
 <View className="w-full">
-  <Button className="w-full bg-slate-100 text-slate-700 rounded-full py-3">
+  <Button className="w-full bg-orange-100 text-orange-700 rounded-full py-3">
     留言
   </Button>
 </View>
 
 // 小按钮（标签/分类）
-<Button className="px-4 py-2 bg-slate-50 text-slate-600 rounded-full text-sm">
+<Button className="px-4 py-2 bg-orange-50 text-orange-600 rounded-full text-sm">
   标签
 </Button>
 ```
 
-### 卡片组件
+### 卡片组件（正方形格子）
 
 ```tsx
-// 墓碑卡片
-<View className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-  <View className="flex items-center gap-3 mb-3">
-    {/* 头像/照片 */}
-    <View className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
-      <Image src={avatar} className="w-full h-full rounded-full" />
+// 故人卡片（正方形）
+<View className="bg-white rounded-2xl overflow-hidden shadow-sm">
+  {/* 图片区域 */}
+  <View className="aspect-square relative">
+    <Image
+      src={avatarUrl}
+      className="w-full h-full"
+      mode="aspectFill"
+    />
+    {/* 底部遮罩 */}
+    <View className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+      <Text className="block text-white font-bold text-lg">{name}</Text>
+      <Text className="block text-white/80 text-xs">{dateRange}</Text>
     </View>
-    <View className="flex-1">
-      <Text className="block text-lg font-bold text-slate-800">{name}</Text>
-      <Text className="block text-xs text-slate-400">{dateRange}</Text>
-    </View>
-  </View>
-  {/* 成就/描述 */}
-  <Text className="block text-sm text-slate-600 mb-3 line-clamp-2">
-    {description}
-  </Text>
-  {/* 操作按钮 */}
-  <View className="flex gap-2">
-    <Button className="flex-1 bg-amber-500 text-white rounded-full text-sm py-2">
-      悼念
-    </Button>
-    <Button className="flex-1 bg-slate-100 text-slate-600 rounded-full text-sm py-2">
-      拜访
-    </Button>
   </View>
 </View>
 
 // 留言卡片
-<View className="bg-slate-50 rounded-xl p-4 mb-3">
+<View className="bg-orange-50 rounded-xl p-4 mb-3">
   <View className="flex items-center justify-between mb-2">
-    <Text className="block text-sm font-medium text-slate-700">{author}</Text>
-    <Text className="block text-xs text-slate-400">{time}</Text>
+    <Text className="block text-sm font-medium text-stone-700">{author}</Text>
+    <Text className="block text-xs text-stone-500">{time}</Text>
   </View>
-  <Text className="block text-sm text-slate-600 leading-relaxed">
+  <Text className="block text-sm text-stone-600 leading-relaxed">
     {content}
   </Text>
 </View>
@@ -236,16 +226,16 @@
 
 ```tsx
 // 文本输入（跨端兼容）
-<View className="bg-slate-50 rounded-xl px-4 py-3 mb-4">
+<View className="bg-orange-50 rounded-xl px-4 py-3 mb-4">
   <Input
-    className="w-full bg-transparent text-slate-700 placeholder-slate-400"
-    placeholder="请输入留言内容"
-    onInput={(e) => setMessage(e.detail.value)}
+    className="w-full bg-transparent text-stone-700 placeholder-stone-400"
+    placeholder="请输入内容"
+    onInput={(e) => setValue(e.detail.value)}
   />
 </View>
 
 // 多行输入
-<View className="bg-slate-50 rounded-xl p-4 mb-4">
+<View className="bg-orange-50 rounded-xl p-4 mb-4">
   <Textarea
     style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
     placeholder="请输入详细描述..."
@@ -254,11 +244,11 @@
 </View>
 ```
 
-### 列表组件
+### 列表组件（正方形网格）
 
 ```tsx
-// 墓碑列表
-<View className="flex flex-col gap-4 px-4 py-6">
+// 故人列表（网格布局）
+<View className="grid grid-cols-2 gap-3 px-4 py-6">
   {memorials.map((item) => (
     <MemorialCard key={item.id} data={item} />
   ))}
@@ -267,18 +257,18 @@
 // 排行榜列表
 <View className="bg-white rounded-2xl p-4 shadow-sm">
   {rankings.map((item, index) => (
-    <View key={item.id} className="flex items-center gap-4 py-3 border-b border-slate-100 last:border-0">
+    <View key={item.id} className="flex items-center gap-4 py-3 border-b border-orange-100 last:border-0">
       {/* 排名 */}
-      <View className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-        <Text className="block text-sm font-bold text-slate-600">{index + 1}</Text>
+      <View className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+        <Text className="block text-sm font-bold text-orange-600">{index + 1}</Text>
       </View>
       {/* 信息 */}
       <View className="flex-1">
-        <Text className="block text-base font-medium text-slate-800">{item.name}</Text>
-        <Text className="block text-xs text-slate-400">悼念 {item.mourningCount} 次</Text>
+        <Text className="block text-base font-medium text-stone-900">{item.name}</Text>
+        <Text className="block text-xs text-stone-500">悼念 {item.mourning_count} 次</Text>
       </View>
       {/* 数据 */}
-      <Text className="block text-amber-600 font-semibold">{item.count}</Text>
+      <Text className="block text-orange-500 font-semibold">{item.count}</Text>
     </View>
   ))}
 </View>
@@ -289,12 +279,12 @@
 ```tsx
 <View className="flex flex-col items-center justify-center py-20">
   <View className="w-24 h-24 mb-6 opacity-30">
-    <Heart color="#94a3b8" size={96} strokeWidth={1.5} />
+    <Heart color="#a8a29e" size={96} strokeWidth={1.5} />
   </View>
-  <Text className="block text-base text-slate-500 mb-2">
+  <Text className="block text-base text-stone-500 mb-2">
     暂无内容
   </Text>
-  <Text className="block text-sm text-slate-400">
+  <Text className="block text-sm text-stone-400">
     还没有创建纪念空间
   </Text>
 </View>
@@ -305,8 +295,8 @@
 ```tsx
 <View className="flex items-center justify-center py-20">
   <View className="flex flex-col items-center gap-3">
-    <View className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
-    <Text className="block text-sm text-slate-400">
+    <View className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+    <Text className="block text-sm text-stone-400">
       加载中...
     </Text>
   </View>
@@ -319,20 +309,14 @@
 
 ```typescript
 tabBar: {
-  color: '#94a3b8',          // 未选中 - slate-400
-  selectedColor: '#d4af37',  // 选中 - amber-500
+  color: '#a8a29e',          // 未选中 - stone-400
+  selectedColor: '#f97316',  // 选中 - orange-500
   backgroundColor: '#ffffff',
   borderStyle: 'white',
   list: [
     {
       pagePath: 'pages/index/index',
-      text: '社区',
-      iconPath: './assets/tabbar/users.png',
-      selectedIconPath: './assets/tabbar/users-active.png',
-    },
-    {
-      pagePath: 'pages/memorial/index',
-      text: '纪念',
+      text: '故人',
       iconPath: './assets/tabbar/heart.png',
       selectedIconPath: './assets/tabbar/heart-active.png',
     },
@@ -415,3 +399,8 @@ Taro.navigateBack()
 - 按悼念次数/拜访次数排序
 - 使用徽章标识前三名
 - 提供多种排序方式
+
+### 我的场景
+- 展示用户创建的故人列表
+- 提供上传新故人的入口
+- 统计用户的悼念/拜访次数

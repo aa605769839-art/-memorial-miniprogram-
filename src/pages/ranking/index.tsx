@@ -53,15 +53,15 @@ const RankingPage = () => {
     if (index === 0) return { color: '#fbbf24', text: '1' }; // gold
     if (index === 1) return { color: '#9ca3af', text: '2' }; // silver
     if (index === 2) return { color: '#b45309', text: '3' }; // bronze
-    return { color: '#64748b', text: `${index + 1}` }; // gray
+    return { color: '#a8a29e', text: `${index + 1}` }; // gray
   };
 
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-slate-50">
+      <View className="flex flex-col items-center justify-center h-full bg-orange-50">
         <View className="flex flex-col items-center gap-3">
-          <View className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
-          <Text className="block text-sm text-slate-400">
+          <View className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+          <Text className="block text-sm text-stone-400">
             加载中...
           </Text>
         </View>
@@ -70,26 +70,26 @@ const RankingPage = () => {
   }
 
   return (
-    <View className="min-h-screen bg-slate-50">
+    <View className="min-h-screen bg-orange-50">
       {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-slate-100">
+      <View className="bg-white px-4 py-5 border-b border-orange-100">
         <View className="flex items-center justify-between mb-4">
-          <Text className="block text-2xl font-bold text-slate-800">
+          <Text className="block text-2xl font-bold text-stone-900">
             排行榜
           </Text>
         </View>
 
         {/* 切换按钮 */}
-        <View className="flex bg-slate-100 rounded-full p-1">
+        <View className="flex bg-orange-100 rounded-full p-1">
           <View
             className={`flex-1 py-2 rounded-full text-center ${
-              type === 'mourning' ? 'bg-amber-500' : ''
+              type === 'mourning' ? 'bg-orange-500' : ''
             }`}
             onClick={() => setType('mourning')}
           >
             <Text
               className={`text-sm font-medium ${
-                type === 'mourning' ? 'text-white' : 'text-slate-600'
+                type === 'mourning' ? 'text-white' : 'text-stone-600'
               }`}
             >
               悼念排行
@@ -97,13 +97,13 @@ const RankingPage = () => {
           </View>
           <View
             className={`flex-1 py-2 rounded-full text-center ${
-              type === 'visit' ? 'bg-amber-500' : ''
+              type === 'visit' ? 'bg-orange-500' : ''
             }`}
             onClick={() => setType('visit')}
           >
             <Text
               className={`text-sm font-medium ${
-                type === 'visit' ? 'text-white' : 'text-slate-600'
+                type === 'visit' ? 'text-white' : 'text-stone-600'
               }`}
             >
               拜访排行
@@ -117,12 +117,12 @@ const RankingPage = () => {
         {rankings.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-20">
             <View className="w-24 h-24 mb-6 opacity-30">
-              <Award color="#94a3b8" size={96} strokeWidth={1.5} />
+              <Award color="#a8a29e" size={96} strokeWidth={1.5} />
             </View>
-            <Text className="block text-base text-slate-500 mb-2">
+            <Text className="block text-base text-stone-500 mb-2">
               暂无排行数据
             </Text>
-            <Text className="block text-sm text-slate-400">
+            <Text className="block text-sm text-stone-400">
               还没有人进行悼念或拜访
             </Text>
           </View>
@@ -134,7 +134,7 @@ const RankingPage = () => {
                 <View
                   key={item.id}
                   className={`flex items-center gap-4 py-4 ${
-                    index !== rankings.length - 1 ? 'border-b border-slate-100' : ''
+                    index !== rankings.length - 1 ? 'border-b border-orange-100' : ''
                   }`}
                   onClick={() => goToDetail(item.id)}
                 >
@@ -150,11 +150,11 @@ const RankingPage = () => {
 
                   {/* 信息 */}
                   <View className="flex-1">
-                    <Text className="block text-base font-medium text-slate-800 mb-1">
+                    <Text className="block text-base font-medium text-stone-900 mb-1">
                       {item.name}
                     </Text>
                     {item.description && (
-                      <Text className="block text-xs text-slate-500 line-clamp-1">
+                      <Text className="block text-xs text-stone-500 line-clamp-1">
                         {item.description}
                       </Text>
                     )}
@@ -164,15 +164,15 @@ const RankingPage = () => {
                   <View className="flex items-center gap-2">
                     {type === 'mourning' ? (
                       <>
-                        <Heart color="#d4af37" size={18} />
-                        <Text className="text-lg font-bold text-amber-600">
+                        <Heart color="#f97316" size={18} />
+                        <Text className="text-lg font-bold text-orange-500">
                           {item.mourning_count}
                         </Text>
                       </>
                     ) : (
                       <>
-                        <User color="#64748b" size={18} />
-                        <Text className="text-lg font-bold text-slate-600">
+                        <User color="#a8a29e" size={18} />
+                        <Text className="text-lg font-bold text-stone-600">
                           {item.visit_count}
                         </Text>
                       </>

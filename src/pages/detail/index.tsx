@@ -171,7 +171,7 @@ const DetailPage = () => {
         method: 'POST',
         data: {
           memorialId: id,
-          author_name: visitorName.trim(),
+          authorName: visitorName.trim(),
           content: message.trim()
         }
       });
@@ -215,10 +215,10 @@ const DetailPage = () => {
 
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-slate-50">
+      <View className="flex flex-col items-center justify-center h-full bg-orange-50">
         <View className="flex flex-col items-center gap-3">
-          <View className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
-          <Text className="block text-sm text-slate-400">
+          <View className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+          <Text className="block text-sm text-stone-400">
             加载中...
           </Text>
         </View>
@@ -228,9 +228,9 @@ const DetailPage = () => {
 
   if (!memorial) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-slate-50">
-        <Flower2 color="#94a3b8" size={64} strokeWidth={1.5} />
-        <Text className="block text-base text-slate-500 mt-4">
+      <View className="flex flex-col items-center justify-center h-full bg-orange-50">
+        <Flower2 color="#a8a29e" size={64} strokeWidth={1.5} />
+        <Text className="block text-base text-stone-500 mt-4">
           纪念空间不存在
         </Text>
       </View>
@@ -238,10 +238,10 @@ const DetailPage = () => {
   }
 
   return (
-    <View className="min-h-screen bg-slate-50 pb-32">
+    <View className="min-h-screen bg-orange-50 pb-32">
       {/* 头像和姓名 */}
       <View className="bg-white px-6 py-8 text-center">
-        <View className="w-24 h-24 mx-auto rounded-full bg-slate-100 flex items-center justify-center overflow-hidden mb-4">
+        <View className="w-24 h-24 mx-auto rounded-full bg-orange-100 flex items-center justify-center overflow-hidden mb-4">
           {memorial.avatar_url ? (
             <Image
               src={memorial.avatar_url}
@@ -249,34 +249,34 @@ const DetailPage = () => {
               mode="aspectFill"
             />
           ) : (
-            <User color="#94a3b8" size={48} />
+            <User color="#a8a29e" size={48} />
           )}
         </View>
-        <Text className="block text-3xl font-bold text-slate-800 mb-2">
+        <Text className="block text-3xl font-bold text-stone-900 mb-2">
           {memorial.name}
         </Text>
         {memorial.birth_date && memorial.death_date && (
           <View className="flex items-center justify-center gap-2 mb-4">
-            <Calendar color="#94a3b8" size={16} />
-            <Text className="block text-sm text-slate-500">
+            <Calendar color="#a8a29e" size={16} />
+            <Text className="block text-sm text-stone-500">
               {formatDate(memorial.birth_date)} ~ {formatDate(memorial.death_date)}
             </Text>
           </View>
         )}
         <View className="flex justify-center gap-6">
           <View className="flex items-center gap-2">
-            <Heart color="#d4af37" size={18} />
-            <Text className="text-base text-amber-600 font-semibold">
+            <Heart color="#f97316" size={18} />
+            <Text className="text-base text-orange-500 font-semibold">
               {memorial.mourning_count}
             </Text>
-            <Text className="text-sm text-slate-500">悼念</Text>
+            <Text className="text-sm text-stone-500">悼念</Text>
           </View>
           <View className="flex items-center gap-2">
-            <User color="#64748b" size={18} />
-            <Text className="text-base text-slate-600 font-semibold">
+            <User color="#a8a29e" size={18} />
+            <Text className="text-base text-stone-600 font-semibold">
               {memorial.visit_count}
             </Text>
-            <Text className="text-sm text-slate-500">拜访</Text>
+            <Text className="text-sm text-stone-500">拜访</Text>
           </View>
         </View>
       </View>
@@ -284,7 +284,7 @@ const DetailPage = () => {
       {/* 简介 */}
       {memorial.description && (
         <View className="bg-white mt-4 px-6 py-4">
-          <Text className="block text-sm text-slate-600 leading-relaxed">
+          <Text className="block text-sm text-stone-600 leading-relaxed">
             {memorial.description}
           </Text>
         </View>
@@ -294,16 +294,16 @@ const DetailPage = () => {
       {memorial.achievements && memorial.achievements.length > 0 && (
         <View className="bg-white mt-4 px-6 py-4">
           <View className="flex items-center gap-2 mb-3">
-            <Award color="#d4af37" size={20} />
-            <Text className="block text-lg font-semibold text-slate-800">
+            <Award color="#f97316" size={20} />
+            <Text className="block text-lg font-semibold text-stone-900">
               主要成就
             </Text>
           </View>
           <View className="flex flex-col gap-2">
             {memorial.achievements.map((achievement, index) => (
               <View key={index} className="flex items-start gap-3">
-                <View className="w-2 h-2 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
-                <Text className="block text-sm text-slate-600 leading-relaxed flex-1">
+                <View className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                <Text className="block text-sm text-stone-600 leading-relaxed flex-1">
                   {achievement}
                 </Text>
               </View>
@@ -313,16 +313,16 @@ const DetailPage = () => {
       )}
 
       {/* 悼念和拜访按钮 */}
-      <View className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 z-50">
+      <View className="fixed bottom-0 left-0 right-0 bg-white border-t border-orange-100 p-4 z-50">
         <View className="flex gap-3">
           <Button
-            className="flex-1 bg-amber-500 text-white rounded-full py-3 shadow-md"
+            className="flex-1 bg-orange-500 text-white rounded-full py-3 shadow-md"
             onClick={handleMourning}
           >
             悼念
           </Button>
           <Button
-            className="flex-1 bg-slate-100 text-slate-700 rounded-full py-3"
+            className="flex-1 bg-orange-100 text-orange-700 rounded-full py-3"
             onClick={handleVisit}
           >
             拜访
@@ -333,17 +333,17 @@ const DetailPage = () => {
       {/* 留言区域 */}
       <View className="bg-white mt-4 px-6 py-4 mb-20">
         <View className="flex items-center justify-between mb-4">
-          <Text className="block text-lg font-semibold text-slate-800">
+          <Text className="block text-lg font-semibold text-stone-900">
             留言板
           </Text>
-          <Text className="block text-sm text-slate-400">
+          <Text className="block text-sm text-stone-500">
             {comments.length} 条
           </Text>
         </View>
 
         {comments.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-10">
-            <Text className="block text-sm text-slate-400">
+            <Text className="block text-sm text-stone-400">
               还没有留言，留下您的思念
             </Text>
           </View>
@@ -352,11 +352,11 @@ const DetailPage = () => {
             {comments.map((comment) => (
               <View
                 key={comment.id}
-                className="bg-slate-50 rounded-xl p-4"
+                className="bg-orange-50 rounded-xl p-4"
               >
                 <View className="flex items-center justify-between mb-2">
                   <View className="flex items-center gap-2">
-                    <View className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
+                    <View className="w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center overflow-hidden">
                       {comment.author_avatar ? (
                         <Image
                           src={comment.author_avatar}
@@ -364,20 +364,20 @@ const DetailPage = () => {
                           mode="aspectFill"
                         />
                       ) : (
-                        <Text className="text-xs text-slate-500">
+                        <Text className="text-xs text-stone-500">
                           {comment.author_name.charAt(0)}
                         </Text>
                       )}
                     </View>
-                    <Text className="block text-sm font-medium text-slate-700">
+                    <Text className="block text-sm font-medium text-stone-700">
                       {comment.author_name}
                     </Text>
                   </View>
-                  <Text className="block text-xs text-slate-400">
+                  <Text className="block text-xs text-stone-500">
                     {formatTime(comment.created_at)}
                   </Text>
                 </View>
-                <Text className="block text-sm text-slate-600 leading-relaxed">
+                <Text className="block text-sm text-stone-600 leading-relaxed">
                   {comment.content}
                 </Text>
               </View>
@@ -386,27 +386,27 @@ const DetailPage = () => {
         )}
 
         {/* 留言输入框 */}
-        <View className="mt-4 pt-4 border-t border-slate-100">
-          <View className="bg-slate-50 rounded-xl px-4 py-3 mb-3">
+        <View className="mt-4 pt-4 border-t border-orange-100">
+          <View className="bg-orange-50 rounded-xl px-4 py-3 mb-3">
             <Input
-              className="w-full bg-transparent text-slate-700 placeholder-slate-400"
+              className="w-full bg-transparent text-stone-700 placeholder-stone-400"
               placeholder="您的名字"
               value={visitorName}
               onInput={(e) => setVisitorName(e.detail.value)}
             />
           </View>
-          <View className="bg-slate-50 rounded-xl px-4 py-3 mb-3">
+          <View className="bg-orange-50 rounded-xl px-4 py-3 mb-3">
             <Input
-              className="w-full bg-transparent text-slate-700 placeholder-slate-400"
+              className="w-full bg-transparent text-stone-700 placeholder-stone-400"
               placeholder="写下您的思念..."
               value={message}
               onInput={(e) => setMessage(e.detail.value)}
             />
           </View>
           <View className="flex items-center justify-end gap-2">
-            <Text className="text-xs text-slate-400">{message.length}/500</Text>
+            <Text className="text-xs text-stone-400">{message.length}/500</Text>
             <Button
-              className="bg-amber-500 text-white rounded-full px-6 py-2 flex items-center gap-2"
+              className="bg-orange-500 text-white rounded-full px-6 py-2 flex items-center gap-2"
               onClick={handleComment}
             >
               <Send size={16} />

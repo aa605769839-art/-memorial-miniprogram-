@@ -1,0 +1,422 @@
+import { View, Text, Image, Input, Button } from '@tarojs/components';
+import Taro, { useRouter } from '@tarojs/taro';
+import { useState, useEffect } from 'react';
+import { Network } from '@/network';
+import { Heart, User, Calendar, Award, Send, Flower2 } from 'lucide-react-taro';
+
+interface Memorial {
+  id: string;
+  name: string;
+  birth_date: string | null;
+  death_date: string | null;
+  avatar_url: string | null;
+  description: string | null;
+  achievements: string[] | null;
+  mourning_count: number;
+  visit_count: number;
+}
+
+interface Comment {
+  id: string;
+  author_name: string;
+  author_avatar: string | null;
+  content: string;
+  created_at: string;
+}
+
+const DetailPage = () => {
+  const router = useRouter();
+  const { id } = router.params;
+  const [memorial, setMemorial] = useState<Memorial | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [message, setMessage] = useState('');
+  const [visitorName, setVisitorName] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      fetchMemorial();
+      fetchComments();
+      recordVisit();
+    }
+  }, [id]);
+
+  const fetchMemorial = async () => {
+    try {
+      const res = await Network.request({
+        url: `/api/memorials/${id}`,
+        method: 'GET'
+      });
+      console.log('Memorial detail response:', res.data);
+      if (res.data?.code === 200) {
+        setMemorial(res.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch memorial:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchComments = async () => {
+    try {
+      const res = await Network.request({
+        url: `/api/memorials/${id}/comments`,
+        method: 'GET'
+      });
+      console.log('Comments response:', res.data);
+      if (res.data?.code === 200) {
+        setComments(res.data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch comments:', error);
+    }
+  };
+
+  const recordVisit = async () => {
+    try {
+      await Network.request({
+        url: '/api/visits',
+        method: 'POST',
+        data: {
+          memorialId: id,
+          visitorName: '访客'
+        }
+      });
+    } catch (error) {
+      console.error('Failed to record visit:', error);
+    }
+  };
+
+  const handleMourning = async () => {
+    if (!visitorName.trim()) {
+      Taro.showToast({
+        title: '请输入您的名字',
+        icon: 'none'
+      });
+      return;
+    }
+
+    try {
+      const res = await Network.request({
+        url: '/api/mourning',
+        method: 'POST',
+        data: {
+          memorialId: id,
+          visitorName: visitorName.trim()
+        }
+      });
+
+      if (res.data?.code === 200) {
+        Taro.showToast({
+          title: '悼念成功',
+          icon: 'success'
+        });
+        fetchMemorial();
+      }
+    } catch (error) {
+      console.error('Failed to mourn:', error);
+      Taro.showToast({
+        title: '悼念失败',
+        icon: 'none'
+      });
+    }
+  };
+
+  const handleVisit = async () => {
+    try {
+      await Network.request({
+        url: '/api/visits',
+        method: 'POST',
+        data: {
+          memorialId: id,
+          visitorName: visitorName.trim() || '访客'
+        }
+      });
+
+      Taro.showToast({
+        title: '拜访成功',
+        icon: 'success'
+      });
+      fetchMemorial();
+    } catch (error) {
+      console.error('Failed to visit:', error);
+      Taro.showToast({
+        title: '拜访失败',
+        icon: 'none'
+      });
+    }
+  };
+
+  const handleComment = async () => {
+    if (!visitorName.trim()) {
+      Taro.showToast({
+        title: '请输入您的名字',
+        icon: 'none'
+      });
+      return;
+    }
+
+    if (!message.trim()) {
+      Taro.showToast({
+        title: '请输入留言内容',
+        icon: 'none'
+      });
+      return;
+    }
+
+    try {
+      const res = await Network.request({
+        url: '/api/comments',
+        method: 'POST',
+        data: {
+          memorialId: id,
+          author_name: visitorName.trim(),
+          content: message.trim()
+        }
+      });
+
+      if (res.data?.code === 200) {
+        Taro.showToast({
+          title: '留言成功',
+          icon: 'success'
+        });
+        setMessage('');
+        fetchComments();
+      }
+    } catch (error) {
+      console.error('Failed to comment:', error);
+      Taro.showToast({
+        title: '留言失败',
+        icon: 'none'
+      });
+    }
+  };
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  };
+
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+
+    if (minutes < 1) return '刚刚';
+    if (minutes < 60) return `${minutes}分钟前`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}小时前`;
+    const days = Math.floor(hours / 24);
+    return `${days}天前`;
+  };
+
+  if (loading) {
+    return (
+      <View className="flex flex-col items-center justify-center h-full bg-slate-50">
+        <View className="flex flex-col items-center gap-3">
+          <View className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
+          <Text className="block text-sm text-slate-400">
+            加载中...
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!memorial) {
+    return (
+      <View className="flex flex-col items-center justify-center h-full bg-slate-50">
+        <Flower2 color="#94a3b8" size={64} strokeWidth={1.5} />
+        <Text className="block text-base text-slate-500 mt-4">
+          纪念空间不存在
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View className="min-h-screen bg-slate-50 pb-32">
+      {/* 头像和姓名 */}
+      <View className="bg-white px-6 py-8 text-center">
+        <View className="w-24 h-24 mx-auto rounded-full bg-slate-100 flex items-center justify-center overflow-hidden mb-4">
+          {memorial.avatar_url ? (
+            <Image
+              src={memorial.avatar_url}
+              className="w-full h-full"
+              mode="aspectFill"
+            />
+          ) : (
+            <User color="#94a3b8" size={48} />
+          )}
+        </View>
+        <Text className="block text-3xl font-bold text-slate-800 mb-2">
+          {memorial.name}
+        </Text>
+        {memorial.birth_date && memorial.death_date && (
+          <View className="flex items-center justify-center gap-2 mb-4">
+            <Calendar color="#94a3b8" size={16} />
+            <Text className="block text-sm text-slate-500">
+              {formatDate(memorial.birth_date)} ~ {formatDate(memorial.death_date)}
+            </Text>
+          </View>
+        )}
+        <View className="flex justify-center gap-6">
+          <View className="flex items-center gap-2">
+            <Heart color="#d4af37" size={18} />
+            <Text className="text-base text-amber-600 font-semibold">
+              {memorial.mourning_count}
+            </Text>
+            <Text className="text-sm text-slate-500">悼念</Text>
+          </View>
+          <View className="flex items-center gap-2">
+            <User color="#64748b" size={18} />
+            <Text className="text-base text-slate-600 font-semibold">
+              {memorial.visit_count}
+            </Text>
+            <Text className="text-sm text-slate-500">拜访</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* 简介 */}
+      {memorial.description && (
+        <View className="bg-white mt-4 px-6 py-4">
+          <Text className="block text-sm text-slate-600 leading-relaxed">
+            {memorial.description}
+          </Text>
+        </View>
+      )}
+
+      {/* 主要成就 */}
+      {memorial.achievements && memorial.achievements.length > 0 && (
+        <View className="bg-white mt-4 px-6 py-4">
+          <View className="flex items-center gap-2 mb-3">
+            <Award color="#d4af37" size={20} />
+            <Text className="block text-lg font-semibold text-slate-800">
+              主要成就
+            </Text>
+          </View>
+          <View className="flex flex-col gap-2">
+            {memorial.achievements.map((achievement, index) => (
+              <View key={index} className="flex items-start gap-3">
+                <View className="w-2 h-2 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
+                <Text className="block text-sm text-slate-600 leading-relaxed flex-1">
+                  {achievement}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* 悼念和拜访按钮 */}
+      <View className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 z-50">
+        <View className="flex gap-3">
+          <Button
+            className="flex-1 bg-amber-500 text-white rounded-full py-3 shadow-md"
+            onClick={handleMourning}
+          >
+            悼念
+          </Button>
+          <Button
+            className="flex-1 bg-slate-100 text-slate-700 rounded-full py-3"
+            onClick={handleVisit}
+          >
+            拜访
+          </Button>
+        </View>
+      </View>
+
+      {/* 留言区域 */}
+      <View className="bg-white mt-4 px-6 py-4 mb-20">
+        <View className="flex items-center justify-between mb-4">
+          <Text className="block text-lg font-semibold text-slate-800">
+            留言板
+          </Text>
+          <Text className="block text-sm text-slate-400">
+            {comments.length} 条
+          </Text>
+        </View>
+
+        {comments.length === 0 ? (
+          <View className="flex flex-col items-center justify-center py-10">
+            <Text className="block text-sm text-slate-400">
+              还没有留言，留下您的思念
+            </Text>
+          </View>
+        ) : (
+          <View className="flex flex-col gap-3">
+            {comments.map((comment) => (
+              <View
+                key={comment.id}
+                className="bg-slate-50 rounded-xl p-4"
+              >
+                <View className="flex items-center justify-between mb-2">
+                  <View className="flex items-center gap-2">
+                    <View className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
+                      {comment.author_avatar ? (
+                        <Image
+                          src={comment.author_avatar}
+                          className="w-full h-full"
+                          mode="aspectFill"
+                        />
+                      ) : (
+                        <Text className="text-xs text-slate-500">
+                          {comment.author_name.charAt(0)}
+                        </Text>
+                      )}
+                    </View>
+                    <Text className="block text-sm font-medium text-slate-700">
+                      {comment.author_name}
+                    </Text>
+                  </View>
+                  <Text className="block text-xs text-slate-400">
+                    {formatTime(comment.created_at)}
+                  </Text>
+                </View>
+                <Text className="block text-sm text-slate-600 leading-relaxed">
+                  {comment.content}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* 留言输入框 */}
+        <View className="mt-4 pt-4 border-t border-slate-100">
+          <View className="bg-slate-50 rounded-xl px-4 py-3 mb-3">
+            <Input
+              className="w-full bg-transparent text-slate-700 placeholder-slate-400"
+              placeholder="您的名字"
+              value={visitorName}
+              onInput={(e) => setVisitorName(e.detail.value)}
+            />
+          </View>
+          <View className="bg-slate-50 rounded-xl px-4 py-3 mb-3">
+            <Input
+              className="w-full bg-transparent text-slate-700 placeholder-slate-400"
+              placeholder="写下您的思念..."
+              value={message}
+              onInput={(e) => setMessage(e.detail.value)}
+            />
+          </View>
+          <View className="flex items-center justify-end gap-2">
+            <Text className="text-xs text-slate-400">{message.length}/500</Text>
+            <Button
+              className="bg-amber-500 text-white rounded-full px-6 py-2 flex items-center gap-2"
+              onClick={handleComment}
+            >
+              <Send size={16} />
+              <Text>发送</Text>
+            </Button>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default DetailPage;

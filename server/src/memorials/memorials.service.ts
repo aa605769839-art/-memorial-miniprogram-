@@ -70,6 +70,7 @@ export class MemorialsService {
     const dbData: Record<string, any> = {};
     if (createMemorialDto.userId) dbData.user_id = createMemorialDto.userId;
     if (createMemorialDto.name) dbData.name = createMemorialDto.name;
+    if (createMemorialDto.gender !== undefined) dbData.gender = createMemorialDto.gender;
     if (createMemorialDto.birthDate) dbData.birth_date = createMemorialDto.birthDate;
     if (createMemorialDto.deathDate) dbData.death_date = createMemorialDto.deathDate;
     if (createMemorialDto.avatarUrl) dbData.avatar_url = createMemorialDto.avatarUrl;
@@ -90,6 +91,7 @@ export class MemorialsService {
     // 转换 camelCase 为 snake_case
     const dbData: Record<string, any> = {};
     if (updateMemorialDto.name !== undefined) dbData.name = updateMemorialDto.name;
+    if (updateMemorialDto.gender !== undefined) dbData.gender = updateMemorialDto.gender;
     if (updateMemorialDto.birthDate !== undefined) dbData.birth_date = updateMemorialDto.birthDate;
     if (updateMemorialDto.deathDate !== undefined) dbData.death_date = updateMemorialDto.deathDate;
     if (updateMemorialDto.avatarUrl !== undefined) dbData.avatar_url = updateMemorialDto.avatarUrl;

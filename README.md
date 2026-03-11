@@ -89,6 +89,32 @@ pnpm build:server # 仅构建后端
 pnpm preview:weapp # 构建并生成预览小程序二维码
 ```
 
+### 数据库迁移
+
+当项目有数据库结构变更时，需要执行相应的迁移脚本。
+
+#### 迁移脚本位置
+
+所有迁移脚本位于 `server/migrations/` 目录下。
+
+#### 执行方式
+
+1. 打开 Supabase Dashboard
+2. 进入 SQL Editor
+3. 执行对应的 `.sql` 迁移文件
+
+例如，添加 gender 字段：
+
+```sql
+ALTER TABLE memorials ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
+```
+
+#### 迁移历史
+
+- `add_gender_column.sql` - 为 memorials 表添加 gender 字段
+
+
+
 ## 前端核心开发规范
 
 ### 新建页面流程

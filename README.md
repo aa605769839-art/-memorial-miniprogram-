@@ -93,25 +93,35 @@ pnpm preview:weapp # 构建并生成预览小程序二维码
 
 当项目有数据库结构变更时，需要执行相应的迁移脚本。
 
-#### 迁移脚本位置
+#### ⚠️ 重要提示
 
-所有迁移脚本位于 `server/migrations/` 目录下。
+由于网络环境限制，数据库迁移无法自动执行。**请手动在 Supabase 控制台执行 SQL**。
 
-#### 执行方式
+#### 迁移步骤
 
 1. 打开 Supabase Dashboard
 2. 进入 SQL Editor
 3. 执行对应的 `.sql` 迁移文件
 
-例如，添加 gender 字段：
+#### 当前需要执行的迁移
+
+**添加性别字段**（v1.1.0）：
 
 ```sql
 ALTER TABLE memorials ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
 ```
 
+#### 迁移脚本位置
+
+所有迁移脚本位于 `server/migrations/` 目录下。
+
 #### 迁移历史
 
 - `add_gender_column.sql` - 为 memorials 表添加 gender 字段
+
+#### 验证迁移
+
+执行迁移后，可以在详情页和新增/编辑页看到性别选择功能。
 
 
 

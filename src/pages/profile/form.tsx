@@ -1,4 +1,4 @@
-import { View, Text, Image, Button, Input, Textarea, Picker } from '@tarojs/components';
+import { View, Text, Image, Button, Input, Textarea } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
@@ -587,17 +587,23 @@ const FormPage = () => {
               <Text className="block text-sm font-medium text-slate-700 mb-2">
                 性别
               </Text>
-              <Picker
-                mode="selector"
-                range={GENDER_OPTIONS}
-                value={GENDER_OPTIONS.indexOf(formData.gender)}
-                onChange={(e) => handleInputChange('gender', GENDER_OPTIONS[e.detail.value])}
-              >
-                <View className="bg-blue-50 rounded-xl px-4 py-3 flex items-center justify-between">
-                  <Text className="text-slate-700">{formData.gender}</Text>
-                  <Text className="text-slate-400 text-xs">点击选择</Text>
-                </View>
-              </Picker>
+              <View className="flex gap-3">
+                {GENDER_OPTIONS.map((option) => (
+                  <View
+                    key={option}
+                    className={`flex-1 py-3 px-4 rounded-xl text-center cursor-pointer transition-colors ${
+                      formData.gender === option
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-blue-50 text-slate-700'
+                    }`}
+                    onClick={() => handleInputChange('gender', option)}
+                  >
+                    <Text className={formData.gender === option ? 'text-white' : 'text-slate-700'}>
+                      {option}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
             {/* 出生日期和去世日期 */}

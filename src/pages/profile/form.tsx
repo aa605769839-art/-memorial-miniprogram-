@@ -23,9 +23,48 @@ const FormPage = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleInputChange = (field: keyof NewMemorial, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleUploadAvatar = () => {
+    Taro.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: async (res) => {
+        const tempFilePath = res.tempFilePaths[0];
+        setIsUploading(true);
+        try {
+          const uploadRes = await Network.uploadFile({
+            url: '/api/upload',
+            filePath: tempFilePath,
+            name: 'file'
+          });
+
+          if (uploadRes.statusCode === 200) {
+            const data = JSON.parse(uploadRes.data);
+            if (data.code === 200) {
+              setAvatarUrl(data.data);
+              Taro.showToast({
+                title: '上传成功',
+                icon: 'success'
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to upload avatar:', error);
+          Taro.showToast({
+            title: '上传失败',
+            icon: 'none'
+          });
+        } finally {
+          setIsUploading(false);
+        }
+      }
+    });
   };
 
   const generateAvatar = async (): Promise<string | null> => {
@@ -167,7 +206,10 @@ const FormPage = () => {
         <View className="bg-white rounded-2xl p-6 shadow-sm">
           {/* 头像预览 */}
           <View className="flex flex-col items-center mb-6">
-            <View className="w-40 h-40 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center overflow-hidden mb-4 shadow-sm border border-blue-200">
+            <View 
+              className="w-40 h-40 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center overflow-hidden mb-4 shadow-sm border border-blue-200"
+              onClick={handleUploadAvatar}
+            >
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
@@ -181,18 +223,23 @@ const FormPage = () => {
                 </View>
               )}
             </View>
-            <Button
-              className="bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-full px-6 py-2.5 shadow-md"
-              size="mini"
-              onClick={generateAvatar}
-              disabled={isGenerating}
-            >
-              <Text className="text-sm font-medium">
+            {avatarUrl ? (
+              <Text 
+                className="text-base font-semibold text-blue-500 underline cursor-pointer"
+                onClick={handleUploadAvatar}
+              >
+                {isUploading ? '上传中...' : '更换头像'}
+              </Text>
+            ) : (
+              <Text 
+                className="text-base font-semibold text-blue-500 underline cursor-pointer"
+                onClick={generateAvatar}
+              >
                 {isGenerating ? '生成中...' : 'AI 生成头像'}
               </Text>
-            </Button>
+            )}
             <Text className="block text-xs text-slate-400 mt-2 text-center">
-              根据姓名、简介和成就自动生成卡通头像
+              {avatarUrl ? '点击更换头像' : '点击生成或上传头像'}
             </Text>
           </View>
 
@@ -213,35 +260,35 @@ const FormPage = () => {
               </View>
             </View>
 
-            {/* 出生日期 */}
-            <View>
-              <Text className="block text-sm font-medium text-slate-700 mb-2">
-                出生日期 *
-              </Text>
-              <View className="bg-blue-50 rounded-xl px-4 py-3">
-                <Input
-                  className="w-full bg-transparent text-slate-700 placeholder-slate-400"
-                  // @ts-expect-error Taro Input type 'date' is valid but not in type definition
-                  type="date"
-                  value={formData.birthDate}
-                  onInput={(e) => handleInputChange('birthDate', e.detail.value)}
-                />
+            {/* 出生日期和去世日期 */}
+            <View className="flex gap-4">
+              <View className="flex-1">
+                <Text className="block text-sm font-medium text-slate-700 mb-2">
+                  出生日期 *
+                </Text>
+                <View className="bg-blue-50 rounded-xl px-4 py-3">
+                  <Input
+                    className="w-full bg-transparent text-slate-700 placeholder-slate-400"
+                    // @ts-expect-error Taro Input type 'date' is valid but not in type definition
+                    type="date"
+                    value={formData.birthDate}
+                    onInput={(e) => handleInputChange('birthDate', e.detail.value)}
+                  />
+                </View>
               </View>
-            </View>
-
-            {/* 去世日期 */}
-            <View>
-              <Text className="block text-sm font-medium text-slate-700 mb-2">
-                去世日期 *
-              </Text>
-              <View className="bg-blue-50 rounded-xl px-4 py-3">
-                <Input
-                  className="w-full bg-transparent text-slate-700 placeholder-slate-400"
-                  // @ts-expect-error Taro Input type 'date' is valid but not in type definition
-                  type="date"
-                  value={formData.deathDate}
-                  onInput={(e) => handleInputChange('deathDate', e.detail.value)}
-                />
+              <View className="flex-1">
+                <Text className="block text-sm font-medium text-slate-700 mb-2">
+                  去世日期 *
+                </Text>
+                <View className="bg-blue-50 rounded-xl px-4 py-3">
+                  <Input
+                    className="w-full bg-transparent text-slate-700 placeholder-slate-400"
+                    // @ts-expect-error Taro Input type 'date' is valid but not in type definition
+                    type="date"
+                    value={formData.deathDate}
+                    onInput={(e) => handleInputChange('deathDate', e.detail.value)}
+                  />
+                </View>
               </View>
             </View>
 

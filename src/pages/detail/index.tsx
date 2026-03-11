@@ -2,7 +2,7 @@ import { View, Text, Image, Input, Button } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { Heart, User, Calendar, Award, Send, Flower2 } from 'lucide-react-taro';
+import { Heart, User, Calendar, Award, Send, Flower2, Trash2 } from 'lucide-react-taro';
 
 interface Memorial {
   id: string;
@@ -257,6 +257,18 @@ const DetailPage = () => {
     return `${days}天前`;
   };
 
+  const calculateAge = (birthDate: string, deathDate: string) => {
+    const birth = new Date(birthDate);
+    const death = new Date(deathDate);
+    const age = death.getFullYear() - birth.getFullYear();
+    const monthDiff = death.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && death.getDate() < birth.getDate())) {
+      return age - 1;
+    }
+    return age;
+  };
+
   if (loading) {
     return (
       <View className="flex flex-col items-center justify-center h-full bg-blue-50">
@@ -284,25 +296,15 @@ const DetailPage = () => {
   return (
     <View className="min-h-screen bg-blue-50 pb-32">
       {/* 顶部操作栏 */}
-      <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-12 pb-3">
-        <View className="flex justify-between items-center">
-          <Button
-            size="mini"
-            className="bg-blue-500 text-white rounded-full px-4"
-            onClick={() => Taro.navigateBack()}
+      <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-12 pb-3 flex justify-end">
+        {isCreator && (
+          <View
+            className="cursor-pointer p-2"
+            onClick={handleDelete}
           >
-            返回
-          </Button>
-          {isCreator && (
-            <Button
-              size="mini"
-              className="bg-red-500 text-white rounded-full px-4"
-              onClick={handleDelete}
-            >
-              删除
-            </Button>
-          )}
-        </View>
+            <Trash2 color="#ef4444" size={24} />
+          </View>
+        )}
       </View>
 
       {/* 头像和姓名 - 正方形头像 */}
@@ -348,6 +350,15 @@ const DetailPage = () => {
           </View>
         </View>
       </View>
+
+      {/* 享年 */}
+      {memorial.birth_date && memorial.death_date && (
+        <View className="bg-white mt-4 px-6 py-4">
+          <Text className="block text-base text-slate-700 font-semibold">
+            {memorial.name} 享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
+          </Text>
+        </View>
+      )}
 
       {/* 简介 */}
       {memorial.description && (

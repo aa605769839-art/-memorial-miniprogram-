@@ -10,7 +10,7 @@
 - 让记忆永不消逝
 
 **设计风格**：
-- 温暖柔和的色调
+- 清新柔和的淡蓝色调
 - 简约亲和的界面
 - 轻松温馨的氛围
 
@@ -19,29 +19,29 @@
 - 希望远程表达思念的朋友
 - 追求数字化纪念的年轻一代
 
-## 配色方案（暖色调）
+## 配色方案（淡蓝色调）
 
 ### 主色板（Tailwind 类名）
 
 ```css
-/* 主色调 - 温暖橙色 */
---primary: #f97316;        /* orange-500 */
---primary-dark: #ea580c;   /* orange-600 */
---primary-light: #fb923c;  /* orange-400 */
+/* 主色调 - 清新蓝色 */
+--primary: #3b82f6;        /* blue-500 */
+--primary-dark: #2563eb;   /* blue-600 */
+--primary-light: #60a5fa;  /* blue-400 */
 
-/* 辅色调 - 温暖黄色 */
---accent: #fbbf24;         /* amber-400 */
---accent-light: #fde047;   /* yellow-300 */
+/* 辅色调 - 淡雅蓝白 */
+--accent: #93c5fd;         /* blue-300 */
+--accent-light: #dbeafe;   /* blue-100 */
 
-/* 中性色 - 柔和米白 */
---bg-primary: #fff7ed;     /* orange-50 */
+/* 中性色 - 柔和淡蓝 */
+--bg-primary: #eff6ff;     /* blue-50 */
 --bg-secondary: #ffffff;   /* white */
---bg-tertiary: #ffedd5;    /* orange-100 */
+--bg-tertiary: #dbeafe;    /* blue-100 */
 
 /* 文字颜色 */
---text-primary: #1c1917;   /* stone-900 */
---text-secondary: #57534e; /* stone-600 */
---text-muted: #a8a29e;     /* stone-400 */
+--text-primary: #1e3a8a;   /* blue-900 */
+--text-secondary: #1e40af; /* blue-800 */
+--text-muted: #94a3b8;     /* slate-400 */
 ```
 
 ### 语义色
@@ -309,8 +309,8 @@
 
 ```typescript
 tabBar: {
-  color: '#a8a29e',          // 未选中 - stone-400
-  selectedColor: '#f97316',  // 选中 - orange-500
+  color: '#94a3b8',          // 未选中 - slate-400
+  selectedColor: '#3b82f6',  // 选中 - blue-500
   backgroundColor: '#ffffff',
   borderStyle: 'black',
   list: [

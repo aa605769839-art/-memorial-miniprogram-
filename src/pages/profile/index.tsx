@@ -38,7 +38,7 @@ const ProfilePage = () => {
 
     setIsGenerating(true);
     try {
-      const prompt = `Create a vibrant, expressive cartoon-style portrait of ${formData.name}. ${formData.description ? `Their personality: ${formData.description}.` : ''} ${formData.achievements ? `Proud achievements: ${formData.achievements}.` : ''} Style: exaggerated facial features, warm and cheerful colors (orange, amber, warm yellow), gentle smile, kind eyes, surrounded by soft glowing light and colorful flower petals, joyful and peaceful atmosphere, like a heartwarming memorial portrait. High saturation, rich colors, soft brush strokes. 2K resolution.`;
+      const prompt = `Create a beautiful, heartwarming cartoon-style portrait of ${formData.name}. ${formData.description ? `Personality and life story: ${formData.description}.` : ''} ${formData.achievements ? `Life achievements and legacy: ${formData.achievements}.` : ''} Style: gentle and kind expression, warm smile, loving eyes, soft and detailed cartoon art style, based on their life story and personality, peaceful and serene atmosphere, soft blue tones mixed with warm colors, professional cartoon illustration, clean lines, soft shadows, high quality, like a memorial portrait that captures their essence. 2K resolution.`;
 
       const res = await Network.request({
         url: '/api/generate-avatar',
@@ -125,10 +125,10 @@ const ProfilePage = () => {
   };
 
   return (
-    <View className="min-h-screen bg-orange-50 pb-6">
+    <View className="min-h-screen bg-blue-50 pb-6">
       {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-orange-100">
-        <Text className="block text-2xl font-bold text-stone-900">
+      <View className="bg-white px-4 py-5 border-b border-blue-100">
+        <Text className="block text-2xl font-bold text-blue-900">
           我的
         </Text>
       </View>
@@ -136,13 +136,13 @@ const ProfilePage = () => {
       {/* 添加故人表单 */}
       <View className="px-4 py-6">
         <View className="bg-white rounded-2xl p-6 shadow-sm">
-          <Text className="block text-lg font-semibold text-stone-900 mb-6">
+          <Text className="block text-lg font-semibold text-blue-900 mb-6">
             添加故人
           </Text>
 
           {/* 头像预览 */}
           <View className="flex flex-col items-center mb-6">
-            <View className="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center overflow-hidden mb-3">
+            <View className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden mb-3">
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
@@ -150,11 +150,11 @@ const ProfilePage = () => {
                   mode="aspectFill"
                 />
               ) : (
-                <User color="#a8a29e" size={48} />
+                <User color="#94a3b8" size={48} />
               )}
             </View>
             <Button
-              className="bg-orange-100 text-orange-600 rounded-full px-4 py-2 flex items-center gap-2"
+              className="bg-blue-100 text-blue-600 rounded-full px-4 py-2 flex items-center gap-2"
               size="mini"
               onClick={generateAvatar}
               disabled={isGenerating}
@@ -164,7 +164,7 @@ const ProfilePage = () => {
                 {isGenerating ? '生成中...' : '生成头像'}
               </Text>
             </Button>
-            <Text className="block text-xs text-stone-400 mt-2">
+            <Text className="block text-xs text-slate-400 mt-2">
               根据信息生成卡通头像
             </Text>
           </View>
@@ -173,12 +173,12 @@ const ProfilePage = () => {
           <View className="flex flex-col gap-4">
             {/* 姓名 */}
             <View>
-              <Text className="block text-sm font-medium text-stone-700 mb-2">
+              <Text className="block text-sm font-medium text-slate-700 mb-2">
                 姓名 *
               </Text>
-              <View className="bg-orange-50 rounded-xl px-4 py-3">
+              <View className="bg-blue-50 rounded-xl px-4 py-3">
                 <Input
-                  className="w-full bg-transparent text-stone-700 placeholder-stone-400"
+                  className="w-full bg-transparent text-slate-700 placeholder-slate-400"
                   placeholder="请输入姓名"
                   value={formData.name}
                   onInput={(e) => handleInputChange('name', e.detail.value)}
@@ -188,12 +188,12 @@ const ProfilePage = () => {
 
             {/* 出生日期 */}
             <View>
-              <Text className="block text-sm font-medium text-stone-700 mb-2">
+              <Text className="block text-sm font-medium text-slate-700 mb-2">
                 出生日期 *
               </Text>
-              <View className="bg-orange-50 rounded-xl px-4 py-3">
+              <View className="bg-blue-50 rounded-xl px-4 py-3">
                 <Input
-                  className="w-full bg-transparent text-stone-700 placeholder-stone-400"
+                  className="w-full bg-transparent text-slate-700 placeholder-slate-400"
                   // @ts-expect-error Taro Input type 'date' is valid but not in type definition
                   type="date"
                   value={formData.birthDate}
@@ -204,12 +204,12 @@ const ProfilePage = () => {
 
             {/* 去世日期 */}
             <View>
-              <Text className="block text-sm font-medium text-stone-700 mb-2">
+              <Text className="block text-sm font-medium text-slate-700 mb-2">
                 去世日期 *
               </Text>
-              <View className="bg-orange-50 rounded-xl px-4 py-3">
+              <View className="bg-blue-50 rounded-xl px-4 py-3">
                 <Input
-                  className="w-full bg-transparent text-stone-700 placeholder-stone-400"
+                  className="w-full bg-transparent text-slate-700 placeholder-slate-400"
                   // @ts-expect-error Taro Input type 'date' is valid but not in type definition
                   type="date"
                   value={formData.deathDate}
@@ -220,10 +220,10 @@ const ProfilePage = () => {
 
             {/* 简介 */}
             <View>
-              <Text className="block text-sm font-medium text-stone-700 mb-2">
+              <Text className="block text-sm font-medium text-slate-700 mb-2">
                 简介
               </Text>
-              <View className="bg-orange-50 rounded-xl p-4">
+              <View className="bg-blue-50 rounded-xl p-4">
                 <Textarea
                   style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
                   placeholder="请输入简介..."
@@ -231,7 +231,7 @@ const ProfilePage = () => {
                   onInput={(e) => handleInputChange('description', e.detail.value)}
                   maxlength={200}
                 />
-                <Text className="block text-xs text-stone-400 mt-1 text-right">
+                <Text className="block text-xs text-slate-400 mt-1 text-right">
                   {formData.description.length}/200
                 </Text>
               </View>
@@ -239,10 +239,10 @@ const ProfilePage = () => {
 
             {/* 主要成就 */}
             <View>
-              <Text className="block text-sm font-medium text-stone-700 mb-2">
+              <Text className="block text-sm font-medium text-slate-700 mb-2">
                 主要成就
               </Text>
-              <View className="bg-orange-50 rounded-xl p-4">
+              <View className="bg-blue-50 rounded-xl p-4">
                 <Textarea
                   style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
                   placeholder="请输入主要成就，用逗号分隔..."
@@ -250,7 +250,7 @@ const ProfilePage = () => {
                   onInput={(e) => handleInputChange('achievements', e.detail.value)}
                   maxlength={300}
                 />
-                <Text className="block text-xs text-stone-400 mt-1 text-right">
+                <Text className="block text-xs text-slate-400 mt-1 text-right">
                   {formData.achievements.length}/300
                 </Text>
               </View>
@@ -258,7 +258,7 @@ const ProfilePage = () => {
 
             {/* 提交按钮 */}
             <Button
-              className="bg-orange-500 text-white rounded-full py-3 shadow-md mt-2"
+              className="bg-blue-500 text-white rounded-full py-3 shadow-md mt-2"
               onClick={handleSubmit}
             >
               <View className="flex items-center gap-2 justify-center">
@@ -271,25 +271,25 @@ const ProfilePage = () => {
 
         {/* 统计信息 */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mt-6">
-          <Text className="block text-lg font-semibold text-stone-900 mb-4">
+          <Text className="block text-lg font-semibold text-blue-900 mb-4">
             我的统计
           </Text>
           <View className="grid grid-cols-2 gap-4">
-            <View className="bg-orange-50 rounded-xl p-4 text-center">
-              <Heart color="#f97316" size={24} />
-              <Text className="block text-2xl font-bold text-orange-500 mt-2">
+            <View className="bg-blue-50 rounded-xl p-4 text-center">
+              <Heart color="#3b82f6" size={24} />
+              <Text className="block text-2xl font-bold text-blue-500 mt-2">
                 0
               </Text>
-              <Text className="block text-xs text-stone-500 mt-1">
+              <Text className="block text-xs text-slate-500 mt-1">
                 悼念次数
               </Text>
             </View>
-            <View className="bg-orange-50 rounded-xl p-4 text-center">
-              <User color="#a8a29e" size={24} />
-              <Text className="block text-2xl font-bold text-stone-600 mt-2">
+            <View className="bg-blue-50 rounded-xl p-4 text-center">
+              <User color="#94a3b8" size={24} />
+              <Text className="block text-2xl font-bold text-slate-600 mt-2">
                 0
               </Text>
-              <Text className="block text-xs text-stone-500 mt-1">
+              <Text className="block text-xs text-slate-500 mt-1">
                 拜访次数
               </Text>
             </View>

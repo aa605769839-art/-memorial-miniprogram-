@@ -54,10 +54,10 @@ const IndexPage = () => {
 
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-orange-50">
+      <View className="flex flex-col items-center justify-center h-full bg-blue-50">
         <View className="flex flex-col items-center gap-3">
-          <View className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
-          <Text className="block text-sm text-stone-400">
+          <View className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+          <Text className="block text-sm text-slate-400">
             加载中...
           </Text>
         </View>
@@ -66,14 +66,14 @@ const IndexPage = () => {
   }
 
   return (
-    <View className="min-h-screen bg-orange-50">
+    <View className="min-h-screen bg-blue-50">
       {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-orange-100">
+      <View className="bg-white px-4 py-5 border-b border-blue-100">
         <View>
-          <Text className="block text-2xl font-bold text-stone-900">
+          <Text className="block text-2xl font-bold text-blue-900">
             温故
           </Text>
-          <Text className="block text-xs text-stone-500 mt-1">
+          <Text className="block text-xs text-slate-500 mt-1">
             温暖回忆，永存心间
           </Text>
         </View>
@@ -84,12 +84,12 @@ const IndexPage = () => {
         {memorials.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-20">
             <View className="w-24 h-24 mb-6 opacity-30">
-              <Flower2 color="#a8a29e" size={96} strokeWidth={1.5} />
+              <Flower2 color="#94a3b8" size={96} strokeWidth={1.5} />
             </View>
-            <Text className="block text-base text-stone-500 mb-2">
+            <Text className="block text-base text-slate-500 mb-2">
               暂无内容
             </Text>
-            <Text className="block text-sm text-stone-400">
+            <Text className="block text-sm text-slate-400">
               前往&ldquo;我的&rdquo;页面添加故人
             </Text>
           </View>
@@ -102,7 +102,7 @@ const IndexPage = () => {
                 onClick={() => goToDetail(memorial.id)}
               >
                 {/* 正方形图片区域 */}
-                <View className="aspect-square relative bg-orange-100 flex items-center justify-center overflow-hidden">
+                <View className="aspect-square relative bg-blue-100 flex items-center justify-center overflow-hidden">
                   {memorial.avatar_url ? (
                     <Image
                       src={memorial.avatar_url}
@@ -110,28 +110,28 @@ const IndexPage = () => {
                       mode="aspectFill"
                     />
                   ) : (
-                    <User color="#a8a29e" size={48} />
+                    <User color="#94a3b8" size={48} />
                   )}
                 </View>
 
                 {/* 信息区域 */}
-                <View className="p-3 bg-gradient-to-b from-orange-50 to-white">
-                  <Text className="block text-base font-bold text-stone-900 mb-1">
+                <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
+                  <Text className="block text-base font-bold text-blue-900 mb-1">
                     {memorial.name}
                   </Text>
-                  <Text className="block text-xs text-stone-500 mb-2">
+                  <Text className="block text-xs text-slate-500 mb-2">
                     {memorial.birth_date && memorial.death_date
                       ? `${formatDate(memorial.birth_date)} ~ ${formatDate(memorial.death_date)}`
                       : '日期未知'}
                   </Text>
                   <View className="flex items-center gap-1">
-                    <Heart color="#f97316" size={12} />
-                    <Text className="text-xs text-orange-500">
+                    <Heart color="#3b82f6" size={12} />
+                    <Text className="text-xs text-blue-500">
                       {memorial.mourning_count}
                     </Text>
-                    <View className="mx-1" style={{ width: 2, height: 12, backgroundColor: '#fed7aa' }} />
-                    <User color="#a8a29e" size={12} />
-                    <Text className="text-xs text-stone-400">
+                    <View className="mx-1" style={{ width: 2, height: 12, backgroundColor: '#dbeafe' }} />
+                    <User color="#94a3b8" size={12} />
+                    <Text className="text-xs text-slate-400">
                       {memorial.visit_count}
                     </Text>
                   </View>

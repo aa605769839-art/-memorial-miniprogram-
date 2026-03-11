@@ -141,7 +141,49 @@ const FormPage = () => {
 
     setIsGenerating(true);
     try {
-      const prompt = `Create a beautiful, heartwarming cartoon-style portrait of ${formData.name}. ${formData.description ? `Personality and life story: ${formData.description}.` : ''} ${formData.achievements ? `Life achievements and legacy: ${formData.achievements}.` : ''} Style: gentle and kind expression, warm smile, loving eyes, soft and detailed cartoon art style, based on their life story and personality, peaceful and serene atmosphere, soft blue tones mixed with warm colors, professional cartoon illustration, clean lines, soft shadows, high quality, like a memorial portrait that captures their essence. 2K resolution.`;
+      // 计算年龄
+      let ageHint = '';
+      if (formData.birthDate) {
+        const birthDate = new Date(formData.birthDate);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+        if (formData.deathDate) {
+          // 已去世，计算去世时的年龄
+          const deathDate = new Date(formData.deathDate);
+          const ageAtDeath = deathDate.getFullYear() - birthDate.getFullYear();
+          // 根据年龄段选择描述词
+          if (ageAtDeath < 13) {
+            ageHint = `a ${ageAtDeath}-year-old child, young age, childlike features`;
+          } else if (ageAtDeath < 20) {
+            ageHint = `a ${ageAtDeath}-year-old teenager, youthful appearance`;
+          } else if (ageAtDeath < 35) {
+            ageHint = `a ${ageAtDeath}-year-old young adult, youthful face`;
+          } else if (ageAtDeath < 50) {
+            ageHint = `a ${ageAtDeath}-year-old middle-aged adult, mature appearance`;
+          } else if (ageAtDeath < 70) {
+            ageHint = `a ${ageAtDeath}-year-old senior adult, mature features with some wrinkles`;
+          } else {
+            ageHint = `a ${ageAtDeath}-year-old elderly person, elderly features, gentle wrinkles, wise expression`;
+          }
+        } else {
+          // 未去世，计算当前年龄
+          if (age < 13) {
+            ageHint = `a ${age}-year-old child, young age, childlike features`;
+          } else if (age < 20) {
+            ageHint = `a ${age}-year-old teenager, youthful appearance`;
+          } else if (age < 35) {
+            ageHint = `a ${age}-year-old young adult, youthful face`;
+          } else if (age < 50) {
+            ageHint = `a ${age}-year-old middle-aged adult, mature appearance`;
+          } else if (age < 70) {
+            ageHint = `a ${age}-year-old senior adult, mature features with some wrinkles`;
+          } else {
+            ageHint = `a ${age}-year-old elderly person, elderly features, gentle wrinkles, wise expression`;
+          }
+        }
+      }
+
+      const prompt = `Create a beautiful, heartwarming cartoon-style portrait of ${formData.name}. ${ageHint ? `This is ${ageHint}.` : ''} ${formData.gender ? `Gender: ${formData.gender}.` : ''} ${formData.description ? `Personality and life story: ${formData.description}.` : ''} ${formData.achievements ? `Life achievements and legacy: ${formData.achievements}.` : ''} Style: gentle and kind expression, warm smile, loving eyes, soft and detailed cartoon art style, based on their age and life story, peaceful and serene atmosphere, soft blue tones mixed with warm colors, professional cartoon illustration, clean lines, soft shadows, high quality, like a memorial portrait that captures their essence at this age. 2K resolution.`;
 
       const res = await Network.request({
         url: '/api/generate-avatar',

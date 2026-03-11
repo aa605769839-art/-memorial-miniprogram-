@@ -2,7 +2,7 @@ import { View, Text, Image, Input, Button, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { Heart, User, Calendar, Award, Send, Flower2, Trash2, X, Gift } from 'lucide-react-taro';
+import { Heart, User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Mars, Venus } from 'lucide-react-taro';
 
 interface Photo {
   id: string;
@@ -441,14 +441,17 @@ const DetailPage = () => {
           )}
         </View>
         <View className="px-6 py-6 text-center">
-          <Text className="block text-3xl font-bold text-blue-900 mb-2">
-            {memorial.name}
-            {memorial.gender && memorial.gender !== '未知' && (
-              <Text className="text-base text-slate-500 font-normal ml-2">
-                ({memorial.gender})
-              </Text>
+          <View className="flex items-center justify-center gap-2 mb-2">
+            <Text className="text-3xl font-bold text-blue-900">
+              {memorial.name}
+            </Text>
+            {memorial.gender === '男' && (
+              <Mars color="#3b82f6" size={24} />
             )}
-          </Text>
+            {memorial.gender === '女' && (
+              <Venus color="#ec4899" size={24} />
+            )}
+          </View>
           {memorial.birth_date && memorial.death_date && (
             <View className="flex items-center justify-center gap-2 mb-4">
               <Calendar color="#94a3b8" size={16} />

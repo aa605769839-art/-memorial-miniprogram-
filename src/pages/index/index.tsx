@@ -108,9 +108,15 @@ const IndexPage = () => {
                       src={memorial.avatar_url}
                       className="w-full h-full"
                       mode="aspectFill"
+                      onError={() => {
+                        console.log('Image load failed:', memorial.avatar_url);
+                      }}
                     />
                   ) : (
-                    <User color="#94a3b8" size={48} />
+                    <View className="flex flex-col items-center gap-2">
+                      <User color="#94a3b8" size={48} />
+                      <Text className="text-xs text-slate-400">暂无头像</Text>
+                    </View>
                   )}
                 </View>
 

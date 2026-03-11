@@ -54,10 +54,10 @@ const IndexPage = () => {
 
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-blue-50">
+      <View className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
         <View className="flex flex-col items-center gap-3">
           <View className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
-          <Text className="block text-sm text-slate-400">
+          <Text className="block text-sm text-slate-500 font-medium">
             加载中...
           </Text>
         </View>
@@ -66,46 +66,58 @@ const IndexPage = () => {
   }
 
   return (
-    <View className="min-h-screen bg-blue-50">
-      {/* 导航栏占位 */}
-      <View style={{ height: '44px', backgroundColor: '#fff' }} />
+    <View className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
+      {/* 导航栏占位 - 添加渐变背景 */}
+      <View style={{ height: '44px', background: 'linear-gradient(to bottom, #fff, #dbeafe)' }} />
 
-      {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-blue-100">
-        <View>
-          <Text className="block text-2xl font-bold text-blue-900">
-            温故
-          </Text>
-          <Text className="block text-xs text-slate-500 mt-1">
-            温暖回忆，永存心间
-          </Text>
+      {/* 头部 - 减少留白，增加渐变背景 */}
+      <View className="bg-gradient-to-b from-white to-blue-50 px-4 py-3 border-b border-blue-200">
+        <View className="flex items-center justify-between">
+          <View>
+            <Text className="block text-2xl font-bold text-blue-900">
+              温故
+            </Text>
+            <Text className="block text-xs text-slate-500 mt-0.5">
+              温暖回忆，永存心间
+            </Text>
+          </View>
+          {/* 右侧装饰图标 */}
+          <View className="opacity-20">
+            <Flower2 color="#3b82f6" size={32} />
+          </View>
         </View>
       </View>
 
-      {/* 故人列表 - 正方形网格 */}
-      <View className="px-4 py-6">
+      {/* 故人列表 - 减少顶部内边距 */}
+      <View className="px-4 py-4">
         {memorials.length === 0 ? (
-          <View className="flex flex-col items-center justify-center py-20">
-            <View className="w-24 h-24 mb-6 opacity-30">
-              <Flower2 color="#94a3b8" size={96} strokeWidth={1.5} />
+          <View className="flex flex-col items-center justify-center py-24">
+            <View className="w-24 h-24 mb-4 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center shadow-sm">
+              <Flower2 color="#3b82f6" size={48} strokeWidth={1.5} />
             </View>
-            <Text className="block text-base text-slate-500 mb-2">
-              暂无内容
+            <Text className="block text-base font-medium text-slate-600 mb-2">
+              暂无纪念空间
             </Text>
-            <Text className="block text-sm text-slate-400">
-              前往&ldquo;我的&rdquo;页面添加故人
+            <Text className="block text-sm text-slate-400 mb-6">
+              前往&ldquo;我的&rdquo;页面创建纪念空间
             </Text>
+            <View
+              className="px-6 py-2.5 bg-blue-500 text-white rounded-full shadow-md cursor-pointer"
+              onClick={() => Taro.switchTab({ url: '/pages/profile/index' })}
+            >
+              <Text className="text-sm font-medium">前往创建</Text>
+            </View>
           </View>
         ) : (
           <View className="grid grid-cols-2 gap-3">
             {memorials.map((memorial) => (
               <View
                 key={memorial.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm"
+                className="bg-white rounded-2xl overflow-hidden shadow-md border border-blue-100"
                 onClick={() => goToDetail(memorial.id)}
               >
-                {/* 正方形图片区域 */}
-                <View className="aspect-square relative bg-blue-100 flex items-center justify-center overflow-hidden">
+                {/* 正方形图片区域 - 添加渐变背景 */}
+                <View className="aspect-square relative bg-gradient-to-br from-blue-100 via-blue-50 to-white flex items-center justify-center overflow-hidden">
                   {memorial.avatar_url ? (
                     <Image
                       src={memorial.avatar_url}
@@ -117,32 +129,37 @@ const IndexPage = () => {
                     />
                   ) : (
                     <View className="flex flex-col items-center gap-2">
-                      <User color="#94a3b8" size={48} />
+                      <View className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
+                        <User color="#3b82f6" size={32} strokeWidth={1.5} />
+                      </View>
                       <Text className="text-xs text-slate-400">暂无头像</Text>
                     </View>
                   )}
                 </View>
 
-                {/* 信息区域 */}
+                {/* 信息区域 - 优化间距 */}
                 <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
-                  <Text className="block text-base font-bold text-blue-900 mb-1">
+                  <Text className="block text-base font-bold text-blue-900 mb-0.5 truncate">
                     {memorial.name}
                   </Text>
-                  <Text className="block text-xs text-slate-500 mb-2">
+                  <Text className="block text-xs text-slate-500 mb-2 truncate">
                     {memorial.birth_date && memorial.death_date
                       ? `${formatDate(memorial.birth_date)} ~ ${formatDate(memorial.death_date)}`
                       : '日期未知'}
                   </Text>
-                  <View className="flex items-center gap-1">
-                    <Heart color="#3b82f6" size={12} />
-                    <Text className="text-xs text-blue-500">
-                      {memorial.mourning_count}
-                    </Text>
-                    <View className="mx-1" style={{ width: 2, height: 12, backgroundColor: '#dbeafe' }} />
-                    <User color="#94a3b8" size={12} />
-                    <Text className="text-xs text-slate-400">
-                      {memorial.visit_count}
-                    </Text>
+                  <View className="flex items-center gap-1.5">
+                    <View className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-full">
+                      <Heart color="#3b82f6" size={10} />
+                      <Text className="text-xs text-blue-600 font-medium">
+                        {memorial.mourning_count}
+                      </Text>
+                    </View>
+                    <View className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-full">
+                      <User color="#94a3b8" size={10} />
+                      <Text className="text-xs text-slate-500">
+                        {memorial.visit_count}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>

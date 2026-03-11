@@ -338,6 +338,7 @@ const FormPage = () => {
           method: 'PUT',
           data: {
             name: formData.name,
+            gender: formData.gender,
             birthDate: new Date(formData.birthDate).toISOString(),
             deathDate: new Date(formData.deathDate).toISOString(),
             description: formData.description || null,
@@ -385,6 +386,7 @@ const FormPage = () => {
           data: {
             userId,
             name: formData.name,
+            gender: formData.gender,
             birthDate: new Date(formData.birthDate).toISOString(),
             deathDate: new Date(formData.deathDate).toISOString(),
             description: formData.description || null,

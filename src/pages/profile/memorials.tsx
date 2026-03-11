@@ -111,11 +111,11 @@ const MyMemorialsPage = () => {
                       mode="aspectFill"
                     />
                   ) : (
-                    <View className="w-full h-full flex items-center justify-center">
-                      <Text className="text-slate-400 text-sm">
-                        暂无图片
-                      </Text>
-                    </View>
+                    <Image
+                      src="https://api.dicebear.com/7.x/avataaars/svg?seed=${memorial.name}&backgroundColor=bfdbfe"
+                      className="w-full h-full"
+                      mode="aspectFit"
+                    />
                   )}
                 </View>
                 <Text className="block text-base font-semibold text-blue-900 truncate">

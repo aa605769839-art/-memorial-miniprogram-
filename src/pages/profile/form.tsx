@@ -2,7 +2,7 @@ import { View, Text, Image, Button, Input, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState } from 'react';
 import { Network } from '@/network';
-import { Camera, User } from 'lucide-react-taro';
+import { User } from 'lucide-react-taro';
 
 interface NewMemorial {
   name: string;
@@ -182,12 +182,11 @@ const FormPage = () => {
               )}
             </View>
             <Button
-              className="bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-full px-6 py-2.5 shadow-md flex items-center gap-2"
+              className="bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-full px-6 py-2.5 shadow-md"
               size="mini"
               onClick={generateAvatar}
               disabled={isGenerating}
             >
-              <Camera size={16} color={isGenerating ? '#fff' : '#fff'} />
               <Text className="text-sm font-medium">
                 {isGenerating ? '生成中...' : 'AI 生成头像'}
               </Text>

@@ -100,6 +100,26 @@ export const comments = pgTable(
   ]
 );
 
+// 照片表
+export const photos = pgTable(
+  "photos",
+  {
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    memorialId: varchar("memorial_id", { length: 36 }).notNull(),
+    url: text("url").notNull(),
+    orderIndex: integer("order_index").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("photos_memorial_id_idx").on(table.memorialId),
+    index("photos_order_idx").on(table.memorialId, table.orderIndex),
+  ]
+);
+
 // Zod schemas for validation
 const { createInsertSchema: createCoercedInsertSchema } = createSchemaFactory({
   coerce: { date: true },
@@ -146,6 +166,12 @@ export const insertCommentSchema = createCoercedInsertSchema(comments).pick({
   content: true,
 });
 
+export const insertPhotoSchema = createCoercedInsertSchema(photos).pick({
+  memorialId: true,
+  url: true,
+  orderIndex: true,
+});
+
 // TypeScript types
 export type Memorial = typeof memorials.$inferSelect;
 export type InsertMemorial = z.infer<typeof insertMemorialSchema>;
@@ -159,3 +185,6 @@ export type InsertVisitRecord = z.infer<typeof insertVisitRecordSchema>;
 
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
+
+export type Photo = typeof photos.$inferSelect;
+export type InsertPhoto = z.infer<typeof insertPhotoSchema>;

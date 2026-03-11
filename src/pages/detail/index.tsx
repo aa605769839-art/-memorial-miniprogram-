@@ -351,23 +351,22 @@ const DetailPage = () => {
         </View>
       </View>
 
-      {/* 享年 */}
-      {memorial.birth_date && memorial.death_date && (
-        <View className="bg-white mt-4 px-6 py-4">
-          <Text className="block text-base text-slate-700 font-semibold">
-            {memorial.name} 享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
-          </Text>
-        </View>
-      )}
-
-      {/* 简介 */}
-      {memorial.description && (
-        <View className="bg-white mt-4 px-6 py-4">
+      {/* 姓名、享年、简介 */}
+      <View className="bg-white mt-4 px-6 py-4">
+        <Text className="block text-xl font-bold text-blue-900 mb-3">
+          {memorial.name}
+          {memorial.birth_date && memorial.death_date && (
+            <Text className="text-base font-semibold text-slate-700 ml-2">
+              享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
+            </Text>
+          )}
+        </Text>
+        {memorial.description && (
           <Text className="block text-sm text-slate-600 leading-relaxed">
             {memorial.description}
           </Text>
-        </View>
-      )}
+        )}
+      </View>
 
       {/* 主要成就 */}
       {memorial.achievements && memorial.achievements.length > 0 && (
@@ -480,6 +479,8 @@ const DetailPage = () => {
               placeholder="写下您的思念..."
               value={message}
               onInput={(e) => setMessage(e.detail.value)}
+              style={{ minHeight: '100px' }}
+              maxlength={500}
             />
           </View>
           <View className="flex items-center justify-end gap-2">

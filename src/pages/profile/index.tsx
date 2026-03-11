@@ -124,10 +124,15 @@ const ProfilePage = () => {
       bio: editForm.bio.trim() || '还没有简介'
     };
 
+    // 先保存数据
     setUserProfile(newProfile);
     Taro.setStorageSync('userProfile', newProfile);
+
+    // 然后退出编辑模式
     setIsEditing(false);
     setTempAvatar(null); // 清空临时头像
+
+    // 显示成功提示
     Taro.showToast({
       title: '保存成功',
       icon: 'success'
@@ -135,10 +140,12 @@ const ProfilePage = () => {
   };
 
   const handleCancel = () => {
+    // 重新加载用户资料，恢复原来的数据
+    loadUserProfile();
+
+    // 退出编辑模式
     setIsEditing(false);
     setTempAvatar(null); // 清空临时头像
-    // 重新加载用户资料，恢复原来的头像
-    loadUserProfile();
   };
 
   const handleAddMemorial = () => {

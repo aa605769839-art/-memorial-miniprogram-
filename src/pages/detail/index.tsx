@@ -49,6 +49,11 @@ const DetailPage = () => {
       fetchMemorial();
       fetchComments();
       recordVisit();
+      // 从本地存储加载用户昵称
+      const userProfile = Taro.getStorageSync('userProfile');
+      if (userProfile && userProfile.name) {
+        setVisitorName(userProfile.name);
+      }
     }
   }, [id]);
 
@@ -109,6 +114,12 @@ const DetailPage = () => {
           }
         }
       }
+    });
+  };
+
+  const handleEdit = () => {
+    Taro.navigateTo({
+      url: `/pages/profile/form?id=${id}`
     });
   };
 
@@ -308,11 +319,19 @@ const DetailPage = () => {
       {/* 顶部操作栏 */}
       <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-12 pb-3 flex justify-end">
         {isCreator && (
-          <View
-            className="cursor-pointer p-2"
-            onClick={handleDelete}
-          >
-            <Trash2 color="#ef4444" size={24} />
+          <View className="flex gap-2">
+            <View
+              className="cursor-pointer p-2"
+              onClick={handleEdit}
+            >
+              <Text className="text-base text-blue-500 font-medium">编辑</Text>
+            </View>
+            <View
+              className="cursor-pointer p-2"
+              onClick={handleDelete}
+            >
+              <Trash2 color="#ef4444" size={24} />
+            </View>
           </View>
         )}
       </View>

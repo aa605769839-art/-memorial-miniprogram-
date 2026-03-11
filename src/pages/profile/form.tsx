@@ -1,6 +1,6 @@
 import { View, Text, Image, Button, Input, Textarea } from '@tarojs/components';
-import Taro from '@tarojs/taro';
-import { useState } from 'react';
+import Taro, { useRouter } from '@tarojs/taro';
+import { useState, useEffect } from 'react';
 import { Network } from '@/network';
 import { User } from 'lucide-react-taro';
 
@@ -12,7 +12,19 @@ interface NewMemorial {
   achievements: string;
 }
 
+interface Photo {
+  id: string;
+  memorial_id: string;
+  url: string;
+  order_index: number;
+  created_at: string;
+}
+
 const FormPage = () => {
+  const router = useRouter();
+  const { id } = router.params;
+  const isEditMode = !!id;
+  
   const [formData, setFormData] = useState<NewMemorial>({
     name: '',
     birthDate: '',
@@ -25,6 +37,51 @@ const FormPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // 加载故人信息（编辑模式）
+  useEffect(() => {
+    if (isEditMode) {
+      loadMemorial();
+    }
+  }, [isEditMode]);
+
+  const loadMemorial = async () => {
+    setLoading(true);
+    try {
+      const res = await Network.request({
+        url: `/api/memorials/${id}`,
+        method: 'GET'
+      });
+
+      if (res.data?.code === 200) {
+        const memorial = res.data.data;
+        setFormData({
+          name: memorial.name,
+          birthDate: memorial.birth_date ? new Date(memorial.birth_date).toISOString().split('T')[0] : '',
+          deathDate: memorial.death_date ? new Date(memorial.death_date).toISOString().split('T')[0] : '',
+          description: memorial.description || '',
+          achievements: memorial.achievements ? memorial.achievements.join('，') : ''
+        });
+        setAvatarUrl(memorial.avatar_url);
+        // 加载照片
+        if (memorial.photos && memorial.photos.length > 0) {
+          const photoUrls = memorial.photos
+            .sort((a: Photo, b: Photo) => a.order_index - b.order_index)
+            .map((p: Photo) => p.url);
+          setPhotos(photoUrls);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load memorial:', error);
+      Taro.showToast({
+        title: '加载失败',
+        icon: 'none'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (field: keyof NewMemorial, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -205,53 +262,80 @@ const FormPage = () => {
         }
       }
 
-      // 获取或生成用户ID
-      let userId = Taro.getStorageSync('userId');
-      if (!userId) {
-        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        Taro.setStorageSync('userId', userId);
-      }
-
       const achievements = formData.achievements
         ? formData.achievements.split(/[,，、]/).map(a => a.trim()).filter(Boolean)
         : null;
 
-      const res = await Network.request({
-        url: '/api/memorials',
-        method: 'POST',
-        data: {
-          userId,
-          name: formData.name,
-          birthDate: new Date(formData.birthDate).toISOString(),
-          deathDate: new Date(formData.deathDate).toISOString(),
-          description: formData.description || null,
-          achievements,
-          avatarUrl: finalAvatarUrl
-        }
-      });
-
-      if (res.data?.code === 200) {
-        // 如果有照片，上传照片
-        if (photos.length > 0) {
-          const memorialId = res.data.data.id;
-          await Network.request({
-            url: `/api/photos/batch/${memorialId}`,
-            method: 'POST',
-            data: { urls: photos }
-          });
-        }
-
-        Taro.showToast({
-          title: '保存成功',
-          icon: 'success'
+      if (isEditMode) {
+        // 更新模式
+        const updateRes = await Network.request({
+          url: `/api/memorials/${id}`,
+          method: 'PUT',
+          data: {
+            name: formData.name,
+            birthDate: new Date(formData.birthDate).toISOString(),
+            deathDate: new Date(formData.deathDate).toISOString(),
+            description: formData.description || null,
+            achievements,
+            avatarUrl: finalAvatarUrl
+          }
         });
 
-        setTimeout(() => {
-          Taro.navigateBack();
-        }, 1000);
+        if (updateRes.data?.code === 200) {
+          Taro.showToast({
+            title: '保存成功',
+            icon: 'success'
+          });
+          setTimeout(() => {
+            Taro.navigateBack();
+          }, 1000);
+        }
+      } else {
+        // 创建模式
+        // 获取或生成用户ID
+        let userId = Taro.getStorageSync('userId');
+        if (!userId) {
+          userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          Taro.setStorageSync('userId', userId);
+        }
+
+        const res = await Network.request({
+          url: '/api/memorials',
+          method: 'POST',
+          data: {
+            userId,
+            name: formData.name,
+            birthDate: new Date(formData.birthDate).toISOString(),
+            deathDate: new Date(formData.deathDate).toISOString(),
+            description: formData.description || null,
+            achievements,
+            avatarUrl: finalAvatarUrl
+          }
+        });
+
+        if (res.data?.code === 200) {
+          // 如果有照片，上传照片
+          if (photos.length > 0) {
+            const memorialId = res.data.data.id;
+            await Network.request({
+              url: `/api/photos/batch/${memorialId}`,
+              method: 'POST',
+              data: { urls: photos }
+            });
+          }
+
+          Taro.showToast({
+            title: '保存成功',
+            icon: 'success'
+          });
+
+          setTimeout(() => {
+            Taro.navigateBack();
+          }, 1000);
+        }
       }
     } catch (error) {
-      console.error('Failed to create memorial:', error);
+      console.error('Failed to save memorial:', error);
       Taro.showToast({
         title: '保存失败',
         icon: 'none'
@@ -261,18 +345,71 @@ const FormPage = () => {
     }
   };
 
+  const handlePolish = async (field: 'description' | 'achievements') => {
+    const text = formData[field];
+    if (!text || text.trim().length === 0) {
+      Taro.showToast({
+        title: '请先输入内容',
+        icon: 'none'
+      });
+      return;
+    }
+
+    Taro.showLoading({
+      title: '正在润色...',
+      mask: true
+    });
+
+    try {
+      const res = await Network.request({
+        url: '/api/memorials/polish-text',
+        method: 'POST',
+        data: { text }
+      });
+
+      if (res.data?.code === 200 && res.data.data?.polishedText) {
+        setFormData(prev => ({ ...prev, [field]: res.data.data.polishedText }));
+        Taro.showToast({
+          title: '润色完成',
+          icon: 'success'
+        });
+      } else {
+        throw new Error('润色失败');
+      }
+    } catch (error) {
+      console.error('Failed to polish text:', error);
+      Taro.showToast({
+        title: '润色失败，请稍后再试',
+        icon: 'none'
+      });
+    } finally {
+      Taro.hideLoading();
+    }
+  };
+
   return (
     <View className="min-h-screen bg-blue-50 pb-6">
       {/* 头部 */}
       <View className="bg-white px-4 py-5 border-b border-blue-100">
         <Text className="block text-2xl font-bold text-blue-900">
-          添加故人
+          {isEditMode ? '编辑故人' : '添加故人'}
         </Text>
       </View>
 
+      {/* 加载状态 */}
+      {loading && (
+        <View className="flex flex-col items-center justify-center py-20">
+          <View className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+          <Text className="block text-sm text-slate-400 mt-4">
+            加载中...
+          </Text>
+        </View>
+      )}
+
       {/* 表单 */}
-      <View className="px-4 py-6">
-        <View className="bg-white rounded-2xl p-6 shadow-sm">
+      {!loading && (
+        <View className="px-4 py-6">
+          <View className="bg-white rounded-2xl p-6 shadow-sm">
           {/* 头像预览 */}
           <View className="flex flex-col items-center mb-6">
             <View 
@@ -396,9 +533,17 @@ const FormPage = () => {
 
             {/* 简介 */}
             <View>
-              <Text className="block text-sm font-medium text-slate-700 mb-2">
-                简介
-              </Text>
+              <View className="flex justify-between items-center mb-2">
+                <Text className="block text-sm font-medium text-slate-700">
+                  简介
+                </Text>
+                <Text
+                  className="text-xs font-semibold text-blue-500 underline cursor-pointer"
+                  onClick={() => handlePolish('description')}
+                >
+                  AI润色
+                </Text>
+              </View>
               <View className="bg-blue-50 rounded-xl p-4">
                 <Textarea
                   style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
@@ -415,9 +560,17 @@ const FormPage = () => {
 
             {/* 主要成就 */}
             <View>
-              <Text className="block text-sm font-medium text-slate-700 mb-2">
-                主要成就
-              </Text>
+              <View className="flex justify-between items-center mb-2">
+                <Text className="block text-sm font-medium text-slate-700">
+                  主要成就
+                </Text>
+                <Text
+                  className="text-xs font-semibold text-blue-500 underline cursor-pointer"
+                  onClick={() => handlePolish('achievements')}
+                >
+                  AI润色
+                </Text>
+              </View>
               <View className="bg-blue-50 rounded-xl p-4">
                 <Textarea
                   style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
@@ -438,11 +591,12 @@ const FormPage = () => {
               onClick={handleSubmit}
               disabled={isSaving}
             >
-              <Text>{isSaving ? '保存中...' : '保存故人'}</Text>
+              <Text>{isSaving ? '保存中...' : (isEditMode ? '保存修改' : '保存故人')}</Text>
             </Button>
           </View>
         </View>
       </View>
+      )}
     </View>
   );
 };

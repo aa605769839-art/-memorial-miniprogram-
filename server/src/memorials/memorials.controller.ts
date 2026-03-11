@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/
 import { MemorialsService } from './memorials.service';
 import { PhotosService } from '../photos/photos.service';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
+import { LLMClient, Config } from 'coze-coding-dev-sdk';
 
 @Controller('memorials')
 export class MemorialsController {
@@ -14,6 +15,36 @@ export class MemorialsController {
   async findAll(@Query('userId') userId?: string) {
     const result = await this.memorialsService.findAll(userId);
     return { code: 200, msg: 'success', data: result };
+  }
+
+  @Post('polish-text')
+  async polishText(@Body() body: { text: string }) {
+    if (!body.text || body.text.trim().length === 0) {
+      return { code: 400, msg: '文本内容不能为空', data: null };
+    }
+
+    try {
+      const config = new Config();
+      const client = new LLMClient(config);
+
+      const messages = [
+        {
+          role: 'system' as const,
+          content: '你是一位专业的文本润色专家，擅长让文字更加优美、感人、富有纪念意义。保持原意不变，仅优化语言表达和排版格式。'
+        },
+        {
+          role: 'user' as const,
+          content: `请帮我润色以下文本：\n\n${body.text}`
+        }
+      ];
+
+      const response = await client.invoke(messages, { temperature: 0.8 });
+
+      return { code: 200, msg: 'success', data: { polishedText: response.content } };
+    } catch (error) {
+      console.error('AI润色失败:', error);
+      return { code: 500, msg: 'AI润色服务暂不可用，请稍后再试', data: null };
+    }
   }
 
   @Get(':id')

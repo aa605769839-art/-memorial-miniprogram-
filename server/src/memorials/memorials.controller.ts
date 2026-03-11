@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { MemorialsService } from './memorials.service';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
 
@@ -7,8 +7,8 @@ export class MemorialsController {
   constructor(private readonly memorialsService: MemorialsService) {}
 
   @Get()
-  async findAll() {
-    const result = await this.memorialsService.findAll();
+  async findAll(@Query('userId') userId?: string) {
+    const result = await this.memorialsService.findAll(userId);
     return { code: 200, msg: 'success', data: result };
   }
 
@@ -37,7 +37,22 @@ export class MemorialsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @Query('userId') userId: string) {
+    if (!userId) {
+      return { code: 400, msg: '用户ID不能为空', data: null };
+    }
+
+    // 先查询 memorial 验证权限
+    const memorial = await this.memorialsService.findOne(id);
+    if (!memorial) {
+      return { code: 404, msg: '故友不存在', data: null };
+    }
+
+    // 验证是否是创建者
+    if (memorial.user_id !== userId) {
+      return { code: 403, msg: '无权删除此故友', data: null };
+    }
+
     const result = await this.memorialsService.remove(id);
     return { code: 200, msg: 'success', data: result };
   }

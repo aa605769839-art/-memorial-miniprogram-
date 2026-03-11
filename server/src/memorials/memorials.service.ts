@@ -6,11 +6,18 @@ import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schem
 export class MemorialsService {
   private client = getSupabaseClient();
 
-  async findAll() {
-    const { data, error } = await this.client
+  async findAll(userId?: string) {
+    let query = this.client
       .from('memorials')
       .select('*')
       .order('created_at', { ascending: false });
+
+    // 如果提供了 userId，只返回该用户的故友
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data;
@@ -41,6 +48,7 @@ export class MemorialsService {
   async create(createMemorialDto: InsertMemorial) {
     // 转换 camelCase 为 snake_case，因为 Supabase SDK 使用数据库字段名
     const dbData: Record<string, any> = {};
+    if (createMemorialDto.userId) dbData.user_id = createMemorialDto.userId;
     if (createMemorialDto.name) dbData.name = createMemorialDto.name;
     if (createMemorialDto.birthDate) dbData.birth_date = createMemorialDto.birthDate;
     if (createMemorialDto.deathDate) dbData.death_date = createMemorialDto.deathDate;

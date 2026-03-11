@@ -17,6 +17,7 @@ export const memorials = pgTable(
     id: varchar("id", { length: 36 })
       .primaryKey()
       .default(sql`gen_random_uuid()`),
+    userId: varchar("user_id", { length: 128 }).notNull(), // 创建者ID
     name: varchar("name", { length: 128 }).notNull(),
     birthDate: timestamp("birth_date", { withTimezone: true, mode: 'string' }),
     deathDate: timestamp("death_date", { withTimezone: true, mode: 'string' }),
@@ -33,6 +34,7 @@ export const memorials = pgTable(
   (table) => [
     index("memorials_created_at_idx").on(table.createdAt),
     index("memorials_mourning_count_idx").on(table.mourningCount),
+    index("memorials_user_id_idx").on(table.userId),
   ]
 );
 
@@ -104,6 +106,7 @@ const { createInsertSchema: createCoercedInsertSchema } = createSchemaFactory({
 });
 
 export const insertMemorialSchema = createCoercedInsertSchema(memorials).pick({
+  userId: true,
   name: true,
   birthDate: true,
   deathDate: true,

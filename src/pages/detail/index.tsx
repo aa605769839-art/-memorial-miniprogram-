@@ -32,6 +32,7 @@ const DetailPage = () => {
   const [message, setMessage] = useState('');
   const [visitorName, setVisitorName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isCreator, setIsCreator] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -50,12 +51,55 @@ const DetailPage = () => {
       console.log('Memorial detail response:', res.data);
       if (res.data?.code === 200) {
         setMemorial(res.data.data);
+        
+        // 检查是否是创建者
+        const currentUserId = Taro.getStorageSync('userId');
+        setIsCreator(res.data.data.user_id === currentUserId);
       }
     } catch (error) {
       console.error('Failed to fetch memorial:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = async () => {
+    Taro.showModal({
+      title: '确认删除',
+      content: '确定要删除这位故友吗？此操作不可恢复。',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            const userId = Taro.getStorageSync('userId');
+            const deleteRes = await Network.request({
+              url: `/api/memorials/${id}?userId=${userId}`,
+              method: 'DELETE'
+            });
+
+            if (deleteRes.data?.code === 200) {
+              Taro.showToast({
+                title: '删除成功',
+                icon: 'success'
+              });
+              setTimeout(() => {
+                Taro.navigateBack();
+              }, 1000);
+            } else {
+              Taro.showToast({
+                title: deleteRes.data?.msg || '删除失败',
+                icon: 'none'
+              });
+            }
+          } catch (error) {
+            console.error('Failed to delete memorial:', error);
+            Taro.showToast({
+              title: '删除失败',
+              icon: 'none'
+            });
+          }
+        }
+      }
+    });
   };
 
   const fetchComments = async () => {
@@ -239,8 +283,30 @@ const DetailPage = () => {
 
   return (
     <View className="min-h-screen bg-blue-50 pb-32">
+      {/* 顶部操作栏 */}
+      <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-12 pb-3">
+        <View className="flex justify-between items-center">
+          <Button
+            size="mini"
+            className="bg-blue-500 text-white rounded-full px-4"
+            onClick={() => Taro.navigateBack()}
+          >
+            返回
+          </Button>
+          {isCreator && (
+            <Button
+              size="mini"
+              className="bg-red-500 text-white rounded-full px-4"
+              onClick={handleDelete}
+            >
+              删除
+            </Button>
+          )}
+        </View>
+      </View>
+
       {/* 头像和姓名 - 正方形头像 */}
-      <View className="bg-white">
+      <View className="bg-white pt-16">
         <View className="w-full aspect-square bg-blue-100 flex items-center justify-center overflow-hidden">
           {memorial.avatar_url ? (
             <Image

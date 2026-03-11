@@ -82,6 +82,13 @@ const FormPage = () => {
     }
 
     try {
+      // 获取或生成用户ID
+      let userId = Taro.getStorageSync('userId');
+      if (!userId) {
+        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        Taro.setStorageSync('userId', userId);
+      }
+
       const achievements = formData.achievements
         ? formData.achievements.split(/[,，、]/).map(a => a.trim()).filter(Boolean)
         : null;
@@ -90,6 +97,7 @@ const FormPage = () => {
         url: '/api/memorials',
         method: 'POST',
         data: {
+          userId,
           name: formData.name,
           birthDate: new Date(formData.birthDate).toISOString(),
           deathDate: new Date(formData.deathDate).toISOString(),

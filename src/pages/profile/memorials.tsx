@@ -7,12 +7,12 @@ import { Network } from '@/network';
 interface Memorial {
   id: string;
   name: string;
-  avatar: string;
-  birthDate: string;
-  deathDate: string;
-  description: string;
-  mourningCount: number;
-  visitCount: number;
+  avatar_url: string | null; // 修正字段名
+  birth_date: string;
+  death_date: string;
+  description: string | null;
+  mourning_count: number;
+  visit_count: number;
 }
 
 const MyMemorialsPage = () => {
@@ -23,11 +23,23 @@ const MyMemorialsPage = () => {
     loadMemorials();
   }, []);
 
+  const getUserId = () => {
+    let userId = Taro.getStorageSync('userId');
+    if (!userId) {
+      userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      Taro.setStorageSync('userId', userId);
+    }
+    return userId;
+  };
+
   const loadMemorials = async () => {
     setLoading(true);
     try {
+      const userId = getUserId();
       const res = await Network.request({
         url: '/api/memorials',
+        method: 'GET',
+        data: { userId }
       });
 
       if (res.statusCode === 200 && res.data.data) {
@@ -55,27 +67,21 @@ const MyMemorialsPage = () => {
   return (
     <View className="min-h-screen bg-blue-50 pb-6">
       {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-blue-100">
+      <View className="bg-white px-4 py-5 border-b border-blue-100 relative">
         <Text className="block text-2xl font-bold text-blue-900">
           我的故友
         </Text>
-      </View>
-
-      {/* 新建按钮 */}
-      <View className="px-4 py-4">
+        {/* 新建按钮 - 右上角 */}
         <View
-          className="bg-blue-500 rounded-2xl p-4 flex items-center justify-center gap-3 cursor-pointer shadow-sm"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-blue-500 rounded-full p-2 cursor-pointer"
           onClick={handleAddMemorial}
         >
           <Plus color="#fff" size={24} />
-          <Text className="text-white text-lg font-semibold">
-            新建故友
-          </Text>
         </View>
       </View>
 
       {/* 故友列表 */}
-      <View className="px-4">
+      <View className="px-4 mt-4">
         {loading ? (
           <View className="flex items-center justify-center py-8">
             <Text className="text-slate-500">加载中...</Text>
@@ -86,7 +92,7 @@ const MyMemorialsPage = () => {
               还没有故友
             </Text>
             <Text className="text-slate-400 text-sm mt-2">
-              点击上方按钮添加
+              点击右上角按钮添加
             </Text>
           </View>
         ) : (
@@ -98,9 +104,9 @@ const MyMemorialsPage = () => {
                 onClick={() => handleMemorialClick(memorial.id)}
               >
                 <View className="w-full aspect-square bg-blue-100 rounded-xl overflow-hidden mb-3">
-                  {memorial.avatar ? (
+                  {memorial.avatar_url ? (
                     <Image
-                      src={memorial.avatar}
+                      src={memorial.avatar_url}
                       className="w-full h-full"
                       mode="aspectFill"
                     />
@@ -122,13 +128,13 @@ const MyMemorialsPage = () => {
                   <View className="flex items-center gap-1">
                     <Heart size={14} color="#3b82f6" />
                     <Text className="text-xs text-slate-400">
-                      {memorial.mourningCount}
+                      {memorial.mourning_count}
                     </Text>
                   </View>
                   <View className="flex items-center gap-1">
                     <User size={14} color="#94a3b8" />
                     <Text className="text-xs text-slate-400">
-                      {memorial.visitCount}
+                      {memorial.visit_count}
                     </Text>
                   </View>
                 </View>

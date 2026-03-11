@@ -223,6 +223,24 @@ const FormPage = () => {
     });
   };
 
+  const handlePreviewPhoto = (currentUrl: string) => {
+    if (photos.length === 0) return;
+
+    Taro.previewImage({
+      urls: photos,
+      current: currentUrl
+    });
+  };
+
+  const handlePreviewAvatar = () => {
+    if (!avatarUrl) return;
+
+    Taro.previewImage({
+      urls: [avatarUrl],
+      current: avatarUrl
+    });
+  };
+
   const handleSubmit = async () => {
     if (!formData.name) {
       Taro.showToast({
@@ -427,15 +445,15 @@ const FormPage = () => {
           <View className="bg-white rounded-2xl p-6 shadow-sm">
           {/* 头像预览 */}
           <View className="flex flex-col items-center mb-6">
-            <View 
+            <View
               className="w-40 h-40 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center overflow-hidden mb-4 shadow-sm border border-blue-200"
-              onClick={handleUploadAvatar}
             >
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
                   className="w-full h-full"
                   mode="aspectFill"
+                  onClick={handlePreviewAvatar}
                 />
               ) : (
                 <View className="flex flex-col items-center gap-2">
@@ -476,6 +494,7 @@ const FormPage = () => {
                     src={photo}
                     className="w-full h-full rounded-lg"
                     mode="aspectFill"
+                    onClick={() => handlePreviewPhoto(photo)}
                   />
                   <View
                     className="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"

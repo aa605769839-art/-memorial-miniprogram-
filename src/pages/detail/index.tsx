@@ -159,6 +159,25 @@ const DetailPage = () => {
     });
   };
 
+  const handlePreviewPhoto = (currentUrl: string) => {
+    if (!memorial || !memorial.photos) return;
+
+    const urls = memorial.photos.map(photo => photo.url);
+    Taro.previewImage({
+      urls,
+      current: currentUrl
+    });
+  };
+
+  const handlePreviewAvatar = () => {
+    if (!memorial || !memorial.avatar_url) return;
+
+    Taro.previewImage({
+      urls: [memorial.avatar_url],
+      current: memorial.avatar_url
+    });
+  };
+
   const fetchComments = async () => {
     try {
       // 获取评论
@@ -414,6 +433,7 @@ const DetailPage = () => {
               src={memorial.avatar_url}
               className="w-full h-full"
               mode="aspectFill"
+              onClick={handlePreviewAvatar}
             />
           ) : (
             <User color="#94a3b8" size={96} />
@@ -490,6 +510,7 @@ const DetailPage = () => {
                   src={photo.url}
                   className="w-full h-full"
                   mode="aspectFill"
+                  onClick={() => handlePreviewPhoto(photo.url)}
                 />
               </View>
             ))}

@@ -21,19 +21,20 @@ const FormPage = () => {
     achievements: ''
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleInputChange = (field: keyof NewMemorial, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const generateAvatar = async () => {
+  const generateAvatar = async (): Promise<string | null> => {
     if (!formData.name) {
       Taro.showToast({
         title: '请先输入姓名',
         icon: 'none'
       });
-      return;
+      return null;
     }
 
     setIsGenerating(true);
@@ -52,13 +53,16 @@ const FormPage = () => {
           title: '头像生成成功',
           icon: 'success'
         });
+        return res.data.data;
       }
+      return null;
     } catch (error) {
       console.error('Failed to generate avatar:', error);
       Taro.showToast({
         title: '头像生成失败',
         icon: 'none'
       });
+      return null;
     } finally {
       setIsGenerating(false);
     }
@@ -81,7 +85,28 @@ const FormPage = () => {
       return;
     }
 
+    setIsSaving(true);
     try {
+      // 如果没有头像，先生成头像
+      let finalAvatarUrl = avatarUrl;
+      if (!finalAvatarUrl) {
+        Taro.showLoading({
+          title: '正在生成头像...',
+          mask: true
+        });
+        finalAvatarUrl = await generateAvatar();
+        Taro.hideLoading();
+        
+        if (!finalAvatarUrl) {
+          Taro.showToast({
+            title: '头像生成失败，请重试',
+            icon: 'none'
+          });
+          setIsSaving(false);
+          return;
+        }
+      }
+
       // 获取或生成用户ID
       let userId = Taro.getStorageSync('userId');
       if (!userId) {
@@ -103,13 +128,13 @@ const FormPage = () => {
           deathDate: new Date(formData.deathDate).toISOString(),
           description: formData.description || null,
           achievements,
-          avatarUrl
+          avatarUrl: finalAvatarUrl
         }
       });
 
       if (res.data?.code === 200) {
         Taro.showToast({
-          title: '创建成功',
+          title: '保存成功',
           icon: 'success'
         });
 
@@ -120,9 +145,11 @@ const FormPage = () => {
     } catch (error) {
       console.error('Failed to create memorial:', error);
       Taro.showToast({
-        title: '创建失败',
+        title: '保存失败',
         icon: 'none'
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -140,7 +167,7 @@ const FormPage = () => {
         <View className="bg-white rounded-2xl p-6 shadow-sm">
           {/* 头像预览 */}
           <View className="flex flex-col items-center mb-6">
-            <View className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden mb-3">
+            <View className="w-40 h-40 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center overflow-hidden mb-4 shadow-sm border border-blue-200">
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
@@ -148,22 +175,25 @@ const FormPage = () => {
                   mode="aspectFill"
                 />
               ) : (
-                <User color="#94a3b8" size={48} />
+                <View className="flex flex-col items-center gap-2">
+                  <User color="#94a3b8" size={64} />
+                  <Text className="text-sm text-slate-400">暂无头像</Text>
+                </View>
               )}
             </View>
             <Button
-              className="bg-blue-100 text-blue-600 rounded-full px-4 py-2 flex items-center gap-2"
+              className="bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-full px-6 py-2.5 shadow-md flex items-center gap-2"
               size="mini"
               onClick={generateAvatar}
               disabled={isGenerating}
             >
-              <Camera size={14} />
-              <Text className="text-sm">
-                {isGenerating ? '生成中...' : '生成头像'}
+              <Camera size={16} color={isGenerating ? '#fff' : '#fff'} />
+              <Text className="text-sm font-medium">
+                {isGenerating ? '生成中...' : 'AI 生成头像'}
               </Text>
             </Button>
-            <Text className="block text-xs text-slate-400 mt-2">
-              根据信息生成卡通头像
+            <Text className="block text-xs text-slate-400 mt-2 text-center">
+              根据姓名、简介和成就自动生成卡通头像
             </Text>
           </View>
 
@@ -258,8 +288,9 @@ const FormPage = () => {
             <Button
               className="bg-blue-500 text-white rounded-full py-3 shadow-md mt-2"
               onClick={handleSubmit}
+              disabled={isSaving}
             >
-              <Text>添加故人</Text>
+              <Text>{isSaving ? '保存中...' : '保存故人'}</Text>
             </Button>
           </View>
         </View>

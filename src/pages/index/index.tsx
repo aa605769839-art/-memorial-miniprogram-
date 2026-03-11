@@ -2,7 +2,7 @@ import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { Heart, User, Flower2 } from 'lucide-react-taro';
+import { Heart, User, Flame } from 'lucide-react-taro';
 
 interface Memorial {
   id: string;
@@ -13,6 +13,7 @@ interface Memorial {
   description: string | null;
   mourning_count: number;
   visit_count: number;
+  gender?: string;
 }
 
 const IndexPage = () => {
@@ -67,11 +68,8 @@ const IndexPage = () => {
 
   return (
     <View className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
-      {/* 导航栏占位 - 添加渐变背景 */}
-      <View style={{ height: '44px', background: 'linear-gradient(to bottom, #fff, #dbeafe)' }} />
-
-      {/* 头部 - 减少留白，增加渐变背景 */}
-      <View className="bg-gradient-to-b from-white to-blue-50 px-4 py-3 border-b border-blue-200">
+      {/* 头部 - 直接从顶部开始，增加高度 */}
+      <View className="bg-gradient-to-b from-white to-blue-50 px-4 py-4 border-b border-blue-200" style={{ paddingTop: '44px' }}>
         <View className="flex items-center justify-between">
           <View>
             <Text className="block text-2xl font-bold text-blue-900">
@@ -81,19 +79,19 @@ const IndexPage = () => {
               温暖回忆，永存心间
             </Text>
           </View>
-          {/* 右侧装饰图标 */}
+          {/* 右侧装饰图标 - 火焰（象征烛光） */}
           <View className="opacity-20">
-            <Flower2 color="#3b82f6" size={32} />
+            <Flame color="#3b82f6" size={32} />
           </View>
         </View>
       </View>
 
-      {/* 故人列表 - 减少顶部内边距 */}
+      {/* 故人列表 */}
       <View className="px-4 py-4">
         {memorials.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-24">
             <View className="w-24 h-24 mb-4 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center shadow-sm">
-              <Flower2 color="#3b82f6" size={48} strokeWidth={1.5} />
+              <Flame color="#3b82f6" size={48} strokeWidth={1.5} />
             </View>
             <Text className="block text-base font-medium text-slate-600 mb-2">
               暂无纪念空间

@@ -19,6 +19,7 @@ export const memorials = pgTable(
       .default(sql`gen_random_uuid()`),
     userId: varchar("user_id", { length: 128 }).notNull(), // 创建者ID
     name: varchar("name", { length: 128 }).notNull(),
+    gender: varchar("gender", { length: 10 }),
     birthDate: timestamp("birth_date", { withTimezone: true, mode: 'string' }),
     deathDate: timestamp("death_date", { withTimezone: true, mode: 'string' }),
     avatarUrl: text("avatar_url"),
@@ -152,6 +153,7 @@ const { createInsertSchema: createCoercedInsertSchema } = createSchemaFactory({
 export const insertMemorialSchema = createCoercedInsertSchema(memorials).pick({
   userId: true,
   name: true,
+  gender: true,
   birthDate: true,
   deathDate: true,
   avatarUrl: true,
@@ -162,6 +164,7 @@ export const insertMemorialSchema = createCoercedInsertSchema(memorials).pick({
 export const updateMemorialSchema = createCoercedInsertSchema(memorials)
   .pick({
     name: true,
+    gender: true,
     birthDate: true,
     deathDate: true,
     avatarUrl: true,

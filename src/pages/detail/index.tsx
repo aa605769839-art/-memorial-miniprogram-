@@ -15,6 +15,7 @@ interface Photo {
 interface Memorial {
   id: string;
   name: string;
+  gender?: string;
   birth_date: string | null;
   death_date: string | null;
   avatar_url: string | null;
@@ -442,6 +443,11 @@ const DetailPage = () => {
         <View className="px-6 py-6 text-center">
           <Text className="block text-3xl font-bold text-blue-900 mb-2">
             {memorial.name}
+            {memorial.gender && memorial.gender !== '未知' && (
+              <Text className="text-base text-slate-500 font-normal ml-2">
+                ({memorial.gender})
+              </Text>
+            )}
           </Text>
           {memorial.birth_date && memorial.death_date && (
             <View className="flex items-center justify-center gap-2 mb-4">

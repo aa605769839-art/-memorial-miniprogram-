@@ -1,4 +1,4 @@
-import { View, Text, Image, Button, Input, Textarea } from '@tarojs/components';
+import { View, Text, Image, Button, Input, Textarea, Picker } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
@@ -6,11 +6,14 @@ import { User } from 'lucide-react-taro';
 
 interface NewMemorial {
   name: string;
+  gender: string;
   birthDate: string;
   deathDate: string;
   description: string;
   achievements: string;
 }
+
+const GENDER_OPTIONS = ['男', '女', '未知'];
 
 interface Photo {
   id: string;
@@ -24,9 +27,10 @@ const FormPage = () => {
   const router = useRouter();
   const { id } = router.params;
   const isEditMode = !!id;
-  
+
   const [formData, setFormData] = useState<NewMemorial>({
     name: '',
+    gender: '未知',
     birthDate: '',
     deathDate: '',
     description: '',
@@ -58,6 +62,7 @@ const FormPage = () => {
         const memorial = res.data.data;
         setFormData({
           name: memorial.name,
+          gender: memorial.gender || '未知',
           birthDate: memorial.birth_date ? new Date(memorial.birth_date).toISOString().split('T')[0] : '',
           deathDate: memorial.death_date ? new Date(memorial.death_date).toISOString().split('T')[0] : '',
           description: memorial.description || '',
@@ -531,6 +536,24 @@ const FormPage = () => {
                   onInput={(e) => handleInputChange('name', e.detail.value)}
                 />
               </View>
+            </View>
+
+            {/* 性别 */}
+            <View>
+              <Text className="block text-sm font-medium text-slate-700 mb-2">
+                性别
+              </Text>
+              <Picker
+                mode="selector"
+                range={GENDER_OPTIONS}
+                value={GENDER_OPTIONS.indexOf(formData.gender)}
+                onChange={(e) => handleInputChange('gender', GENDER_OPTIONS[e.detail.value])}
+              >
+                <View className="bg-blue-50 rounded-xl px-4 py-3 flex items-center justify-between">
+                  <Text className="text-slate-700">{formData.gender}</Text>
+                  <Text className="text-slate-400 text-xs">点击选择</Text>
+                </View>
+              </Picker>
             </View>
 
             {/* 出生日期和去世日期 */}

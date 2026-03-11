@@ -105,7 +105,7 @@ const FormPage = () => {
           if (uploadRes.statusCode === 200) {
             const data = JSON.parse(uploadRes.data);
             if (data.code === 200) {
-              setAvatarUrl(data.data);
+              setAvatarUrl(data.data.url);
               Taro.showToast({
                 title: '上传成功',
                 icon: 'success'
@@ -188,7 +188,7 @@ const FormPage = () => {
             if (result.statusCode === 200) {
               const data = JSON.parse(result.data);
               if (data.code === 200) {
-                uploadedUrls.push(data.data);
+                uploadedUrls.push(data.data.url);
               }
             }
           });

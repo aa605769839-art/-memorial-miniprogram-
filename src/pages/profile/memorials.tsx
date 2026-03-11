@@ -73,10 +73,10 @@ const MyMemorialsPage = () => {
         </Text>
         {/* 新建按钮 - 右上角 */}
         <View
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-blue-500 rounded-full p-2 cursor-pointer"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 rounded-full p-2 cursor-pointer"
           onClick={handleAddMemorial}
         >
-          <Plus color="#fff" size={24} />
+          <Plus color="#60a5fa" size={24} />
         </View>
       </View>
 

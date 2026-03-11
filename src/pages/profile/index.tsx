@@ -1,4 +1,4 @@
-import { View, Text, Button, Input } from '@tarojs/components';
+import { View, Text, Button, Input, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Plus, Heart, User, ChevronRight } from 'lucide-react-taro';
@@ -30,6 +30,7 @@ const ProfilePage = () => {
     name: '',
     bio: ''
   });
+  const [tempAvatar, setTempAvatar] = useState<string | null>(null); // 编辑模式下的临时头像
 
   useEffect(() => {
     loadUserProfile();
@@ -56,6 +57,7 @@ const ProfilePage = () => {
 
   const handleEdit = () => {
     setIsEditing(true);
+    setTempAvatar(userProfile.avatar); // 初始化临时头像
     setEditForm({
       name: userProfile.name,
       bio: userProfile.bio
@@ -83,13 +85,8 @@ const ProfilePage = () => {
           const data = JSON.parse(uploadRes.data);
 
           if (data.code === 200 && data.data.url) {
-            const newProfile: UserProfile = {
-              ...userProfile,
-              avatar: data.data.url
-            };
-
-            setUserProfile(newProfile);
-            Taro.setStorageSync('userProfile', newProfile);
+            // 只更新临时头像，不保存到 storage
+            setTempAvatar(data.data.url);
             Taro.showToast({
               title: '头像上传成功',
               icon: 'success'
@@ -123,13 +120,14 @@ const ProfilePage = () => {
 
     const newProfile: UserProfile = {
       name: editForm.name.trim(),
-      avatar: userProfile.avatar,
+      avatar: tempAvatar, // 使用临时头像
       bio: editForm.bio.trim() || '还没有简介'
     };
 
     setUserProfile(newProfile);
     Taro.setStorageSync('userProfile', newProfile);
     setIsEditing(false);
+    setTempAvatar(null); // 清空临时头像
     Taro.showToast({
       title: '保存成功',
       icon: 'success'
@@ -138,10 +136,9 @@ const ProfilePage = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditForm({
-      name: userProfile.name,
-      bio: userProfile.bio
-    });
+    setTempAvatar(null); // 清空临时头像
+    // 重新加载用户资料，恢复原来的头像
+    loadUserProfile();
   };
 
   const handleAddMemorial = () => {
@@ -166,8 +163,12 @@ const ProfilePage = () => {
                   className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden mx-auto cursor-pointer"
                   onClick={handleAvatarUpload}
                 >
-                  {userProfile.avatar ? (
-                    <Text className="text-xs text-slate-400">已上传</Text>
+                  {tempAvatar ? (
+                    <Image
+                      src={tempAvatar}
+                      className="w-full h-full"
+                      mode="aspectFill"
+                    />
                   ) : (
                     <User color="#94a3b8" size={40} />
                   )}
@@ -224,7 +225,11 @@ const ProfilePage = () => {
             >
               <View className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
                 {userProfile.avatar ? (
-                  <Text className="text-xs text-slate-400">头像</Text>
+                  <Image
+                    src={userProfile.avatar}
+                    className="w-full h-full"
+                    mode="aspectFill"
+                  />
                 ) : (
                   <User color="#94a3b8" size={40} />
                 )}

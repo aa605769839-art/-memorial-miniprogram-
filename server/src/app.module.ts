@@ -6,9 +6,10 @@ import { InteractionsModule } from './interactions/interactions.module';
 import { RankingsModule } from './rankings/rankings.module';
 import { UploadModule } from './upload/upload.module';
 import { PhotosModule } from './photos/photos.module';
+import { GiftsModule } from './gifts/gifts.module';
 
 @Module({
-  imports: [MemorialsModule, InteractionsModule, RankingsModule, UploadModule, PhotosModule],
+  imports: [MemorialsModule, InteractionsModule, RankingsModule, UploadModule, PhotosModule, GiftsModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -1,6 +1,6 @@
 import { View, Text, Image } from '@tarojs/components';
-import Taro from '@tarojs/taro';
-import { useState, useEffect } from 'react';
+import Taro, { useDidShow } from '@tarojs/taro';
+import { useState } from 'react';
 import { Plus, Heart, User } from 'lucide-react-taro';
 import { Network } from '@/network';
 
@@ -19,9 +19,10 @@ const MyMemorialsPage = () => {
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  // 页面显示时加载数据（包括从其他页面返回时）
+  useDidShow(() => {
     loadMemorials();
-  }, []);
+  });
 
   const getUserId = () => {
     let userId = Taro.getStorageSync('userId');

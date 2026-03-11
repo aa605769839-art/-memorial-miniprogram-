@@ -120,6 +120,30 @@ export const photos = pgTable(
   ]
 );
 
+// 礼物表
+export const gifts = pgTable(
+  "gifts",
+  {
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    memorialId: varchar("memorial_id", { length: 36 }).notNull(),
+    giftType: varchar("gift_type", { length: 50 }).notNull(), // 礼物类型：flower, candle, wreath等
+    giftName: varchar("gift_name", { length: 128 }).notNull(), // 礼物名称：鲜花、蜡烛、花圈
+    giftIcon: text("gift_icon"), // 礼物图标URL
+    senderName: varchar("sender_name", { length: 128 }).notNull(), // 赠送者姓名
+    senderAvatar: text("sender_avatar"), // 赠送者头像
+    message: text("message"), // 留言信息
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("gifts_memorial_id_idx").on(table.memorialId),
+    index("gifts_created_at_idx").on(table.createdAt),
+  ]
+);
+
 // Zod schemas for validation
 const { createInsertSchema: createCoercedInsertSchema } = createSchemaFactory({
   coerce: { date: true },
@@ -172,6 +196,16 @@ export const insertPhotoSchema = createCoercedInsertSchema(photos).pick({
   orderIndex: true,
 });
 
+export const insertGiftSchema = createCoercedInsertSchema(gifts).pick({
+  memorialId: true,
+  giftType: true,
+  giftName: true,
+  giftIcon: true,
+  senderName: true,
+  senderAvatar: true,
+  message: true,
+});
+
 // TypeScript types
 export type Memorial = typeof memorials.$inferSelect;
 export type InsertMemorial = z.infer<typeof insertMemorialSchema>;
@@ -188,3 +222,6 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 
 export type Photo = typeof photos.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
+
+export type Gift = typeof gifts.$inferSelect;
+export type InsertGift = z.infer<typeof insertGiftSchema>;

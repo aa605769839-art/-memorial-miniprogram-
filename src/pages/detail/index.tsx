@@ -1,8 +1,8 @@
-import { View, Text, Image, Input, Button } from '@tarojs/components';
-import Taro, { useRouter } from '@tarojs/taro';
+import { View, Text, Image, Input, Button, Textarea } from '@tarojs/components';
+import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { Heart, User, Calendar, Award, Send, Flower2, Trash2 } from 'lucide-react-taro';
+import { Heart, User, Calendar, Award, Send, Flower2, Trash2, X, Gift } from 'lucide-react-taro';
 
 interface Photo {
   id: string;
@@ -33,20 +33,56 @@ interface Comment {
   created_at: string;
 }
 
+interface Gift {
+  id: string;
+  gift_type: string;
+  gift_name: string;
+  gift_icon: string | null;
+  sender_name: string;
+  sender_avatar: string | null;
+  message: string | null;
+  created_at: string;
+}
+
+// 礼物类型定义
+const GIFT_TYPES = [
+  { type: 'flower', name: '鲜花', icon: '🌸', color: 'text-pink-500' },
+  { type: 'candle', name: '蜡烛', icon: '🕯️', color: 'text-orange-500' },
+  { type: 'wreath', name: '花圈', icon: '💐', color: 'text-purple-500' },
+  { type: 'rose', name: '玫瑰', icon: '🌹', color: 'text-red-500' },
+  { type: 'lily', name: '百合', icon: '🌷', color: 'text-pink-600' },
+  { type: 'heart', name: '爱心', icon: '❤️', color: 'text-red-600' },
+];
+
 const DetailPage = () => {
   const router = useRouter();
   const { id } = router.params;
   const [memorial, setMemorial] = useState<Memorial | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
   const [message, setMessage] = useState('');
   const [visitorName, setVisitorName] = useState('');
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
 
-  useEffect(() => {
+  // 礼物相关状态
+  const [showGiftModal, setShowGiftModal] = useState(false);
+  const [selectedGift, setSelectedGift] = useState<typeof GIFT_TYPES[0] | null>(null);
+  const [giftMessage, setGiftMessage] = useState('');
+  const [isSendingGift, setIsSendingGift] = useState(false);
+
+  // 合并的留言和礼物列表（用于在留言板上展示）
+  const [combinedMessages, setCombinedMessages] = useState<Array<Comment | Gift>>([]);
+
+  // 页面显示时重新加载故人信息（包括从编辑页面返回时）
+  useDidShow(() => {
     if (id) {
       fetchMemorial();
+    }
+  });
+
+  // 只在组件挂载时加载评论和记录访问（避免重复加载）
+  useEffect(() => {
+    if (id) {
       fetchComments();
       recordVisit();
       // 从本地存储加载用户昵称
@@ -125,14 +161,26 @@ const DetailPage = () => {
 
   const fetchComments = async () => {
     try {
-      const res = await Network.request({
+      // 获取评论
+      const commentsRes = await Network.request({
         url: `/api/memorials/${id}/comments`,
         method: 'GET'
       });
-      console.log('Comments response:', res.data);
-      if (res.data?.code === 200) {
-        setComments(res.data.data || []);
-      }
+
+      // 获取礼物
+      const giftsRes = await Network.request({
+        url: `/api/gifts/memorial/${id}`,
+        method: 'GET'
+      });
+
+      // 合并评论和礼物，按时间排序
+      const allComments = commentsRes.data?.data || [];
+      const allGifts = giftsRes.data?.data || [];
+      const combined = [...allComments, ...allGifts].sort(
+        (a: any, b: any) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setCombinedMessages(combined);
     } catch (error) {
       console.error('Failed to fetch comments:', error);
     }
@@ -153,7 +201,7 @@ const DetailPage = () => {
     }
   };
 
-  const handleMourning = async () => {
+  const handleSendGift = async () => {
     if (!visitorName.trim()) {
       Taro.showToast({
         title: '请输入您的名字',
@@ -162,29 +210,51 @@ const DetailPage = () => {
       return;
     }
 
+    if (!selectedGift) {
+      Taro.showToast({
+        title: '请选择礼物',
+        icon: 'none'
+      });
+      return;
+    }
+
+    setIsSendingGift(true);
     try {
+      const userProfile = Taro.getStorageSync('userProfile') || {};
       const res = await Network.request({
-        url: '/api/mourning',
+        url: '/api/gifts',
         method: 'POST',
         data: {
           memorialId: id,
-          visitorName: visitorName.trim()
+          giftType: selectedGift.type,
+          giftName: selectedGift.name,
+          giftIcon: selectedGift.icon,
+          senderName: visitorName.trim(),
+          senderAvatar: userProfile.avatar || null,
+          message: giftMessage.trim() || null
         }
       });
 
       if (res.data?.code === 200) {
         Taro.showToast({
-          title: '悼念成功',
+          title: '赠送成功',
           icon: 'success'
         });
+        setShowGiftModal(false);
+        setSelectedGift(null);
+        setGiftMessage('');
+        // 刷新留言板（需要同时获取评论和礼物）
+        fetchComments();
         fetchMemorial();
       }
     } catch (error) {
-      console.error('Failed to mourn:', error);
+      console.error('Failed to send gift:', error);
       Taro.showToast({
-        title: '悼念失败',
+        title: '赠送失败',
         icon: 'none'
       });
+    } finally {
+      setIsSendingGift(false);
     }
   };
 
@@ -453,10 +523,11 @@ const DetailPage = () => {
       <View className="fixed bottom-0 left-0 right-0 bg-white border-t border-blue-100 p-4 z-50">
         <View className="flex gap-3">
           <Button
-            className="flex-1 bg-blue-500 text-white rounded-full py-3 shadow-md"
-            onClick={handleMourning}
+            className="flex-1 bg-blue-500 text-white rounded-full py-3 shadow-md flex items-center justify-center gap-2"
+            onClick={() => setShowGiftModal(true)}
           >
-            悼念
+            <Gift size={18} />
+            <Text>悼念</Text>
           </Button>
           <Button
             className="flex-1 bg-blue-100 text-blue-700 rounded-full py-3"
@@ -474,11 +545,11 @@ const DetailPage = () => {
             留言板
           </Text>
           <Text className="block text-sm text-slate-500">
-            {comments.length} 条
+            {combinedMessages.length} 条
           </Text>
         </View>
 
-        {comments.length === 0 ? (
+        {combinedMessages.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-10">
             <Text className="block text-sm text-slate-400">
               还没有留言，留下您的思念
@@ -486,39 +557,90 @@ const DetailPage = () => {
           </View>
         ) : (
           <View className="flex flex-col gap-3">
-            {comments.map((comment) => (
-              <View
-                key={comment.id}
-                className="bg-blue-50 rounded-xl p-4"
-              >
-                <View className="flex items-center justify-between mb-2">
-                  <View className="flex items-center gap-2">
-                    <View className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center overflow-hidden">
-                      {comment.author_avatar ? (
-                        <Image
-                          src={comment.author_avatar}
-                          className="w-full h-full"
-                          mode="aspectFill"
-                        />
-                      ) : (
-                        <Text className="text-xs text-slate-500">
-                          {comment.author_name.charAt(0)}
-                        </Text>
-                      )}
+            {combinedMessages.map((msg: any) => {
+              // 判断是礼物还是留言
+              const isGift = 'gift_type' in msg;
+              if (isGift) {
+                // 渲染礼物卡片
+                return (
+                  <View key={msg.id} className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-200">
+                    <View className="flex items-center justify-between mb-3">
+                      <View className="flex items-center gap-2">
+                        <View className="w-8 h-8 rounded-full bg-pink-200 flex items-center justify-center overflow-hidden">
+                          {msg.sender_avatar ? (
+                            <Image
+                              src={msg.sender_avatar}
+                              className="w-full h-full"
+                              mode="aspectFill"
+                            />
+                          ) : (
+                            <Text className="text-xs text-pink-600">
+                              {msg.sender_name.charAt(0)}
+                            </Text>
+                          )}
+                        </View>
+                        <View>
+                          <Text className="block text-sm font-medium text-pink-700">
+                            {msg.sender_name}
+                          </Text>
+                          <Text className="block text-xs text-pink-500">
+                            赠送了 {msg.gift_name}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text className="block text-xs text-pink-400">
+                        {formatTime(msg.created_at)}
+                      </Text>
                     </View>
-                    <Text className="block text-sm font-medium text-slate-700">
-                      {comment.author_name}
+                    <View className="flex items-start gap-3">
+                      <Text className="text-4xl">{msg.gift_icon}</Text>
+                      <View className="flex-1">
+                        {msg.message && (
+                          <Text className="block text-sm text-slate-700 leading-relaxed">
+                            {msg.message}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                );
+              } else {
+                // 渲染普通留言
+                return (
+                  <View
+                    key={msg.id}
+                    className="bg-blue-50 rounded-xl p-4"
+                  >
+                    <View className="flex items-center justify-between mb-2">
+                      <View className="flex items-center gap-2">
+                        <View className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center overflow-hidden">
+                          {msg.author_avatar ? (
+                            <Image
+                              src={msg.author_avatar}
+                              className="w-full h-full"
+                              mode="aspectFill"
+                            />
+                          ) : (
+                            <Text className="text-xs text-slate-500">
+                              {msg.author_name.charAt(0)}
+                            </Text>
+                          )}
+                        </View>
+                        <Text className="block text-sm font-medium text-slate-700">
+                          {msg.author_name}
+                        </Text>
+                      </View>
+                      <Text className="block text-xs text-slate-500">
+                        {formatTime(msg.created_at)}
+                      </Text>
+                    </View>
+                    <Text className="block text-sm text-slate-600 leading-relaxed">
+                      {msg.content}
                     </Text>
                   </View>
-                  <Text className="block text-xs text-slate-500">
-                    {formatTime(comment.created_at)}
-                  </Text>
-                </View>
-                <Text className="block text-sm text-slate-600 leading-relaxed">
-                  {comment.content}
-                </Text>
-              </View>
-            ))}
+                );
+              }
+            })}
           </View>
         )}
 
@@ -554,6 +676,103 @@ const DetailPage = () => {
           </View>
         </View>
       </View>
+
+      {/* 礼物选择弹窗 */}
+      {showGiftModal && (
+        <View
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50"
+          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowGiftModal(false);
+              setSelectedGift(null);
+              setGiftMessage('');
+            }
+          }}
+        >
+          <View
+            className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 弹窗头部 */}
+            <View className="px-6 py-4 border-b border-blue-100 flex items-center justify-between">
+              <Text className="text-lg font-bold text-blue-900">选择礼物</Text>
+              <View
+                className="p-2 cursor-pointer"
+                onClick={() => {
+                  setShowGiftModal(false);
+                  setSelectedGift(null);
+                  setGiftMessage('');
+                }}
+              >
+                <X size={24} color="#94a3b8" />
+              </View>
+            </View>
+
+            {/* 礼物列表 */}
+            <View className="px-6 py-4">
+              <View className="grid grid-cols-3 gap-4">
+                {GIFT_TYPES.map((gift) => (
+                  <View
+                    key={gift.type}
+                    className={`flex flex-col items-center p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                      selectedGift?.type === gift.type
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-transparent bg-gray-50'
+                    }`}
+                    onClick={() => setSelectedGift(gift)}
+                  >
+                    <Text className="text-4xl mb-2">{gift.icon}</Text>
+                    <Text className={`text-sm font-semibold ${gift.color}`}>
+                      {gift.name}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* 留言输入 */}
+            {selectedGift && (
+              <View className="px-6 py-4 border-t border-blue-100">
+                <Text className="block text-sm font-medium text-slate-700 mb-2">
+                  给故人留句话（可选）
+                </Text>
+                <View className="bg-blue-50 rounded-xl p-4">
+                  <Textarea
+                    style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
+                    placeholder="写下您的思念..."
+                    value={giftMessage}
+                    onInput={(e) => setGiftMessage(e.detail.value)}
+                    maxlength={200}
+                  />
+                  <Text className="block text-xs text-slate-400 mt-1 text-right">
+                    {giftMessage.length}/200
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* 确认按钮 */}
+            <View className="px-6 py-4 border-t border-blue-100">
+              <Button
+                className={`w-full rounded-full py-3 ${
+                  selectedGift
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-400'
+                }`}
+                onClick={handleSendGift}
+                disabled={!selectedGift || isSendingGift}
+              >
+                <Text>
+                  {isSendingGift
+                    ? '赠送中...'
+                    : `赠送 ${selectedGift ? selectedGift.name : ''}`}
+                </Text>
+              </Button>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

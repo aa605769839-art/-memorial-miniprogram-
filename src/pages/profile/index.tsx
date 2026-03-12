@@ -276,6 +276,18 @@ const ProfilePage = () => {
             </View>
             <ChevronRight color="#94a3b8" size={20} />
           </View>
+          <View
+            className="flex items-center justify-between px-6 py-4"
+            onClick={() => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' })}
+          >
+            <View className="flex items-center gap-3">
+              <View className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+                <Text className="text-xl">🎁</Text>
+              </View>
+              <Text className="text-base text-slate-700">礼物配置</Text>
+            </View>
+            <ChevronRight color="#94a3b8" size={20} />
+          </View>
         </View>
       </View>
     </View>

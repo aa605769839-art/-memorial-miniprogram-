@@ -183,7 +183,7 @@ const FormPage = () => {
         }
       }
 
-      const prompt = `Create a beautiful, heartwarming cartoon-style portrait of ${formData.name}. ${ageHint ? `This is ${ageHint}.` : ''} ${formData.gender ? `Gender: ${formData.gender}.` : ''} ${formData.description ? `Personality and life story: ${formData.description}.` : ''} ${formData.achievements ? `Life achievements and legacy: ${formData.achievements}.` : ''} Style: gentle and kind expression, warm smile, loving eyes, soft and detailed cartoon art style, based on their age and life story, peaceful and serene atmosphere, soft blue tones mixed with warm colors, professional cartoon illustration, clean lines, soft shadows, high quality, like a memorial portrait that captures their essence at this age. 2K resolution.`;
+      const prompt = `Cute cartoon portrait of ${formData.name}, ${ageHint || 'adult'}, ${formData.gender || 'person'}. ${formData.description ? `Personality: ${formData.description.slice(0, 50)}.` : ''} Style: gentle smile, warm eyes, soft cartoon art, peaceful atmosphere, pastel blue and warm tones, clean lines, high quality memorial portrait.`;
 
       const res = await Network.request({
         url: '/api/generate-avatar',

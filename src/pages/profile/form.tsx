@@ -183,7 +183,16 @@ const FormPage = () => {
         }
       }
 
-      const prompt = `Cute cartoon portrait of ${formData.name}, ${ageHint || 'adult'}, ${formData.gender || 'person'}. ${formData.description ? `Personality: ${formData.description.slice(0, 50)}.` : ''} Style: gentle smile, warm eyes, soft cartoon art, peaceful atmosphere, pastel blue and warm tones, clean lines, high quality memorial portrait.`;
+      // 清理 description 中的特殊字符，只保留纯文本
+      const cleanDescription = formData.description 
+        ? formData.description
+            .replace(/[#*_`~\[\](){}|\\]/g, '') // 移除 Markdown 特殊字符
+            .replace(/\s+/g, ' ') // 合并多余空格
+            .trim()
+            .slice(0, 50)
+        : '';
+
+      const prompt = `Cute cartoon portrait of ${formData.name}, ${ageHint || 'adult'}, ${formData.gender || 'person'}. ${cleanDescription ? `Personality: ${cleanDescription}.` : ''} Style: gentle smile, warm eyes, soft cartoon art, peaceful atmosphere, pastel blue and warm tones, clean lines, high quality memorial portrait.`;
 
       const res = await Network.request({
         url: '/api/generate-avatar',

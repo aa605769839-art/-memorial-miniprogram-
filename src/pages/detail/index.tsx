@@ -2,7 +2,7 @@ import { View, Text, Image, Input, Button, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { Heart, User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Mars, Venus } from 'lucide-react-taro';
+import { Heart, User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Mars, Venus, Pencil } from 'lucide-react-taro';
 
 interface Photo {
   id: string;
@@ -414,13 +414,13 @@ const DetailPage = () => {
               className="cursor-pointer p-2"
               onClick={handleEdit}
             >
-              <Text className="text-base text-blue-500 font-medium">编辑</Text>
+              <Pencil color="#64748b" size={22} />
             </View>
             <View
               className="cursor-pointer p-2"
               onClick={handleDelete}
             >
-              <Trash2 color="#ef4444" size={24} />
+              <Trash2 color="#94a3b8" size={22} />
             </View>
           </View>
         )}
@@ -446,10 +446,14 @@ const DetailPage = () => {
               {memorial.name}
             </Text>
             {memorial.gender === '男' && (
-              <Mars color="#3b82f6" size={24} />
+              <View className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center">
+                <Mars color="#3b82f6" size={18} />
+              </View>
             )}
             {memorial.gender === '女' && (
-              <Venus color="#ec4899" size={24} />
+              <View className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center">
+                <Venus color="#ec4899" size={18} />
+              </View>
             )}
           </View>
           {memorial.birth_date && memorial.death_date && (

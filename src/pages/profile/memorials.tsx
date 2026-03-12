@@ -1,7 +1,7 @@
 import { View, Text, Image } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useState } from 'react';
-import { Plus } from 'lucide-react-taro';
+import { Plus, Eye } from 'lucide-react-taro';
 import { Network } from '@/network';
 
 interface Memorial {
@@ -128,22 +128,23 @@ const MyMemorialsPage = () => {
                 </View>
                 {/* 信息区域 - 两行布局 */}
                 <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
-                  {/* 第一行：姓名 + 享年 */}
-                  <View className="flex items-center gap-2 mb-1">
-                    <Text className="text-base font-bold text-blue-900 truncate">
-                      {memorial.name}
-                    </Text>
+                  {/* 第一行：姓名 */}
+                  <Text className="text-base font-bold text-blue-900 truncate mb-1">
+                    {memorial.name}
+                  </Text>
+                  {/* 第二行：享岁居右 + 访问icon */}
+                  <View className="flex items-center justify-between">
                     {calculateAge(memorial.birth_date, memorial.death_date) && (
-                      <Text className="text-xs text-slate-500">
+                      <Text className="text-sm text-slate-400">
                         享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
                       </Text>
                     )}
-                  </View>
-                  {/* 第二行：访问次数右对齐 */}
-                  <View className="flex justify-end">
-                    <Text className="text-xs text-slate-400">
-                      访问 {memorial.visit_count}
-                    </Text>
+                    <View className="flex items-center gap-1">
+                      <Eye size={14} color="#94a3b8" />
+                      <Text className="text-xs text-slate-400">
+                        {memorial.visit_count}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>

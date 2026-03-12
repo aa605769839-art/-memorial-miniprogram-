@@ -2,7 +2,7 @@ import { View, Text, Image, Input, Button, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Pencil } from 'lucide-react-taro';
+import { User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Pencil, Eye } from 'lucide-react-taro';
 
 interface Photo {
   id: string;
@@ -464,9 +464,10 @@ const DetailPage = () => {
               </Text>
             </View>
           )}
-          <View className="flex justify-center">
+          <View className="flex justify-center items-center gap-1">
+            <Eye size={14} color="#94a3b8" />
             <Text className="text-sm text-slate-400">
-              访问 {memorial.visit_count}
+              {memorial.visit_count}
             </Text>
           </View>
         </View>

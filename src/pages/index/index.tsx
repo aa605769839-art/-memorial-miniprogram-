@@ -2,7 +2,7 @@ import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { User, Flame } from 'lucide-react-taro';
+import { User, Flame, Eye } from 'lucide-react-taro';
 
 interface Memorial {
   id: string;
@@ -82,7 +82,7 @@ const IndexPage = () => {
           </View>
           {/* 右侧装饰图标 - 蜡烛 */}
           <View className="flex flex-col items-center opacity-30">
-            <Flame color="#3b82f6" size={20} />
+            <Flame color="#3b82f6" size={40} />
             <View className="w-4 h-5 bg-blue-400 rounded-sm -mt-1" />
           </View>
         </View>
@@ -139,22 +139,23 @@ const IndexPage = () => {
 
                 {/* 信息区域 - 两行布局 */}
                 <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
-                  {/* 第一行：姓名 + 享年 */}
-                  <View className="flex items-center gap-2 mb-1">
-                    <Text className="text-base font-bold text-blue-900 truncate">
-                      {memorial.name}
-                    </Text>
+                  {/* 第一行：姓名 */}
+                  <Text className="text-base font-bold text-blue-900 truncate mb-1">
+                    {memorial.name}
+                  </Text>
+                  {/* 第二行：享岁居右 + 访问icon */}
+                  <View className="flex items-center justify-between">
                     {calculateAge(memorial.birth_date, memorial.death_date) && (
-                      <Text className="text-xs text-slate-500">
+                      <Text className="text-sm text-slate-400">
                         享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
                       </Text>
                     )}
-                  </View>
-                  {/* 第二行：访问次数右对齐 */}
-                  <View className="flex justify-end">
-                    <Text className="text-xs text-slate-400">
-                      访问 {memorial.visit_count}
-                    </Text>
+                    <View className="flex items-center gap-1">
+                      <Eye size={14} color="#94a3b8" />
+                      <Text className="text-xs text-slate-400">
+                        {memorial.visit_count}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>

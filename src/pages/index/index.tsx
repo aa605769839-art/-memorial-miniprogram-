@@ -47,12 +47,6 @@ const IndexPage = () => {
     });
   };
 
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  };
-
   if (loading) {
     return (
       <View className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
@@ -138,14 +132,23 @@ const IndexPage = () => {
 
                 {/* 信息区域 - 优化间距 */}
                 <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
-                  <Text className="block text-base font-bold text-blue-900 mb-0.5 truncate">
-                    {memorial.name}
-                  </Text>
-                  <Text className="block text-xs text-slate-500 mb-2 truncate">
-                    {memorial.birth_date && memorial.death_date
-                      ? `${formatDate(memorial.birth_date)} ~ ${formatDate(memorial.death_date)}`
-                      : '日期未知'}
-                  </Text>
+                  {/* 名字和日期 */}
+                  <View className="flex items-center justify-between mb-1">
+                    <Text className="text-base font-bold text-blue-900 truncate flex-1">
+                      {memorial.name}
+                    </Text>
+                    <Text className="text-xs text-slate-400 ml-1">
+                      {memorial.birth_date && memorial.death_date
+                        ? `${new Date(memorial.birth_date).getFullYear()}-${String(new Date(memorial.birth_date).getMonth() + 1).padStart(2, '0')} ~ ${new Date(memorial.death_date).getFullYear()}-${String(new Date(memorial.death_date).getMonth() + 1).padStart(2, '0')}`
+                        : ''}
+                    </Text>
+                  </View>
+                  {/* 简介 - 最多两行，去除名字 */}
+                  {memorial.description && (
+                    <Text className="block text-xs text-slate-500 mb-2 line-clamp-2" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {memorial.description.replace(memorial.name, '').trim()}
+                    </Text>
+                  )}
                   <View className="flex items-center gap-1.5">
                     <View className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-full">
                       <Heart color="#3b82f6" size={10} />

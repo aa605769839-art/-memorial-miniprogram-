@@ -2,7 +2,7 @@ import { View, Text, Image, Input, Button, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { Heart, User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Mars, Venus, Pencil } from 'lucide-react-taro';
+import { Heart, User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Pencil } from 'lucide-react-taro';
 
 interface Photo {
   id: string;
@@ -446,13 +446,13 @@ const DetailPage = () => {
               {memorial.name}
             </Text>
             {memorial.gender === '男' && (
-              <View className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center">
-                <Mars color="#3b82f6" size={18} />
+              <View className="w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center">
+                <Text className="text-white text-xs font-bold">男</Text>
               </View>
             )}
             {memorial.gender === '女' && (
-              <View className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center">
-                <Venus color="#ec4899" size={18} />
+              <View className="w-6 h-6 rounded-full bg-pink-400 flex items-center justify-center">
+                <Text className="text-white text-xs font-bold">女</Text>
               </View>
             )}
           </View>
@@ -560,7 +560,7 @@ const DetailPage = () => {
             className="flex-1 bg-blue-500 text-white rounded-full py-3 shadow-md flex items-center justify-center gap-2"
             onClick={() => setShowGiftModal(true)}
           >
-            <Gift size={18} />
+            <Gift size={18} color="#ffffff" />
             <Text>悼念</Text>
           </Button>
           <Button
@@ -704,7 +704,7 @@ const DetailPage = () => {
               className="bg-blue-500 text-white rounded-full px-6 py-2 flex items-center gap-2"
               onClick={handleComment}
             >
-              <Send size={16} />
+              <Send size={16} color="#ffffff" />
               <Text>发送</Text>
             </Button>
           </View>

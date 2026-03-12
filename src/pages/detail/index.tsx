@@ -446,23 +446,13 @@ const DetailPage = () => {
               {memorial.name}
             </Text>
             {memorial.gender === '男' && (
-              <View className="w-6 h-6 flex items-center justify-center">
-                <View className="relative">
-                  {/* 头 */}
-                  <View className="w-4 h-4 rounded-full border-2 border-blue-400 bg-blue-50" />
-                  {/* 身体 */}
-                  <View className="w-5 h-3 -mt-0.5 rounded-t-full border-2 border-blue-400 bg-blue-50" />
-                </View>
+              <View className="w-5 h-5 rounded-full border border-blue-400 flex items-center justify-center">
+                <Text className="text-blue-400 text-xs font-bold">♂</Text>
               </View>
             )}
             {memorial.gender === '女' && (
-              <View className="w-6 h-6 flex items-center justify-center">
-                <View className="relative">
-                  {/* 头 */}
-                  <View className="w-4 h-4 rounded-full border-2 border-pink-400 bg-pink-50" />
-                  {/* 裙子 */}
-                  <View className="w-0 h-0 -mt-0.5 ml-0.5" style={{ borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: '10px solid #f472b6' }} />
-                </View>
+              <View className="w-5 h-5 rounded-full border border-pink-400 flex items-center justify-center">
+                <Text className="text-pink-400 text-xs font-bold">♀</Text>
               </View>
             )}
           </View>

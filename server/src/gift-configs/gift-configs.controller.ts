@@ -8,43 +8,37 @@ export class GiftConfigsController {
 
   @Get()
   async findAll() {
-    const result = await this.giftConfigsService.findAll();
-    return { code: 200, msg: 'success', data: result };
+    return this.giftConfigsService.findAll();
   }
 
   @Get('enabled')
   async findEnabled() {
-    const result = await this.giftConfigsService.findEnabled();
-    return { code: 200, msg: 'success', data: result };
+    return this.giftConfigsService.findEnabled();
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const result = await this.giftConfigsService.findOne(id);
-    return { code: 200, msg: 'success', data: result };
+    return this.giftConfigsService.findOne(id);
   }
 
   @Post()
   async create(@Body() createGiftConfigDto: InsertGiftConfig) {
-    const result = await this.giftConfigsService.create(createGiftConfigDto);
-    return { code: 200, msg: 'success', data: result };
+    return this.giftConfigsService.create(createGiftConfigDto);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateGiftConfigDto: UpdateGiftConfig) {
-    const result = await this.giftConfigsService.update(id, updateGiftConfigDto);
-    return { code: 200, msg: 'success', data: result };
+    return this.giftConfigsService.update(id, updateGiftConfigDto);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
     await this.giftConfigsService.remove(id);
-    return { code: 200, msg: 'success', data: { id } };
+    return { id };
   }
 
   @Put(':id/sort')
   async updateSort(@Param('id') id: string, @Body('sortOrder') sortOrder: number) {
-    const result = await this.giftConfigsService.updateSort(id, sortOrder);
-    return { code: 200, msg: 'success', data: result };
+    return this.giftConfigsService.updateSort(id, sortOrder);
   }
 }

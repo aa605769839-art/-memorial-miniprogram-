@@ -8,14 +8,12 @@ export class PhotosController {
 
   @Get('memorial/:memorialId')
   async findByMemorial(@Param('memorialId') memorialId: string) {
-    const result = await this.photosService.findByMemorialId(memorialId);
-    return { code: 200, msg: 'success', data: result };
+    return this.photosService.findByMemorialId(memorialId);
   }
 
   @Post()
   async create(@Body() createPhotoDto: InsertPhoto) {
-    const result = await this.photosService.create(createPhotoDto);
-    return { code: 200, msg: 'success', data: result };
+    return this.photosService.create(createPhotoDto);
   }
 
   @Post('batch/:memorialId')
@@ -23,19 +21,16 @@ export class PhotosController {
     @Param('memorialId') memorialId: string,
     @Body() body: { urls: string[] }
   ) {
-    const result = await this.photosService.createBatch(memorialId, body.urls);
-    return { code: 200, msg: 'success', data: result };
+    return this.photosService.createBatch(memorialId, body.urls);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    const result = await this.photosService.remove(id);
-    return { code: 200, msg: 'success', data: result };
+    return this.photosService.remove(id);
   }
 
   @Delete('memorial/:memorialId')
   async removeByMemorialId(@Param('memorialId') memorialId: string) {
-    const result = await this.photosService.removeByMemorialId(memorialId);
-    return { code: 200, msg: 'success', data: result };
+    return this.photosService.removeByMemorialId(memorialId);
   }
 }

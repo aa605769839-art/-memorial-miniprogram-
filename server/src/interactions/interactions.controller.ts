@@ -8,8 +8,7 @@ export class MourningController {
 
   @Post()
   async createMourning(@Body() createMourningDto: InsertMourningRecord) {
-    const result = await this.interactionsService.createMourning(createMourningDto);
-    return { code: 200, msg: 'success', data: result };
+    return this.interactionsService.createMourning(createMourningDto);
   }
 }
 
@@ -19,8 +18,7 @@ export class VisitController {
 
   @Post()
   async createVisit(@Body() createVisitDto: InsertVisitRecord) {
-    const result = await this.interactionsService.createVisit(createVisitDto);
-    return { code: 200, msg: 'success', data: result };
+    return this.interactionsService.createVisit(createVisitDto);
   }
 }
 
@@ -30,7 +28,6 @@ export class CommentController {
 
   @Post()
   async createComment(@Body() createCommentDto: InsertComment) {
-    const result = await this.interactionsService.createComment(createCommentDto);
-    return { code: 200, msg: 'success', data: result };
+    return this.interactionsService.createComment(createCommentDto);
   }
 }

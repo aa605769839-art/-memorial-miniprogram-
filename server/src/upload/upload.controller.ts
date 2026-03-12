@@ -12,7 +12,6 @@ export class UploadController {
     @UploadedFile() file: Express.Multer.File,
     @Body('category') category?: string
   ) {
-    const result = await this.uploadService.uploadFile(file, category || 'uploads');
-    return { code: 200, msg: 'success', data: result };
+    return this.uploadService.uploadFile(file, category || 'uploads');
   }
 }

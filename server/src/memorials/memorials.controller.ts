@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { MemorialsService } from './memorials.service';
 import { PhotosService } from '../photos/photos.service';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
@@ -13,14 +13,13 @@ export class MemorialsController {
 
   @Get()
   async findAll(@Query('userId') userId?: string) {
-    const result = await this.memorialsService.findAll(userId);
-    return { code: 200, msg: 'success', data: result };
+    return this.memorialsService.findAll(userId);
   }
 
   @Post('polish-text')
   async polishText(@Body() body: { text: string }) {
     if (!body.text || body.text.trim().length === 0) {
-      return { code: 400, msg: '文本内容不能为空', data: null };
+      throw new HttpException('文本内容不能为空', HttpStatus.BAD_REQUEST);
     }
 
     try {
@@ -40,55 +39,50 @@ export class MemorialsController {
 
       const response = await client.invoke(messages, { temperature: 0.8 });
 
-      return { code: 200, msg: 'success', data: { polishedText: response.content } };
+      return { polishedText: response.content };
     } catch (error) {
       console.error('AI润色失败:', error);
-      return { code: 500, msg: 'AI润色服务暂不可用，请稍后再试', data: null };
+      throw new HttpException('AI润色服务暂不可用，请稍后再试', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const result = await this.memorialsService.findOneWithPhotos(id);
-    return { code: 200, msg: 'success', data: result };
+    return this.memorialsService.findOneWithPhotos(id);
   }
 
   @Get(':id/comments')
   async findComments(@Param('id') id: string) {
-    const result = await this.memorialsService.findComments(id);
-    return { code: 200, msg: 'success', data: result };
+    return this.memorialsService.findComments(id);
   }
 
   @Post()
   async create(@Body() createMemorialDto: InsertMemorial) {
-    const result = await this.memorialsService.create(createMemorialDto);
-    return { code: 200, msg: 'success', data: result };
+    return this.memorialsService.create(createMemorialDto);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateMemorialDto: UpdateMemorial) {
-    const result = await this.memorialsService.update(id, updateMemorialDto);
-    return { code: 200, msg: 'success', data: result };
+    return this.memorialsService.update(id, updateMemorialDto);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string, @Query('userId') userId: string) {
     if (!userId) {
-      return { code: 400, msg: '用户ID不能为空', data: null };
+      throw new HttpException('用户ID不能为空', HttpStatus.BAD_REQUEST);
     }
 
     // 先查询 memorial 验证权限
     const memorial = await this.memorialsService.findOne(id);
     if (!memorial) {
-      return { code: 404, msg: '故友不存在', data: null };
+      throw new HttpException('故友不存在', HttpStatus.NOT_FOUND);
     }
 
     // 验证是否是创建者
     if (memorial.user_id !== userId) {
-      return { code: 403, msg: '无权删除此故友', data: null };
+      throw new HttpException('无权删除此故友', HttpStatus.FORBIDDEN);
     }
 
-    const result = await this.memorialsService.remove(id);
-    return { code: 200, msg: 'success', data: result };
+    return this.memorialsService.remove(id);
   }
 }

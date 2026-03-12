@@ -7,7 +7,6 @@ export class RankingsController {
 
   @Get()
   async getRankings(@Query('type') type: string = 'mourning') {
-    const result = await this.rankingsService.getRankings(type);
-    return { code: 200, msg: 'success', data: result };
+    return this.rankingsService.getRankings(type);
   }
 }

@@ -79,9 +79,10 @@ const IndexPage = () => {
               温暖回忆，永存心间
             </Text>
           </View>
-          {/* 右侧装饰图标 - 火焰（象征烛光） */}
-          <View className="opacity-20">
-            <Flame color="#3b82f6" size={32} />
+          {/* 右侧装饰图标 - 蜡烛 */}
+          <View className="flex flex-col items-center opacity-30">
+            <Flame color="#3b82f6" size={20} />
+            <View className="w-4 h-5 bg-blue-400 rounded-sm -mt-1" />
           </View>
         </View>
       </View>

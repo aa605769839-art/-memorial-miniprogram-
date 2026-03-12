@@ -474,7 +474,7 @@ const FormPage = () => {
       {/* 头部 */}
       <View className="bg-white px-4 py-5 border-b border-blue-100">
         <Text className="block text-2xl font-bold text-blue-900">
-          {isEditMode ? '编辑故人' : '添加故人'}
+          {isEditMode ? '编辑' : '添加故人'}
         </Text>
       </View>
 

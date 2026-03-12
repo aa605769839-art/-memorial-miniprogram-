@@ -2,7 +2,7 @@ import { View, Text, Image, Input, Button, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { Heart, User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Pencil } from 'lucide-react-taro';
+import { User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Pencil } from 'lucide-react-taro';
 
 interface Photo {
   id: string;
@@ -464,21 +464,10 @@ const DetailPage = () => {
               </Text>
             </View>
           )}
-          <View className="flex justify-center gap-6">
-            <View className="flex items-center gap-2">
-              <Heart color="#3b82f6" size={18} />
-              <Text className="text-base text-blue-500 font-semibold">
-                {memorial.mourning_count}
-              </Text>
-              <Text className="text-sm text-slate-500">悼念</Text>
-            </View>
-            <View className="flex items-center gap-2">
-              <User color="#94a3b8" size={18} />
-              <Text className="text-base text-slate-600 font-semibold">
-                {memorial.visit_count}
-              </Text>
-              <Text className="text-sm text-slate-500">拜访</Text>
-            </View>
+          <View className="flex justify-center">
+            <Text className="text-sm text-slate-400">
+              访问 {memorial.visit_count}
+            </Text>
           </View>
         </View>
       </View>

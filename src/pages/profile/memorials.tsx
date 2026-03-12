@@ -1,13 +1,13 @@
 import { View, Text, Image } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useState } from 'react';
-import { Plus, Heart, User } from 'lucide-react-taro';
+import { Plus } from 'lucide-react-taro';
 import { Network } from '@/network';
 
 interface Memorial {
   id: string;
   name: string;
-  avatar_url: string | null; // 修正字段名
+  avatar_url: string | null;
   birth_date: string;
   death_date: string;
   description: string | null;
@@ -65,6 +65,13 @@ const MyMemorialsPage = () => {
     });
   };
 
+  const calculateAge = (birthDate: string, deathDate: string) => {
+    if (!birthDate || !deathDate) return null;
+    const birth = new Date(birthDate);
+    const death = new Date(deathDate);
+    return death.getFullYear() - birth.getFullYear();
+  };
+
   return (
     <View className="min-h-screen bg-blue-50 pb-6">
       {/* 头部 */}
@@ -101,10 +108,10 @@ const MyMemorialsPage = () => {
             {memorials.map((memorial) => (
               <View
                 key={memorial.id}
-                className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer"
+                className="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer border border-blue-100"
                 onClick={() => handleMemorialClick(memorial.id)}
               >
-                <View className="w-full aspect-square bg-blue-100 rounded-xl overflow-hidden mb-3">
+                <View className="w-full aspect-square bg-blue-100 overflow-hidden">
                   {memorial.avatar_url ? (
                     <Image
                       src={memorial.avatar_url}
@@ -119,23 +126,23 @@ const MyMemorialsPage = () => {
                     />
                   )}
                 </View>
-                <Text className="block text-base font-semibold text-blue-900 truncate">
-                  {memorial.name}
-                </Text>
-                <Text className="block text-xs text-slate-500 mt-1 truncate">
-                  {memorial.description || '暂无描述'}
-                </Text>
-                <View className="flex items-center justify-between gap-2 mt-2">
-                  <View className="flex items-center gap-1">
-                    <Heart size={14} color="#3b82f6" />
-                    <Text className="text-xs text-slate-400">
-                      {memorial.mourning_count}
+                {/* 信息区域 - 两行布局 */}
+                <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
+                  {/* 第一行：姓名 + 享年 */}
+                  <View className="flex items-center gap-2 mb-1">
+                    <Text className="text-base font-bold text-blue-900 truncate">
+                      {memorial.name}
                     </Text>
+                    {calculateAge(memorial.birth_date, memorial.death_date) && (
+                      <Text className="text-xs text-slate-500">
+                        享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
+                      </Text>
+                    )}
                   </View>
-                  <View className="flex items-center gap-1">
-                    <User size={14} color="#94a3b8" />
+                  {/* 第二行：访问次数右对齐 */}
+                  <View className="flex justify-end">
                     <Text className="text-xs text-slate-400">
-                      {memorial.visit_count}
+                      访问 {memorial.visit_count}
                     </Text>
                   </View>
                 </View>

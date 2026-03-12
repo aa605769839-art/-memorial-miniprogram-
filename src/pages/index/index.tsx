@@ -2,7 +2,7 @@ import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { Heart, User, Flame } from 'lucide-react-taro';
+import { User, Flame } from 'lucide-react-taro';
 
 interface Memorial {
   id: string;
@@ -47,10 +47,11 @@ const IndexPage = () => {
     });
   };
 
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  const calculateAge = (birthDate: string | null, deathDate: string | null) => {
+    if (!birthDate || !deathDate) return null;
+    const birth = new Date(birthDate);
+    const death = new Date(deathDate);
+    return death.getFullYear() - birth.getFullYear();
   };
 
   if (loading) {
@@ -136,29 +137,24 @@ const IndexPage = () => {
                   )}
                 </View>
 
-                {/* 信息区域 - 优化间距 */}
+                {/* 信息区域 - 两行布局 */}
                 <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
-                  <Text className="block text-base font-bold text-blue-900 mb-0.5 truncate">
-                    {memorial.name}
-                  </Text>
-                  <Text className="block text-xs text-slate-500 mb-2 truncate">
-                    {memorial.birth_date && memorial.death_date
-                      ? `${formatDate(memorial.birth_date)} ~ ${formatDate(memorial.death_date)}`
-                      : '日期未知'}
-                  </Text>
-                  <View className="flex items-center gap-1.5">
-                    <View className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-full">
-                      <Heart color="#3b82f6" size={10} />
-                      <Text className="text-xs text-blue-600 font-medium">
-                        {memorial.mourning_count}
-                      </Text>
-                    </View>
-                    <View className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-full">
-                      <User color="#94a3b8" size={10} />
+                  {/* 第一行：姓名 + 享年 */}
+                  <View className="flex items-center gap-2 mb-1">
+                    <Text className="text-base font-bold text-blue-900 truncate">
+                      {memorial.name}
+                    </Text>
+                    {calculateAge(memorial.birth_date, memorial.death_date) && (
                       <Text className="text-xs text-slate-500">
-                        {memorial.visit_count}
+                        享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
                       </Text>
-                    </View>
+                    )}
+                  </View>
+                  {/* 第二行：访问次数右对齐 */}
+                  <View className="flex justify-end">
+                    <Text className="text-xs text-slate-400">
+                      访问 {memorial.visit_count}
+                    </Text>
                   </View>
                 </View>
               </View>

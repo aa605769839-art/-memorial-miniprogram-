@@ -119,24 +119,13 @@ const MyMemorialsPage = () => {
                     />
                   )}
                 </View>
-                {/* 名字和日期 */}
-                <View className="flex items-center justify-between mb-1">
-                  <Text className="text-base font-semibold text-blue-900 truncate flex-1">
-                    {memorial.name}
-                  </Text>
-                  <Text className="text-xs text-slate-400 ml-1">
-                    {memorial.birth_date && memorial.death_date
-                      ? `${String(new Date(memorial.birth_date).getFullYear()).slice(-2)}年/${String(new Date(memorial.birth_date).getMonth() + 1).padStart(2, '0')}月 ~ ${String(new Date(memorial.death_date).getFullYear()).slice(-2)}年/${String(new Date(memorial.death_date).getMonth() + 1).padStart(2, '0')}月`
-                      : ''}
-                  </Text>
-                </View>
-                {/* 简介 - 最多两行，去除名字 */}
-                {memorial.description && (
-                  <Text className="block text-xs text-slate-500 line-clamp-2 mb-1" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {memorial.description.replace(memorial.name, '').trim()}
-                  </Text>
-                )}
-                <View className="flex items-center justify-between gap-2 mt-1">
+                <Text className="block text-base font-semibold text-blue-900 truncate">
+                  {memorial.name}
+                </Text>
+                <Text className="block text-xs text-slate-500 mt-1 truncate">
+                  {memorial.description || '暂无描述'}
+                </Text>
+                <View className="flex items-center justify-between gap-2 mt-2">
                   <View className="flex items-center gap-1">
                     <Heart size={14} color="#3b82f6" />
                     <Text className="text-xs text-slate-400">

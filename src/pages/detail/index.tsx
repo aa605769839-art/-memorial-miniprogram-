@@ -34,6 +34,13 @@ interface Comment {
   created_at: string;
 }
 
+interface GiftConfig {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+}
+
 interface Gift {
   id: string;
   gift_type: string;
@@ -44,16 +51,6 @@ interface Gift {
   message: string | null;
   created_at: string;
 }
-
-// 礼物类型定义
-const GIFT_TYPES = [
-  { type: 'flower', name: '鲜花', icon: '🌸', color: 'text-pink-500' },
-  { type: 'candle', name: '蜡烛', icon: '🕯️', color: 'text-orange-500' },
-  { type: 'wreath', name: '花圈', icon: '💐', color: 'text-purple-500' },
-  { type: 'rose', name: '玫瑰', icon: '🌹', color: 'text-red-500' },
-  { type: 'lily', name: '百合', icon: '🌷', color: 'text-pink-600' },
-  { type: 'heart', name: '爱心', icon: '❤️', color: 'text-red-600' },
-];
 
 const DetailPage = () => {
   const router = useRouter();
@@ -67,7 +64,8 @@ const DetailPage = () => {
 
   // 礼物相关状态
   const [showGiftModal, setShowGiftModal] = useState(false);
-  const [selectedGift, setSelectedGift] = useState<typeof GIFT_TYPES[0] | null>(null);
+  const [giftConfigs, setGiftConfigs] = useState<GiftConfig[]>([]);
+  const [selectedGift, setSelectedGift] = useState<GiftConfig | null>(null);
   const [giftMessage, setGiftMessage] = useState('');
   const [isSendingGift, setIsSendingGift] = useState(false);
 
@@ -86,6 +84,7 @@ const DetailPage = () => {
     if (id) {
       fetchComments();
       recordVisit();
+      fetchGiftConfigs();
       // 从本地存储加载用户昵称
       const userProfile = Taro.getStorageSync('userProfile');
       if (userProfile && userProfile.name) {
@@ -112,6 +111,20 @@ const DetailPage = () => {
       console.error('Failed to fetch memorial:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGiftConfigs = async () => {
+    try {
+      const res = await Network.request({
+        url: '/api/gift-configs/enabled',
+        method: 'GET'
+      });
+      if (res.data?.code === 200) {
+        setGiftConfigs(res.data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch gift configs:', error);
     }
   };
 
@@ -246,7 +259,7 @@ const DetailPage = () => {
         method: 'POST',
         data: {
           memorialId: id,
-          giftType: selectedGift.type,
+          giftType: selectedGift.id,
           giftName: selectedGift.name,
           giftIcon: selectedGift.icon,
           senderName: visitorName.trim(),
@@ -736,11 +749,11 @@ const DetailPage = () => {
             {/* 礼物列表 */}
             <View className="px-6 py-4">
               <View className="grid grid-cols-3 gap-4">
-                {GIFT_TYPES.map((gift) => (
+                {giftConfigs.map((gift) => (
                   <View
-                    key={gift.type}
+                    key={gift.id}
                     className={`flex flex-col items-center p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                      selectedGift?.type === gift.type
+                      selectedGift?.id === gift.id
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-transparent bg-gray-50'
                     }`}

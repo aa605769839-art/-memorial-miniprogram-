@@ -1,4 +1,4 @@
-import { pgTable, serial, timestamp, text, varchar, integer, jsonb, index } from "drizzle-orm/pg-core"
+import { pgTable, serial, timestamp, text, varchar, integer, jsonb, index, boolean } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 import { createSchemaFactory } from "drizzle-zod"
 import { z } from "zod"
@@ -121,7 +121,30 @@ export const photos = pgTable(
   ]
 );
 
-// 礼物表
+// 礼物配置表（中台配置）
+export const giftConfigs = pgTable(
+  "gift_configs",
+  {
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    name: varchar("name", { length: 128 }).notNull(), // 礼物名称
+    icon: text("icon").notNull(), // 礼物图标（emoji或URL）
+    color: varchar("color", { length: 50 }).default("text-pink-500"), // 颜色class
+    sortOrder: integer("sort_order").default(0), // 排序
+    isEnabled: boolean("is_enabled").default(true), // 是否启用
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("gift_configs_sort_idx").on(table.sortOrder),
+    index("gift_configs_enabled_idx").on(table.isEnabled),
+  ]
+);
 export const gifts = pgTable(
   "gifts",
   {
@@ -228,3 +251,27 @@ export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
 
 export type Gift = typeof gifts.$inferSelect;
 export type InsertGift = z.infer<typeof insertGiftSchema>;
+
+// Gift Config schemas
+export const insertGiftConfigSchema = createCoercedInsertSchema(giftConfigs).pick({
+  name: true,
+  icon: true,
+  color: true,
+  sortOrder: true,
+  isEnabled: true,
+});
+
+export const updateGiftConfigSchema = createCoercedInsertSchema(giftConfigs)
+  .pick({
+    name: true,
+    icon: true,
+    color: true,
+    sortOrder: true,
+    isEnabled: true,
+  })
+  .partial();
+
+// TypeScript types for Gift Config
+export type GiftConfig = typeof giftConfigs.$inferSelect;
+export type InsertGiftConfig = z.infer<typeof insertGiftConfigSchema>;
+export type UpdateGiftConfig = z.infer<typeof updateGiftConfigSchema>;

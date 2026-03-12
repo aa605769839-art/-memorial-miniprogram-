@@ -12,11 +12,17 @@ export class ImageGenerationController {
       const config = new Config();
       const client = new ImageGenerationClient(config, customHeaders);
 
-      console.log('Generating avatar with prompt:', body.prompt.substring(0, 100) + '...');
+      console.log('Generating avatar with prompt:', body.prompt);
+
+      // 清理 prompt 中的可能引起问题的字符
+      const cleanPrompt = body.prompt
+        .replace(/[\n\r\t]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 
       const response = await client.generate({
-        prompt: body.prompt,
-        size: '2K',
+        prompt: cleanPrompt,
+        size: '1024x1024',
         watermark: false,
       });
 

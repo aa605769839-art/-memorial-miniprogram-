@@ -140,6 +140,7 @@ const FormPage = () => {
     }
 
     setIsGenerating(true);
+    Taro.showLoading({ title: '正在生成头像...', mask: true });
     try {
       // 计算年龄
       let ageHint = '';
@@ -186,13 +187,14 @@ const FormPage = () => {
       // 清理 description 中的特殊字符，只保留纯文本
       const cleanDescription = formData.description 
         ? formData.description
-            .replace(/[#*_`~\[\](){}|\\]/g, '') // 移除 Markdown 特殊字符
-            .replace(/\s+/g, ' ') // 合并多余空格
+            .replace(/[#*_`~\[\](){}|\\]/g, '')
+            .replace(/\s+/g, ' ')
             .trim()
-            .slice(0, 50)
+            .slice(0, 30)
         : '';
 
-      const prompt = `Cute cartoon portrait of ${formData.name}, ${ageHint || 'adult'}, ${formData.gender || 'person'}. ${cleanDescription ? `Personality: ${cleanDescription}.` : ''} Style: gentle smile, warm eyes, soft cartoon art, peaceful atmosphere, pastel blue and warm tones, clean lines, high quality memorial portrait.`;
+      const genderEn = formData.gender === '男' ? 'male' : formData.gender === '女' ? 'female' : 'person';
+      const prompt = `Cute cartoon portrait of ${formData.name}, ${ageHint || 'adult'}, ${genderEn}. ${cleanDescription ? `Personality: ${cleanDescription}.` : ''} Style: gentle smile, warm eyes, soft cartoon art, peaceful atmosphere, pastel blue and warm tones, clean lines, high quality memorial portrait.`;
 
       const res = await Network.request({
         url: '/api/generate-avatar',
@@ -218,6 +220,7 @@ const FormPage = () => {
       return null;
     } finally {
       setIsGenerating(false);
+      Taro.hideLoading();
     }
   };
 

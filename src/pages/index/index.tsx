@@ -130,8 +130,8 @@ const IndexPage = () => {
                   )}
                 </View>
 
-                {/* 信息区域 - 优化间距 */}
-                <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
+                {/* 信息区域 - 高度自适应 */}
+                <View className="p-3 bg-gradient-to-b from-blue-50 to-white flex flex-col">
                   {/* 名字和日期 */}
                   <View className="flex items-center justify-between mb-1">
                     <Text className="text-base font-bold text-blue-900 truncate flex-1">
@@ -139,7 +139,7 @@ const IndexPage = () => {
                     </Text>
                     <Text className="text-xs text-slate-400 ml-1">
                       {memorial.birth_date && memorial.death_date
-                        ? `${new Date(memorial.birth_date).getFullYear()}-${String(new Date(memorial.birth_date).getMonth() + 1).padStart(2, '0')} ~ ${new Date(memorial.death_date).getFullYear()}-${String(new Date(memorial.death_date).getMonth() + 1).padStart(2, '0')}`
+                        ? `${String(new Date(memorial.birth_date).getFullYear()).slice(-2)}年/${String(new Date(memorial.birth_date).getMonth() + 1).padStart(2, '0')}月 ~ ${String(new Date(memorial.death_date).getFullYear()).slice(-2)}年/${String(new Date(memorial.death_date).getMonth() + 1).padStart(2, '0')}月`
                         : ''}
                     </Text>
                   </View>

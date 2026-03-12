@@ -126,7 +126,7 @@ const MyMemorialsPage = () => {
                   </Text>
                   <Text className="text-xs text-slate-400 ml-1">
                     {memorial.birth_date && memorial.death_date
-                      ? `${new Date(memorial.birth_date).getFullYear()}-${String(new Date(memorial.birth_date).getMonth() + 1).padStart(2, '0')} ~ ${new Date(memorial.death_date).getFullYear()}-${String(new Date(memorial.death_date).getMonth() + 1).padStart(2, '0')}`
+                      ? `${String(new Date(memorial.birth_date).getFullYear()).slice(-2)}年/${String(new Date(memorial.birth_date).getMonth() + 1).padStart(2, '0')}月 ~ ${String(new Date(memorial.death_date).getFullYear()).slice(-2)}年/${String(new Date(memorial.death_date).getMonth() + 1).padStart(2, '0')}月`
                       : ''}
                   </Text>
                 </View>

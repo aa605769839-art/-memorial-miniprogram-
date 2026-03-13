@@ -26,7 +26,8 @@ const COLORS = [
 
 const GiftConfigPage = () => {
   const [giftConfigs, setGiftConfigs] = useState<GiftConfig[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -45,23 +46,30 @@ const GiftConfigPage = () => {
     loadGiftConfigs();
   }, []);
 
-  // 页面显示时重新加载数据（从其他页面返回时）
-  useDidShow(() => {
+  // 页面显示时重新加载数据（从其他页面返回时）- 仅在小程序环境
+  useDidShow?.(() => {
+    console.log('[GiftConfig] useDidShow 执行');
     loadGiftConfigs();
   });
 
   const loadGiftConfigs = async () => {
+    console.log('[GiftConfig] 开始加载礼物配置');
     setLoading(true);
+    setError('');
     try {
       const res = await Network.request({
         url: '/api/gift-configs',
         method: 'GET',
       });
+      console.log('[GiftConfig] API 响应:', res.data);
       if (res.data?.code === 200) {
         setGiftConfigs(res.data.data || []);
+      } else {
+        setError(res.data?.msg || '加载失败');
       }
-    } catch (error) {
-      console.error('加载礼物配置失败:', error);
+    } catch (error: any) {
+      console.error('[GiftConfig] 加载礼物配置失败:', error);
+      setError(error?.message || '网络错误');
       Taro.showToast({ title: '加载失败', icon: 'none' });
     } finally {
       setLoading(false);
@@ -184,8 +192,19 @@ const GiftConfigPage = () => {
       {/* 礼物列表 */}
       <View className="p-4">
         {loading ? (
-          <View className="flex items-center justify-center py-8">
+          <View className="flex flex-col items-center justify-center py-12">
+            <View className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
             <Text className="text-gray-500">加载中...</Text>
+          </View>
+        ) : error ? (
+          <View className="flex flex-col items-center justify-center py-12">
+            <Text className="text-red-500 mb-2">加载失败: {error}</Text>
+            <Button
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm mt-4"
+              onClick={loadGiftConfigs}
+            >
+              重新加载
+            </Button>
           </View>
         ) : giftConfigs.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-12">

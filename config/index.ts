@@ -172,6 +172,9 @@ export default defineConfig<'vite'>(async (merge, _env) => {
     h5: {
       publicPath: './',
       staticDirectory: 'static',
+      router: {
+        mode: 'hash',
+      },
       devServer: {
         port: 5000,
         host: '0.0.0.0',

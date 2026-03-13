@@ -14,7 +14,7 @@ function parsePort(): number {
       return port;
     }
   }
-  return 3000;
+  return 3001;
 }
 
 async function bootstrap() {
@@ -53,6 +53,6 @@ async function bootstrap() {
       throw err;
     }
   }
-  console.log(`Application is running on: http://localhost:3000`);
+  console.log(`Application is running on: http://localhost:3001`);
 }
 bootstrap();

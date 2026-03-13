@@ -579,7 +579,10 @@ const DetailPage = () => {
         <View className="flex gap-3">
           <Button
             className="flex-1 bg-blue-500 text-white rounded-full py-3 shadow-md flex items-center justify-center gap-2"
-            onClick={() => setShowGiftModal(true)}
+            onClick={() => {
+              fetchGiftConfigs();
+              setShowGiftModal(true);
+            }}
           >
             <Gift size={18} color="#ffffff" />
             <Text>悼念</Text>

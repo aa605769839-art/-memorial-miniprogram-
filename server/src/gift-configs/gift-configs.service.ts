@@ -44,6 +44,7 @@ export class GiftConfigsService {
       name: createGiftConfigDto.name,
       icon: createGiftConfigDto.icon,
       color: createGiftConfigDto.color,
+      price: createGiftConfigDto.price ?? 0,
       sort_order: createGiftConfigDto.sortOrder ?? 0,
       is_enabled: createGiftConfigDto.isEnabled ?? true,
     };
@@ -63,6 +64,7 @@ export class GiftConfigsService {
     if (updateGiftConfigDto.name !== undefined) dbData.name = updateGiftConfigDto.name;
     if (updateGiftConfigDto.icon !== undefined) dbData.icon = updateGiftConfigDto.icon;
     if (updateGiftConfigDto.color !== undefined) dbData.color = updateGiftConfigDto.color;
+    if (updateGiftConfigDto.price !== undefined) dbData.price = updateGiftConfigDto.price;
     if (updateGiftConfigDto.sortOrder !== undefined) dbData.sort_order = updateGiftConfigDto.sortOrder;
     if (updateGiftConfigDto.isEnabled !== undefined) dbData.is_enabled = updateGiftConfigDto.isEnabled;
 

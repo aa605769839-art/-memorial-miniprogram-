@@ -9,6 +9,7 @@ interface GiftConfig {
   name: string;
   icon: string;
   color: string;
+  price: number;
   sortOrder: number;
   isEnabled: boolean;
 }
@@ -32,6 +33,7 @@ const GiftConfigPage = () => {
     name: '',
     icon: '',
     color: 'text-pink-500',
+    price: 0,
     isEnabled: true,
   });
 
@@ -68,7 +70,7 @@ const GiftConfigPage = () => {
 
   const handleAdd = () => {
     setEditingId(null);
-    setFormData({ name: '', icon: '', color: 'text-pink-500', isEnabled: true });
+    setFormData({ name: '', icon: '', color: 'text-pink-500', price: 0, isEnabled: true });
     setShowModal(true);
   };
 
@@ -78,6 +80,7 @@ const GiftConfigPage = () => {
       name: config.name,
       icon: config.icon,
       color: config.color,
+      price: config.price || 0,
       isEnabled: config.isEnabled,
     });
     setShowModal(true);
@@ -208,6 +211,9 @@ const GiftConfigPage = () => {
                         <Text className="text-xs text-gray-500">
                           {config.isEnabled ? '已启用' : '已禁用'}
                         </Text>
+                        <Text className="text-xs text-orange-500 font-medium">
+                          ¥{config.price || 0}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -297,6 +303,17 @@ const GiftConfigPage = () => {
                     />
                   ))}
                 </View>
+              </View>
+
+              <View>
+                <Text className="text-sm text-gray-600 mb-2">价格（虚拟货币）</Text>
+                <Input
+                  className="w-full bg-gray-50 rounded-lg px-4 py-3 text-gray-900"
+                  placeholder="如：10、50、100"
+                  type="number"
+                  value={String(formData.price)}
+                  onInput={(e) => setFormData({ ...formData, price: parseInt(e.detail.value) || 0 })}
+                />
               </View>
 
               <View className="flex items-center justify-between">

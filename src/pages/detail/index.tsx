@@ -39,6 +39,7 @@ interface GiftConfig {
   name: string;
   icon: string;
   color: string;
+  price: number;
 }
 
 interface Gift {
@@ -770,6 +771,9 @@ const DetailPage = () => {
                     <Text className="text-4xl mb-2">{gift.icon}</Text>
                     <Text className={`text-sm font-semibold ${gift.color}`}>
                       {gift.name}
+                    </Text>
+                    <Text className="text-xs text-gray-500 mt-1">
+                      ¥{gift.price || 0}
                     </Text>
                   </View>
                 ))}

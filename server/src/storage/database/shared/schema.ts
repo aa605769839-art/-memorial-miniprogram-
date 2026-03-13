@@ -131,6 +131,7 @@ export const giftConfigs = pgTable(
     name: varchar("name", { length: 128 }).notNull(), // 礼物名称
     icon: text("icon").notNull(), // 礼物图标（emoji或URL）
     color: varchar("color", { length: 50 }).default("text-pink-500"), // 颜色class
+    price: integer("price").default(0), // 礼物价格（虚拟货币）
     sortOrder: integer("sort_order").default(0), // 排序
     isEnabled: boolean("is_enabled").default(true), // 是否启用
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -257,6 +258,7 @@ export const insertGiftConfigSchema = createCoercedInsertSchema(giftConfigs).pic
   name: true,
   icon: true,
   color: true,
+  price: true,
   sortOrder: true,
   isEnabled: true,
 });
@@ -266,6 +268,7 @@ export const updateGiftConfigSchema = createCoercedInsertSchema(giftConfigs)
     name: true,
     icon: true,
     color: true,
+    price: true,
     sortOrder: true,
     isEnabled: true,
   })

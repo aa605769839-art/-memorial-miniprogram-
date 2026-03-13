@@ -1,6 +1,6 @@
 import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Network } from '@/network';
 import { User, Flame, Eye } from 'lucide-react-taro';
 
@@ -19,9 +19,34 @@ interface Memorial {
 const IndexPage = () => {
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [loading, setLoading] = useState(true);
+  const lastTapTime = useRef(0);
 
   useEffect(() => {
     fetchMemorials();
+  }, []);
+
+  // TabBar 双击刷新
+  useEffect(() => {
+    if (Taro.getEnv() === Taro.ENV_TYPE.WEAPP) {
+      const handleTabTap = (item: any) => {
+        if (item.index === 0) {
+          const currentTime = Date.now();
+          const timeDiff = currentTime - lastTapTime.current;
+          if (timeDiff < 300) {
+            setLoading(true);
+            fetchMemorials();
+            Taro.showToast({ title: '刷新成功', icon: 'success', duration: 1000 });
+          }
+          lastTapTime.current = currentTime;
+        }
+      };
+      // @ts-ignore
+      Taro.onTabItemTap?.(handleTabTap);
+      return () => {
+        // @ts-ignore
+        Taro.offTabItemTap?.(handleTabTap);
+      };
+    }
   }, []);
 
   const fetchMemorials = async () => {

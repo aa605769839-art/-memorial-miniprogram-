@@ -455,7 +455,8 @@ const DetailPage = () => {
           )}
         </View>
         <View className="px-6 py-6 text-center">
-          <View className="flex items-center justify-center gap-2 mb-2">
+          {/* 第一行：姓名 + 性别 */}
+          <View className="flex items-center justify-center gap-2 mb-3">
             <Text className="text-3xl font-bold text-blue-900">
               {memorial.name}
             </Text>
@@ -470,23 +471,31 @@ const DetailPage = () => {
               </View>
             )}
           </View>
+          
+          {/* 第二行：享年 + 拜访记录 */}
           {memorial.birth_date && memorial.death_date && (
-            <View className="flex items-center justify-center gap-2 mb-4">
-              <Calendar color="#94a3b8" size={16} />
-              <Text className="block text-sm text-slate-500">
-                {formatDate(memorial.birth_date)} ~ {formatDate(memorial.death_date)}
-              </Text>
-              <Text className="text-sm text-slate-400">
+            <View className="flex items-center justify-center gap-4 mb-3">
+              <Text className="text-base text-slate-600 font-medium">
                 享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
+              </Text>
+              <View className="flex items-center gap-1">
+                <Eye size={16} color="#94a3b8" />
+                <Text className="text-sm text-slate-400">
+                  拜访 {memorial.visit_count}
+                </Text>
+              </View>
+            </View>
+          )}
+          
+          {/* 第三行：出生~去世时间 */}
+          {memorial.birth_date && memorial.death_date && (
+            <View className="flex items-center justify-center gap-2">
+              <Calendar color="#94a3b8" size={14} />
+              <Text className="block text-sm text-slate-400">
+                {formatDate(memorial.birth_date)} ~ {formatDate(memorial.death_date)}
               </Text>
             </View>
           )}
-          <View className="flex justify-center items-center gap-1">
-            <Eye size={14} color="#94a3b8" />
-            <Text className="text-sm text-slate-400">
-              {memorial.visit_count}
-            </Text>
-          </View>
         </View>
       </View>
 

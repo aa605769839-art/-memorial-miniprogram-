@@ -1,5 +1,5 @@
 import { View, Text, Button, Input, Switch } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
 import { Plus, Trash2, Pencil, ArrowUp, ArrowDown } from 'lucide-react-taro';
@@ -38,6 +38,11 @@ const GiftConfigPage = () => {
   useEffect(() => {
     loadGiftConfigs();
   }, []);
+
+  // 页面显示时重新加载数据（从其他页面返回时）
+  useDidShow(() => {
+    loadGiftConfigs();
+  });
 
   const loadGiftConfigs = async () => {
     setLoading(true);
@@ -153,7 +158,10 @@ const GiftConfigPage = () => {
       {/* 头部 */}
       <View className="bg-white px-4 py-4 border-b border-gray-200">
         <View className="flex items-center justify-between">
-          <Text className="text-xl font-bold text-gray-900">礼物配置管理</Text>
+          <View>
+            <Text className="text-xl font-bold text-gray-900">礼物配置管理</Text>
+            <Text className="text-sm text-gray-500 mt-1">共 {giftConfigs.length} 个礼物</Text>
+          </View>
           <Button
             className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
             onClick={handleAdd}

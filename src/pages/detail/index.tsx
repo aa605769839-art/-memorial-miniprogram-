@@ -59,6 +59,7 @@ const DetailPage = () => {
   const [memorial, setMemorial] = useState<Memorial | null>(null);
   const [message, setMessage] = useState('');
   const [visitorName, setVisitorName] = useState('');
+  const [visitorAvatar, setVisitorAvatar] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
@@ -86,10 +87,11 @@ const DetailPage = () => {
       fetchComments();
       recordVisit();
       fetchGiftConfigs();
-      // 从本地存储加载用户昵称
+      // 从本地存储加载用户昵称和头像
       const userProfile = Taro.getStorageSync('userProfile');
-      if (userProfile && userProfile.name) {
-        setVisitorName(userProfile.name);
+      if (userProfile) {
+        if (userProfile.name) setVisitorName(userProfile.name);
+        if (userProfile.avatar) setVisitorAvatar(userProfile.avatar);
       }
     }
   }, [id]);
@@ -236,14 +238,6 @@ const DetailPage = () => {
   };
 
   const handleSendGift = async () => {
-    if (!visitorName.trim()) {
-      Taro.showToast({
-        title: '请输入您的名字',
-        icon: 'none'
-      });
-      return;
-    }
-
     if (!selectedGift) {
       Taro.showToast({
         title: '请选择礼物',
@@ -254,7 +248,6 @@ const DetailPage = () => {
 
     setIsSendingGift(true);
     try {
-      const userProfile = Taro.getStorageSync('userProfile') || {};
       const res = await Network.request({
         url: '/api/gifts',
         method: 'POST',
@@ -263,8 +256,8 @@ const DetailPage = () => {
           giftType: selectedGift.id,
           giftName: selectedGift.name,
           giftIcon: selectedGift.icon,
-          senderName: visitorName.trim(),
-          senderAvatar: userProfile.avatar || null,
+          senderName: visitorName.trim() || '访客',
+          senderAvatar: visitorAvatar,
           message: giftMessage.trim() || null
         }
       });
@@ -341,6 +334,7 @@ const DetailPage = () => {
         data: {
           memorialId: id,
           authorName: visitorName.trim(),
+          authorAvatar: visitorAvatar,
           content: message.trim()
         }
       });
@@ -760,13 +754,19 @@ const DetailPage = () => {
 
         {/* 留言输入框 */}
         <View className="mt-4 pt-4 border-t border-blue-100">
-          <View className="bg-blue-50 rounded-xl px-4 py-3 mb-3">
-            <Input
-              className="w-full bg-transparent text-slate-700 placeholder-slate-400"
-              placeholder="您的名字"
-              value={visitorName}
-              onInput={(e) => setVisitorName(e.detail.value)}
-            />
+          {/* 用户信息展示（只读） */}
+          <View className="flex items-center gap-3 mb-3 px-1">
+            <View className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center overflow-hidden">
+              {visitorAvatar ? (
+                <Image src={visitorAvatar} className="w-full h-full" mode="aspectFill" />
+              ) : (
+                <Text className="text-sm text-slate-500">{visitorName.charAt(0) || '访'}</Text>
+              )}
+            </View>
+            <View>
+              <Text className="block text-sm font-medium text-slate-700">{visitorName || '访客'}</Text>
+              <Text className="block text-xs text-slate-400">来自"我的"页面设置</Text>
+            </View>
           </View>
           <View className="bg-blue-50 rounded-xl px-4 py-3 mb-3">
             <Input

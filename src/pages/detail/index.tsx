@@ -74,6 +74,10 @@ const DetailPage = () => {
   // 合并的留言和礼物列表（用于在留言板上展示）
   const [combinedMessages, setCombinedMessages] = useState<Array<Comment | Gift>>([]);
 
+  // 删除确认弹窗状态
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; authorName: string } | null>(null);
+
   // 页面显示时重新加载故人信息（包括从编辑页面返回时）
   useDidShow(() => {
     if (id) {
@@ -364,40 +368,39 @@ const DetailPage = () => {
       });
       return;
     }
+    setDeleteTarget({ id: commentId, authorName });
+    setShowDeleteModal(true);
+  };
 
-    Taro.showModal({
-      title: '确认删除',
-      content: '确定要删除这条留言吗？',
-      success: async (res) => {
-        if (res.confirm) {
-          try {
-            const deleteRes = await Network.request({
-              url: `/api/comments/${commentId}?authorName=${encodeURIComponent(visitorName.trim())}`,
-              method: 'DELETE'
-            });
+  const confirmDeleteComment = async () => {
+    if (!deleteTarget) return;
+    setShowDeleteModal(false);
+    try {
+      const deleteRes = await Network.request({
+        url: `/api/comments/${deleteTarget.id}?authorName=${encodeURIComponent(visitorName.trim())}`,
+        method: 'DELETE'
+      });
 
-            if (deleteRes.data?.code === 200) {
-              Taro.showToast({
-                title: '删除成功',
-                icon: 'success'
-              });
-              fetchComments();
-            } else {
-              Taro.showToast({
-                title: deleteRes.data?.msg || '删除失败',
-                icon: 'none'
-              });
-            }
-          } catch (error) {
-            console.error('Failed to delete comment:', error);
-            Taro.showToast({
-              title: '删除失败',
-              icon: 'none'
-            });
-          }
-        }
+      if (deleteRes.data?.code === 200) {
+        Taro.showToast({
+          title: '删除成功',
+          icon: 'success'
+        });
+        fetchComments();
+      } else {
+        Taro.showToast({
+          title: deleteRes.data?.msg || '删除失败',
+          icon: 'none'
+        });
       }
-    });
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      Taro.showToast({
+        title: '删除失败',
+        icon: 'none'
+      });
+    }
+    setDeleteTarget(null);
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -884,6 +887,64 @@ const DetailPage = () => {
                     : `赠送 ${selectedGift ? selectedGift.name : ''}`}
                 </Text>
               </Button>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* 删除确认弹窗 - 风格统一 */}
+      {showDeleteModal && (
+        <View
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={() => {
+            setShowDeleteModal(false);
+            setDeleteTarget(null);
+          }}
+        >
+          <View
+            className="bg-white rounded-2xl mx-6 w-full max-w-sm overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 弹窗头部 - 蓝色主题 */}
+            <View className="bg-blue-500 px-6 py-4">
+              <Text className="text-lg font-bold text-white text-center">
+                确认删除
+              </Text>
+            </View>
+            
+            {/* 弹窗内容 */}
+            <View className="px-6 py-6">
+              <Text className="text-base text-slate-600 text-center leading-relaxed">
+                确定要删除这条留言吗？
+              </Text>
+              <Text className="text-sm text-slate-400 text-center mt-2">
+                删除后无法恢复
+              </Text>
+            </View>
+            
+            {/* 按钮区域 */}
+            <View className="flex border-t border-blue-100">
+              <View
+                className="flex-1 py-4 cursor-pointer bg-blue-50"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteTarget(null);
+                }}
+              >
+                <Text className="text-base text-slate-600 text-center font-medium">
+                  取消
+                </Text>
+              </View>
+              <View className="w-px bg-blue-100" />
+              <View
+                className="flex-1 py-4 cursor-pointer bg-blue-500"
+                onClick={confirmDeleteComment}
+              >
+                <Text className="text-base text-white text-center font-medium">
+                  确定
+                </Text>
+              </View>
             </View>
           </View>
         </View>

@@ -372,9 +372,8 @@ const DetailPage = () => {
         if (res.confirm) {
           try {
             const deleteRes = await Network.request({
-              url: `/api/comments/${commentId}`,
-              method: 'DELETE',
-              data: { authorName: visitorName.trim() }
+              url: `/api/comments/${commentId}?authorName=${encodeURIComponent(visitorName.trim())}`,
+              method: 'DELETE'
             });
 
             if (deleteRes.data?.code === 200) {
@@ -765,7 +764,6 @@ const DetailPage = () => {
             </View>
             <View>
               <Text className="block text-sm font-medium text-slate-700">{visitorName || '访客'}</Text>
-              <Text className="block text-xs text-slate-400">来自"我的"页面设置</Text>
             </View>
           </View>
           <View className="bg-blue-50 rounded-xl px-4 py-3 mb-3">

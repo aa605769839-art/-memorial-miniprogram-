@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Post, Delete, Body, Param, Query } from '@nestjs/common';
 import { InteractionsService } from './interactions.service';
 import { InsertMourningRecord, InsertVisitRecord, InsertComment } from '../storage/database/shared/schema';
 
@@ -32,7 +32,7 @@ export class CommentController {
   }
 
   @Delete(':id')
-  async deleteComment(@Param('id') id: string, @Body('authorName') authorName: string) {
+  async deleteComment(@Param('id') id: string, @Query('authorName') authorName: string) {
     return this.interactionsService.deleteComment(id, authorName);
   }
 }

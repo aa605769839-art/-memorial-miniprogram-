@@ -35,7 +35,11 @@ const GiftConfigPage = () => {
     isEnabled: true,
   });
 
+  // 调试信息
+  console.log('[GiftConfig] 组件初始化');
+
   useEffect(() => {
+    console.log('[GiftConfig] useEffect 执行');
     loadGiftConfigs();
   }, []);
 

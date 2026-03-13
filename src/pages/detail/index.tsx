@@ -495,9 +495,12 @@ const DetailPage = () => {
           {/* 简介 */}
           {memorial.description && (
             <View className="mb-4">
-              <Text className="block text-lg font-semibold text-blue-900 mb-3">
-                简介
-              </Text>
+              <View className="flex items-center gap-2 mb-3">
+                <User color="#3b82f6" size={20} />
+                <Text className="block text-lg font-semibold text-blue-900">
+                  简介
+                </Text>
+              </View>
               <Text className="block text-sm text-slate-600 leading-relaxed">
                 {memorial.description}
               </Text>

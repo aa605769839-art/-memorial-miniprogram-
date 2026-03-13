@@ -481,7 +481,7 @@ const DetailPage = () => {
               <View className="flex items-center gap-1">
                 <Eye size={16} color="#94a3b8" />
                 <Text className="text-sm text-slate-400">
-                  拜访 {memorial.visit_count}
+                  {memorial.visit_count}
                 </Text>
               </View>
             </View>

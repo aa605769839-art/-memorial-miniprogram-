@@ -475,6 +475,9 @@ const DetailPage = () => {
               <Text className="block text-sm text-slate-500">
                 {formatDate(memorial.birth_date)} ~ {formatDate(memorial.death_date)}
               </Text>
+              <Text className="text-sm text-slate-400">
+                享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
+              </Text>
             </View>
           )}
           <View className="flex justify-center items-center gap-1">
@@ -486,22 +489,44 @@ const DetailPage = () => {
         </View>
       </View>
 
-      {/* 姓名、享年、简介 */}
-      <View className="bg-white mt-4 px-6 py-4">
-        <Text className="block text-xl font-bold text-blue-900 mb-3">
-          {memorial.name}
-          {memorial.birth_date && memorial.death_date && (
-            <Text className="text-base font-semibold text-slate-700 ml-2">
-              享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
-            </Text>
+      {/* 简介和主要成就合并展示 */}
+      {(memorial.description || (memorial.achievements && memorial.achievements.length > 0)) && (
+        <View className="bg-white mt-4 px-6 py-4">
+          {/* 简介 */}
+          {memorial.description && (
+            <View className="mb-4">
+              <Text className="block text-lg font-semibold text-blue-900 mb-3">
+                简介
+              </Text>
+              <Text className="block text-sm text-slate-600 leading-relaxed">
+                {memorial.description}
+              </Text>
+            </View>
           )}
-        </Text>
-        {memorial.description && (
-          <Text className="block text-sm text-slate-600 leading-relaxed">
-            {memorial.description}
-          </Text>
-        )}
-      </View>
+          
+          {/* 主要成就 */}
+          {memorial.achievements && memorial.achievements.length > 0 && (
+            <View>
+              <View className="flex items-center gap-2 mb-3">
+                <Award color="#3b82f6" size={20} />
+                <Text className="block text-lg font-semibold text-blue-900">
+                  主要成就
+                </Text>
+              </View>
+              <View className="flex flex-col gap-2">
+                {memorial.achievements.map((achievement, index) => (
+                  <View key={index} className="flex items-start gap-3">
+                    <View className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                    <Text className="block text-sm text-slate-600 leading-relaxed flex-1">
+                      {achievement}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* 生活照片 */}
       {memorial.photos && memorial.photos.length > 0 && (
@@ -534,27 +559,7 @@ const DetailPage = () => {
         </View>
       )}
 
-      {/* 主要成就 */}
-      {memorial.achievements && memorial.achievements.length > 0 && (
-        <View className="bg-white mt-4 px-6 py-4">
-          <View className="flex items-center gap-2 mb-3">
-            <Award color="#3b82f6" size={20} />
-            <Text className="block text-lg font-semibold text-blue-900">
-              主要成就
-            </Text>
-          </View>
-          <View className="flex flex-col gap-2">
-            {memorial.achievements.map((achievement, index) => (
-              <View key={index} className="flex items-start gap-3">
-                <View className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                <Text className="block text-sm text-slate-600 leading-relaxed flex-1">
-                  {achievement}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
+
 
       {/* 悼念和拜访按钮 */}
       <View className="fixed bottom-0 left-0 right-0 bg-white border-t border-blue-100 p-4 z-50">

@@ -362,6 +362,51 @@ const DetailPage = () => {
     }
   };
 
+  const handleDeleteComment = async (commentId: string, authorName: string) => {
+    if (authorName !== visitorName.trim()) {
+      Taro.showToast({
+        title: '只能删除自己的留言',
+        icon: 'none'
+      });
+      return;
+    }
+
+    Taro.showModal({
+      title: '确认删除',
+      content: '确定要删除这条留言吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            const deleteRes = await Network.request({
+              url: `/api/comments/${commentId}`,
+              method: 'DELETE',
+              data: { authorName: visitorName.trim() }
+            });
+
+            if (deleteRes.data?.code === 200) {
+              Taro.showToast({
+                title: '删除成功',
+                icon: 'success'
+              });
+              fetchComments();
+            } else {
+              Taro.showToast({
+                title: deleteRes.data?.msg || '删除失败',
+                icon: 'none'
+              });
+            }
+          } catch (error) {
+            console.error('Failed to delete comment:', error);
+            Taro.showToast({
+              title: '删除失败',
+              icon: 'none'
+            });
+          }
+        }
+      }
+    });
+  };
+
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -664,6 +709,7 @@ const DetailPage = () => {
                 );
               } else {
                 // 渲染普通留言
+                const isMyComment = msg.author_name === visitorName.trim();
                 return (
                   <View
                     key={msg.id}
@@ -688,9 +734,19 @@ const DetailPage = () => {
                           {msg.author_name}
                         </Text>
                       </View>
-                      <Text className="block text-xs text-slate-500">
-                        {formatTime(msg.created_at)}
-                      </Text>
+                      <View className="flex items-center gap-2">
+                        <Text className="block text-xs text-slate-500">
+                          {formatTime(msg.created_at)}
+                        </Text>
+                        {isMyComment && (
+                          <View
+                            className="px-2 py-1 bg-red-100 rounded-full cursor-pointer"
+                            onClick={() => handleDeleteComment(msg.id, msg.author_name)}
+                          >
+                            <Text className="text-xs text-red-500">删除</Text>
+                          </View>
+                        )}
+                      </View>
                     </View>
                     <Text className="block text-sm text-slate-600 leading-relaxed">
                       {msg.content}

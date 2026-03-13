@@ -107,4 +107,25 @@ export class InteractionsService {
     if (error) throw error;
     return data;
   }
+
+  async deleteComment(id: string, authorName: string) {
+    // 先验证是否是该用户的留言
+    const { data: comment, error: fetchError } = await this.client
+      .from('comments')
+      .select('author_name')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw fetchError;
+    if (!comment) throw new Error('留言不存在');
+    if (comment.author_name !== authorName) throw new Error('无权删除他人留言');
+
+    const { error } = await this.client
+      .from('comments')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { id };
+  }
 }

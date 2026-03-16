@@ -74,15 +74,22 @@ const GiftConfigPage = () => {
 
   // 初始化时读取保存的 API 地址
   useEffect(() => {
-    const saved = Taro.getStorageSync('admin_api_base') || '';
-    setApiBase(saved);
+    const saved = Taro.getStorageSync('admin_api_base');
+    // H5 环境下，如果没有配置地址，默认使用空字符串（相对路径）
+    if (saved === undefined || saved === null) {
+      setApiBase('');
+    } else {
+      setApiBase(saved);
+    }
   }, []);
 
   // 调试信息
   console.log('[GiftConfig] 组件初始化');
 
   useEffect(() => {
-    if (apiBase !== undefined) {
+    console.log('[GiftConfig] apiBase 变化:', apiBase);
+    // 只有 apiBase 有值时才加载数据
+    if (apiBase !== undefined && apiBase !== null) {
       loadGiftConfigs();
     }
   }, [apiBase]);
@@ -94,7 +101,7 @@ const GiftConfigPage = () => {
   });
 
   const loadGiftConfigs = async () => {
-    console.log('[GiftConfig] 开始加载礼物配置');
+    console.log('[GiftConfig] 开始加载礼物配置, apiBase:', apiBase);
     setLoading(true);
     setError('');
     try {
@@ -111,7 +118,12 @@ const GiftConfigPage = () => {
       }
     } catch (error: any) {
       console.error('[GiftConfig] 加载礼物配置失败:', error);
-      setError('请求失败: ' + (error?.message || '未知错误'));
+      const errorMsg = error?.message || '未知错误';
+      setError('请求失败: ' + errorMsg);
+      // 如果请求失败，自动显示配置弹窗
+      if (errorMsg.includes('fail') || errorMsg.includes('timeout')) {
+        setShowApiConfig(true);
+      }
     } finally {
       setLoading(false);
     }

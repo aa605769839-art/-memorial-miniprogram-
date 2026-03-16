@@ -6,7 +6,7 @@ import { InsertGift } from '../storage/database/shared/schema';
 export class GiftsService {
   private client = getSupabaseClient();
 
-  // 获取所有礼物记录（用于中台日志）- 关联 memorials 表获取故人姓名
+  // 获取所有礼物记录（用于中台日志）- 关联 memorials 表获取故人信息
   async findAll(page: number = 1, limit: number = 50) {
     const offset = (page - 1) * limit;
     
@@ -29,24 +29,43 @@ export class GiftsService {
     // 获取所有相关的 memorial_id
     const memorialIds = [...new Set(giftsData?.map(g => g.memorial_id).filter(Boolean))];
     
-    // 查询 memorials 表获取故人姓名
-    let memorialsMap: Record<string, string> = {};
+    // 查询 memorials 表获取故人信息
+    let memorialsMap: Record<string, { name: string; avatar?: string }> = {};
     if (memorialIds.length > 0) {
       const { data: memorialsData } = await this.client
         .from('memorials')
-        .select('id, name')
+        .select('id, name, avatar_url')
         .in('id', memorialIds);
       
       memorialsMap = (memorialsData || []).reduce((acc, m) => {
-        acc[m.id] = m.name;
+        acc[m.id] = { name: m.name, avatar: m.avatar_url };
         return acc;
-      }, {} as Record<string, string>);
+      }, {} as Record<string, { name: string; avatar?: string }>);
     }
     
-    // 合并数据
+    // 格式化数据 - 明确展示赠送者和接收者
     const formattedData = giftsData?.map(item => ({
-      ...item,
-      memorial_name: memorialsMap[item.memorial_id] || '未知故人',
+      id: item.id,
+      // 礼物信息
+      gift_id: item.gift_type,
+      gift_name: item.gift_name,
+      gift_icon: item.gift_icon,
+      // 赠送者信息
+      sender: {
+        id: null, // 非注册用户为null
+        name: item.sender_name,
+        avatar: item.sender_avatar,
+      },
+      // 接收者信息（故人）
+      receiver: {
+        id: item.memorial_id,
+        name: memorialsMap[item.memorial_id]?.name || '未知故人',
+        avatar: memorialsMap[item.memorial_id]?.avatar || null,
+      },
+      // 留言
+      message: item.message,
+      // 时间
+      created_at: item.created_at,
     })) || [];
     
     return {
@@ -60,7 +79,7 @@ export class GiftsService {
     };
   }
 
-  // 查询某个纪念空间的所有礼物
+  // 查询某个纪念空间的所有礼物（详情页展示）
   async findByMemorialId(memorialId: string) {
     const { data, error } = await this.client
       .from('gifts')
@@ -69,7 +88,24 @@ export class GiftsService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+    
+    // 格式化数据
+    return data?.map(item => ({
+      id: item.id,
+      // 礼物信息
+      gift_id: item.gift_type,
+      gift_name: item.gift_name,
+      gift_icon: item.gift_icon,
+      // 赠送者信息
+      sender: {
+        name: item.sender_name,
+        avatar: item.sender_avatar,
+      },
+      // 留言
+      message: item.message,
+      // 时间
+      created_at: item.created_at,
+    })) || [];
   }
 
   // 创建礼物记录

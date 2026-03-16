@@ -769,13 +769,12 @@ const DetailPage = () => {
               <Text className="block text-sm font-medium text-slate-700">{visitorName || '访客'}</Text>
             </View>
           </View>
-          <View className="bg-blue-50 rounded-xl px-4 py-3 mb-3">
-            <Input
-              className="w-full bg-transparent text-slate-700 placeholder-slate-400"
+          <View className="bg-blue-50 rounded-xl p-4 mb-3" style={{ textAlign: 'left' }}>
+            <Textarea
+              style={{ width: '100%', minHeight: '100px', backgroundColor: 'transparent', textAlign: 'left', textAlignVertical: 'top' }}
               placeholder="写下您的思念..."
               value={message}
               onInput={(e) => setMessage(e.detail.value)}
-              style={{ minHeight: '100px' }}
               maxlength={500}
             />
           </View>

@@ -895,7 +895,7 @@ const DetailPage = () => {
       {/* 删除确认弹窗 - 风格统一 */}
       {showDeleteModal && (
         <View
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50"
           style={{ top: 0, left: 0, right: 0, bottom: 0 }}
           onClick={() => {
             setShowDeleteModal(false);
@@ -903,7 +903,7 @@ const DetailPage = () => {
           }}
         >
           <View
-            className="bg-white rounded-2xl mx-6 w-full max-w-sm overflow-hidden"
+            className="bg-white rounded-2xl mx-6 w-full max-w-sm overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 弹窗头部 - 蓝色主题 */}
@@ -926,7 +926,7 @@ const DetailPage = () => {
             {/* 按钮区域 */}
             <View className="flex border-t border-blue-100">
               <View
-                className="flex-1 py-4 cursor-pointer bg-blue-50"
+                className="flex-1 py-4 bg-blue-50 flex items-center justify-center"
                 onClick={() => {
                   setShowDeleteModal(false);
                   setDeleteTarget(null);
@@ -938,7 +938,7 @@ const DetailPage = () => {
               </View>
               <View className="w-px bg-blue-100" />
               <View
-                className="flex-1 py-4 cursor-pointer bg-blue-500"
+                className="flex-1 py-4 bg-blue-500 flex items-center justify-center"
                 onClick={confirmDeleteComment}
               >
                 <Text className="text-base text-white text-center font-medium">

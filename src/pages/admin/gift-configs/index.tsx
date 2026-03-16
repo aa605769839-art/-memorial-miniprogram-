@@ -126,6 +126,12 @@ const GiftConfigPage = () => {
       setIsAuthenticated(true);
       Taro.setStorageSync('admin_authenticated', 'true');
       setPasswordError('');
+      
+      // 登录后检查是否需要配置 API
+      const saved = Taro.getStorageSync('admin_api_base');
+      if (!saved) {
+        setShowApiConfig(true);
+      }
     } else {
       setPasswordError('密码错误');
     }
@@ -140,10 +146,17 @@ const GiftConfigPage = () => {
 
   // 认证后才加载数据
   useEffect(() => {
-    if (isAuthenticated && apiBase !== undefined && apiBase !== null) {
-      loadGiftConfigs();
+    if (isAuthenticated) {
+      const saved = Taro.getStorageSync('admin_api_base');
+      if (!saved) {
+        // 未配置 API 地址，显示配置弹窗
+        setShowApiConfig(true);
+        setLoading(false);
+      } else {
+        loadGiftConfigs();
+      }
     }
-  }, [isAuthenticated, apiBase]);
+  }, [isAuthenticated]);
 
   const loadGiftConfigs = async () => {
     console.log('[GiftConfig] 开始加载礼物配置, apiBase:', apiBase);

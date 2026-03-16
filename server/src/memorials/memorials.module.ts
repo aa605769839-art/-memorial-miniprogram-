@@ -3,9 +3,10 @@ import { MemorialsService } from './memorials.service';
 import { MemorialsController } from './memorials.controller';
 import { ImageGenerationController } from './image-generation.controller';
 import { PhotosModule } from '../photos/photos.module';
+import { GiftsModule } from '../gifts/gifts.module';
 
 @Module({
-  imports: [PhotosModule],
+  imports: [PhotosModule, GiftsModule],
   controllers: [MemorialsController, ImageGenerationController],
   providers: [MemorialsService],
   exports: [MemorialsService],

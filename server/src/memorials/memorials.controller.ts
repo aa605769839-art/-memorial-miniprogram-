@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { MemorialsService } from './memorials.service';
 import { PhotosService } from '../photos/photos.service';
+import { GiftsService } from '../gifts/gifts.service';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
 import { LLMClient, Config } from 'coze-coding-dev-sdk';
 
@@ -8,7 +9,8 @@ import { LLMClient, Config } from 'coze-coding-dev-sdk';
 export class MemorialsController {
   constructor(
     private readonly memorialsService: MemorialsService,
-    private readonly photosService: PhotosService
+    private readonly photosService: PhotosService,
+    private readonly giftsService: GiftsService
   ) {}
 
   @Get()
@@ -54,6 +56,12 @@ export class MemorialsController {
   @Get(':id/comments')
   async findComments(@Param('id') id: string) {
     return this.memorialsService.findComments(id);
+  }
+
+  // 获取指定故人的礼物记录
+  @Get(':id/gifts')
+  async findGifts(@Param('id') id: string) {
+    return this.giftsService.findByMemorialId(id);
   }
 
   @Post()

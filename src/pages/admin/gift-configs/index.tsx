@@ -46,6 +46,20 @@ interface GiftConfig {
   isEnabled: boolean;
 }
 
+// 礼物日志类型
+interface GiftLog {
+  id: string;
+  memorial_id: string;
+  memorial_name: string;
+  gift_type: string;
+  gift_name: string;
+  gift_icon: string;
+  sender_name: string;
+  sender_avatar: string | null;
+  message: string | null;
+  created_at: string;
+}
+
 const COLORS = [
   { value: 'text-pink-500', label: '粉色', bg: 'bg-pink-500' },
   { value: 'text-red-500', label: '红色', bg: 'bg-red-500' },
@@ -64,9 +78,21 @@ const GiftConfigPage = () => {
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   
+  // 标签页切换
+  const [activeTab, setActiveTab] = useState<'config' | 'logs'>('config');
+  
+  // 礼物配置状态
   const [giftConfigs, setGiftConfigs] = useState<GiftConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  
+  // 礼物日志状态
+  const [giftLogs, setGiftLogs] = useState<GiftLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsError, setLogsError] = useState<string>('');
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsTotal, setLogsTotal] = useState(0);
+  
   const [apiBase, setApiBase] = useState<string>('');
   const [showApiConfig, setShowApiConfig] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -145,6 +171,40 @@ const GiftConfigPage = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 加载礼物日志
+  const loadGiftLogs = async (page: number = 1) => {
+    console.log('[GiftLogs] 开始加载礼物日志, page:', page);
+    setLogsLoading(true);
+    setLogsError('');
+    try {
+      const res = await apiRequest({
+        url: `/api/gifts?page=${page}&limit=20`,
+        method: 'GET',
+        timeout: 10000,
+      });
+      console.log('[GiftLogs] API 响应:', res.data);
+      if (res.data?.code === 200) {
+        setGiftLogs(res.data.data?.data || []);
+        setLogsTotal(res.data.data?.pagination?.total || 0);
+      } else {
+        setLogsError(res.data?.msg || '加载失败: ' + JSON.stringify(res.data));
+      }
+    } catch (error: any) {
+      console.error('[GiftLogs] 加载礼物日志失败:', error);
+      setLogsError('请求失败: ' + (error?.message || '未知错误'));
+    } finally {
+      setLogsLoading(false);
+    }
+  };
+
+  // 切换标签页时加载对应数据
+  const handleTabChange = (tab: 'config' | 'logs') => {
+    setActiveTab(tab);
+    if (tab === 'logs' && giftLogs.length === 0) {
+      loadGiftLogs(1);
     }
   };
 
@@ -321,10 +381,12 @@ const GiftConfigPage = () => {
 
       {/* 头部 */}
       <View className="bg-white px-4 py-4 border-b border-gray-200">
-        <View className="flex items-center justify-between">
+        <View className="flex items-center justify-between mb-4">
           <View>
-            <Text className="text-xl font-bold text-gray-900">礼物配置管理</Text>
-            <Text className="text-sm text-gray-500 mt-1">共 {giftConfigs.length} 个礼物</Text>
+            <Text className="text-xl font-bold text-gray-900">礼物管理中台</Text>
+            <Text className="text-sm text-gray-500 mt-1">
+              {activeTab === 'config' ? `共 ${giftConfigs.length} 个礼物配置` : `共 ${logsTotal} 条赠送记录`}
+            </Text>
           </View>
           <View className="flex gap-2">
             <Button
@@ -339,62 +401,82 @@ const GiftConfigPage = () => {
             >
               配置
             </Button>
-            <Button
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
-              onClick={handleAdd}
-            >
-              <View className="flex items-center gap-1">
-                <Plus size={16} />
-                <Text>新增</Text>
-              </View>
-            </Button>
+            {activeTab === 'config' && (
+              <Button
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
+                onClick={handleAdd}
+              >
+                <View className="flex items-center gap-1">
+                  <Plus size={16} />
+                  <Text>新增</Text>
+                </View>
+              </Button>
+            )}
+          </View>
+        </View>
+        
+        {/* 标签页切换 */}
+        <View className="flex border-b border-gray-200">
+          <View
+            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'config' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
+            onClick={() => handleTabChange('config')}
+          >
+            <Text>礼物配置</Text>
+          </View>
+          <View
+            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'logs' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
+            onClick={() => handleTabChange('logs')}
+          >
+            <Text>赠送日志</Text>
           </View>
         </View>
       </View>
 
-      {/* 礼物列表 */}
-      <View className="p-4">
-        {loading ? (
-          <View className="flex flex-col items-center justify-center py-12">
-            <View className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
-            <Text className="text-gray-500">加载中...</Text>
-          </View>
-        ) : error ? (
-          <View className="flex flex-col items-center justify-center py-12 px-6">
-            <Text className="text-red-500 mb-2 text-center">{error}</Text>
-            <Text className="text-gray-400 text-sm text-center mb-4">
-              请确保已正确配置后端 API 地址
-            </Text>
-            <View className="flex gap-3">
-              <Button
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm"
-                onClick={() => setShowApiConfig(true)}
-              >
-                配置地址
-              </Button>
-              <Button
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
-                onClick={loadGiftConfigs}
-              >
-                重新加载
-              </Button>
+      {/* 内容区域 */}
+      {activeTab === 'config' ? (
+        /* 礼物配置列表 */
+        <View className="p-4">
+          {loading ? (
+            <View className="flex flex-col items-center justify-center py-12">
+              <View className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <Text className="text-gray-500">加载中...</Text>
             </View>
-          </View>
-        ) : giftConfigs.length === 0 ? (
-          <View className="flex flex-col items-center justify-center py-12">
-            <Text className="text-gray-400">暂无礼物配置</Text>
-            <Text className="text-gray-400 text-sm mt-2">点击右上角按钮添加</Text>
-          </View>
-        ) : (
-          <View className="space-y-3">
-            {giftConfigs.map((config, index) => (
-              <View
-                key={config.id}
-                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
-              >
-                <View className="flex items-center justify-between">
-                  <View className="flex items-center gap-3">
-                    <Text className="text-3xl">{config.icon}</Text>
+          ) : error ? (
+            <View className="flex flex-col items-center justify-center py-12 px-6">
+              <Text className="text-red-500 mb-2 text-center">{error}</Text>
+              <Text className="text-gray-400 text-sm text-center mb-4">
+                请确保已正确配置后端 API 地址
+              </Text>
+              <View className="flex gap-3">
+                <Button
+                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm"
+                  onClick={() => setShowApiConfig(true)}
+                >
+                  配置地址
+                </Button>
+                <Button
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
+                  onClick={loadGiftConfigs}
+                >
+                  重新加载
+                </Button>
+              </View>
+            </View>
+          ) : giftConfigs.length === 0 ? (
+            <View className="flex flex-col items-center justify-center py-12">
+              <Text className="text-gray-400">暂无礼物配置</Text>
+              <Text className="text-gray-400 text-sm mt-2">点击右上角按钮添加</Text>
+            </View>
+          ) : (
+            <View className="space-y-3">
+              {giftConfigs.map((config, index) => (
+                <View
+                  key={config.id}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                >
+                  <View className="flex items-center justify-between">
+                    <View className="flex items-center gap-3">
+                      <Text className="text-3xl">{config.icon}</Text>
                     <View>
                       <Text className="text-base font-semibold text-gray-900">
                         {config.name}
@@ -444,6 +526,98 @@ const GiftConfigPage = () => {
           </View>
         )}
       </View>
+      ) : (
+        /* 礼物日志列表 */
+        <View className="p-4">
+          {logsLoading ? (
+            <View className="flex flex-col items-center justify-center py-12">
+              <View className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <Text className="text-gray-500">加载中...</Text>
+            </View>
+          ) : logsError ? (
+            <View className="flex flex-col items-center justify-center py-12 px-6">
+              <Text className="text-red-500 mb-2 text-center">{logsError}</Text>
+              <View className="flex gap-3">
+                <Button
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
+                  onClick={() => loadGiftLogs(logsPage)}
+                >
+                  重新加载
+                </Button>
+              </View>
+            </View>
+          ) : giftLogs.length === 0 ? (
+            <View className="flex flex-col items-center justify-center py-12">
+              <Text className="text-gray-400">暂无赠送记录</Text>
+              <Text className="text-gray-400 text-sm mt-2">用户赠送的礼物将显示在这里</Text>
+            </View>
+          ) : (
+            <View className="space-y-3">
+              {giftLogs.map((log) => (
+                <View
+                  key={log.id}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                >
+                  <View className="flex items-start gap-3">
+                    <Text className="text-3xl">{log.gift_icon}</Text>
+                    <View className="flex-1">
+                      <View className="flex items-center justify-between mb-2">
+                        <Text className="font-semibold text-gray-900">{log.gift_name}</Text>
+                        <Text className="text-xs text-gray-400">{new Date(log.created_at).toLocaleString()}</Text>
+                      </View>
+                      <View className="bg-blue-50 rounded-lg p-3 mb-2">
+                        <Text className="text-sm text-gray-600">
+                          <Text className="font-medium text-blue-600">{log.sender_name}</Text>
+                          <Text className="text-gray-400"> 赠送给 </Text>
+                          <Text className="font-medium text-blue-600">{log.memorial_name}</Text>
+                        </Text>
+                        {log.message && (
+                          <Text className="text-sm text-gray-500 mt-1 italic">"{log.message}"</Text>
+                        )}
+                      </View>
+                      <Text className="text-xs text-gray-400">礼物ID: {log.gift_type}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+              
+              {/* 分页控制 */}
+              {logsTotal > 20 && (
+                <View className="flex items-center justify-center gap-4 mt-6">
+                  <Button
+                    className={`px-4 py-2 rounded-lg text-sm ${logsPage === 1 ? 'bg-gray-200 text-gray-400' : 'bg-blue-500 text-white'}`}
+                    onClick={() => {
+                      if (logsPage > 1) {
+                        const newPage = logsPage - 1;
+                        setLogsPage(newPage);
+                        loadGiftLogs(newPage);
+                      }
+                    }}
+                    disabled={logsPage === 1}
+                  >
+                    上一页
+                  </Button>
+                  <Text className="text-gray-600">第 {logsPage} 页 / 共 {Math.ceil(logsTotal / 20)} 页</Text>
+                  <Button
+                    className={`px-4 py-2 rounded-lg text-sm ${logsPage >= Math.ceil(logsTotal / 20) ? 'bg-gray-200 text-gray-400' : 'bg-blue-500 text-white'}`}
+                    onClick={() => {
+                      const totalPages = Math.ceil(logsTotal / 20);
+                      if (logsPage < totalPages) {
+                        const newPage = logsPage + 1;
+                        setLogsPage(newPage);
+                        loadGiftLogs(newPage);
+                      }
+                    }}
+                    disabled={logsPage >= Math.ceil(logsTotal / 20)}
+                  >
+                    下一页
+                  </Button>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      )}
 
       {/* 弹窗 */}
       {showModal && (

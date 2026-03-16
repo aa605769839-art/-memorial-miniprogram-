@@ -77,18 +77,28 @@ async function deploy() {
     
     let html = fs.readFileSync(path.join(distPath, htmlFile), "utf-8");
     
-    Object.entries(pathToKey).forEach(([originalPath, key]) => {
-      if (originalPath === htmlFile) return;
+    // 替换所有资源引用为完整签名 URL
+    for (const [originalPath, key] of Object.entries(pathToKey)) {
+      if (originalPath.endsWith('.html')) continue;
       
-      const dir = path.dirname(originalPath);
-      const originalName = path.basename(originalPath);
-      const originalRef = dir === "." ? `./${originalName}` : `./${dir}/${originalName}`;
       const fullUrl = pathToUrl[originalPath];
       
-      if (html.includes(originalRef)) {
-        html = html.split(originalRef).join(fullUrl);
+      // 匹配各种可能的引用方式
+      const patterns = [
+        `"./${originalPath}"`,  // "./js/file.js"
+        `'./${originalPath}'`,   // './js/file.js'
+        `="${originalPath}"`,    // ="js/file.js"
+        `='${originalPath}'`,    // ='js/file.js'
+        `"${originalPath}"`,     // "js/file.js"
+        `'${originalPath}'`,     // 'js/file.js'
+      ];
+      
+      for (const pattern of patterns) {
+        if (html.includes(pattern)) {
+          html = html.split(pattern).join(`"${fullUrl}"`);
+        }
       }
-    });
+    }
     
     // 上传修改后的 HTML
     const finalKey = await storage.uploadFile({

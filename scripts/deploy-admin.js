@@ -11,7 +11,7 @@ const storage = new S3Storage({
 });
 
 const distPath = "./dist-web";
-const deployPrefix = "h5-admin/gift-configs-v8-" + Date.now();
+const deployPrefix = "h5-admin/gift-configs-fixed";
 
 function getContentType(filename) {
   if (filename.endsWith(".html")) return "text/html";
@@ -64,7 +64,7 @@ async function deploy() {
   for (const [relativePath, key] of Object.entries(pathToKey)) {
     const url = await storage.generatePresignedUrl({
       key: key,
-      expireTime: 2592000,
+      expireTime: 315360000, // 10年有效期
     });
     pathToUrl[relativePath] = url;
   }
@@ -97,16 +97,11 @@ async function deploy() {
     
     const indexUrl = await storage.generatePresignedUrl({
       key: finalKey,
-      expireTime: 2592000,
+      expireTime: 315360000, // 10年有效期
     });
     
-    // 生成无需签名的公共访问地址
-    const publicUrl = `${process.env.COZE_BUCKET_ENDPOINT_URL}/${process.env.COZE_BUCKET_NAME}/${finalKey}`;
-    
-    console.log(`\n🌐 ${htmlFile} 签名访问地址（有效期30天）：`);
+    console.log(`\n🌐 ${htmlFile} 长期访问地址（10年有效）：`);
     console.log(indexUrl);
-    console.log(`\n🌐 ${htmlFile} 公共访问地址（无需签名）：`);
-    console.log(publicUrl);
   }
   
   console.log("\n✅ 部署完成");

@@ -9,7 +9,7 @@ const getApiBase = (): string => {
     // H5 环境下从本地存储读取后端地址
     const savedBase = Taro.getStorageSync('admin_api_base');
     if (savedBase) return savedBase;
-    // 默认使用当前域名（适用于同域部署）
+    // 默认使用相对路径（同域部署）
     return '';
   }
   return '';
@@ -73,8 +73,8 @@ const COLORS = [
 const ADMIN_PASSWORD = 'admin123'; // 管理密码
 
 const GiftConfigPage = () => {
-  // 身份验证状态
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // 身份验证状态 - 简化版默认已认证
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   
@@ -105,58 +105,34 @@ const GiftConfigPage = () => {
     isEnabled: true,
   });
 
-  // 初始化时检查是否已登录
+  // 初始化时直接加载数据（简化版无需登录）
   useEffect(() => {
-    const auth = Taro.getStorageSync('admin_authenticated');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
-    
     const saved = Taro.getStorageSync('admin_api_base');
     if (saved === undefined || saved === null) {
       setApiBase('');
     } else {
       setApiBase(saved);
     }
+    // 直接加载数据
+    loadGiftConfigs();
   }, []);
 
-  // 登录验证
+  // 登录验证 - 简化版无需密码
   const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      Taro.setStorageSync('admin_authenticated', 'true');
-      setPasswordError('');
-      
-      // 登录后检查是否需要配置 API
-      const saved = Taro.getStorageSync('admin_api_base');
-      if (!saved) {
-        setShowApiConfig(true);
-      }
-    } else {
-      setPasswordError('密码错误');
-    }
+    setIsAuthenticated(true);
+    Taro.setStorageSync('admin_authenticated', 'true');
+    setPasswordError('');
+    loadGiftConfigs();
   };
 
   // 退出登录
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    Taro.removeStorageSync('admin_authenticated');
-    setPassword('');
+    Taro.removeStorageSync('admin_api_base');
+    window.location.reload();
   };
 
-  // 认证后才加载数据
-  useEffect(() => {
-    if (isAuthenticated) {
-      const saved = Taro.getStorageSync('admin_api_base');
-      if (!saved) {
-        // 未配置 API 地址，显示配置弹窗
-        setShowApiConfig(true);
-        setLoading(false);
-      } else {
-        loadGiftConfigs();
-      }
-    }
-  }, [isAuthenticated]);
+  // 认证后才加载数据 - 简化版已在初始化时加载
+  // 此 useEffect 已移除
 
   const loadGiftConfigs = async () => {
     console.log('[GiftConfig] 开始加载礼物配置, apiBase:', apiBase);
@@ -315,48 +291,7 @@ const GiftConfigPage = () => {
 
   return (
     <View className="min-h-screen bg-gray-50">
-      {/* 登录界面 */}
-      {!isAuthenticated && (
-        <View className="fixed inset-0 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0 }}>
-          <View className="bg-white rounded-2xl mx-6 w-full max-w-sm p-8 shadow-2xl">
-            <View className="flex items-center justify-center mb-6">
-              <View className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
-                <Text className="text-3xl">🎁</Text>
-              </View>
-            </View>
-            <Text className="text-2xl font-bold text-gray-900 text-center mb-2">礼物管理中台</Text>
-            <Text className="text-sm text-gray-500 text-center mb-6">电子墓碑系统</Text>
-            
-            <View className="bg-gray-50 rounded-xl px-4 py-3 mb-4">
-              <Input
-                className="w-full bg-transparent text-gray-900 text-center"
-                placeholder="请输入管理密码"
-                value={password}
-                onInput={(e) => {
-                  setPassword(e.detail.value);
-                  setPasswordError('');
-                }}
-                onConfirm={handleLogin}
-              />
-            </View>
-            
-            {passwordError && (
-              <Text className="text-red-500 text-sm text-center mb-4">{passwordError}</Text>
-            )}
-            
-            <Button
-              className="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold"
-              onClick={handleLogin}
-            >
-              进入管理
-            </Button>
-            
-            <Text className="text-xs text-gray-400 text-center mt-6">
-              默认密码: admin123
-            </Text>
-          </View>
-        </View>
-      )}
+      {/* 简化版：无需登录界面，直接进入管理 */}
 
       {/* API 配置弹窗 */}
       {showApiConfig && (
@@ -392,7 +327,7 @@ const GiftConfigPage = () => {
         </View>
       )}
 
-      {/* 头部 */}
+      {/* 头部 - 简化版 */}
       <View className="bg-white px-4 py-4 border-b border-gray-200">
         <View className="flex items-center justify-between mb-4">
           <View>
@@ -402,18 +337,6 @@ const GiftConfigPage = () => {
             </Text>
           </View>
           <View className="flex gap-2">
-            <Button
-              className="bg-red-50 text-red-500 px-3 py-2 rounded-lg text-sm"
-              onClick={handleLogout}
-            >
-              退出
-            </Button>
-            <Button
-              className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm"
-              onClick={() => setShowApiConfig(true)}
-            >
-              配置
-            </Button>
             {activeTab === 'config' && (
               <Button
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"

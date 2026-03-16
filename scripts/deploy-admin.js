@@ -100,8 +100,13 @@ async function deploy() {
       expireTime: 2592000,
     });
     
-    console.log(`\n🌐 ${htmlFile} 访问地址（有效期30天）：`);
+    // 生成无需签名的公共访问地址
+    const publicUrl = `${process.env.COZE_BUCKET_ENDPOINT_URL}/${process.env.COZE_BUCKET_NAME}/${finalKey}`;
+    
+    console.log(`\n🌐 ${htmlFile} 签名访问地址（有效期30天）：`);
     console.log(indexUrl);
+    console.log(`\n🌐 ${htmlFile} 公共访问地址（无需签名）：`);
+    console.log(publicUrl);
   }
   
   console.log("\n✅ 部署完成");

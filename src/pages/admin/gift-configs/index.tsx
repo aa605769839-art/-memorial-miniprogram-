@@ -1,8 +1,30 @@
 import { View, Text, Button, Input, Switch } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
-import { Network } from '@/network';
 import { Plus, Trash2, Pencil, ArrowUp, ArrowDown } from 'lucide-react-taro';
+
+// API 请求封装 - H5 环境下使用相对路径
+const apiRequest = async (options: any) => {
+  const isH5 = Taro.getEnv() === Taro.ENV_TYPE.WEB;
+  // H5 环境下使用相对路径，让浏览器使用当前域名
+  const url = isH5 && options.url.startsWith('/api') 
+    ? options.url 
+    : options.url;
+  
+  console.log('[API Request]', url, options.method || 'GET');
+  
+  try {
+    const res = await Taro.request({
+      ...options,
+      url,
+    });
+    console.log('[API Response]', res.data);
+    return res;
+  } catch (error) {
+    console.error('[API Error]', error);
+    throw error;
+  }
+};
 
 interface GiftConfig {
   id: string;
@@ -57,20 +79,20 @@ const GiftConfigPage = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await Network.request({
+      const res = await apiRequest({
         url: '/api/gift-configs',
         method: 'GET',
+        timeout: 10000,
       });
       console.log('[GiftConfig] API 响应:', res.data);
       if (res.data?.code === 200) {
         setGiftConfigs(res.data.data || []);
       } else {
-        setError(res.data?.msg || '加载失败');
+        setError(res.data?.msg || '加载失败: ' + JSON.stringify(res.data));
       }
     } catch (error: any) {
       console.error('[GiftConfig] 加载礼物配置失败:', error);
-      setError(error?.message || '网络错误');
-      Taro.showToast({ title: '加载失败', icon: 'none' });
+      setError('请求失败: ' + (error?.message || '未知错误'));
     } finally {
       setLoading(false);
     }
@@ -101,7 +123,7 @@ const GiftConfigPage = () => {
       success: async (res) => {
         if (res.confirm) {
           try {
-            await Network.request({
+            await apiRequest({
               url: `/api/gift-configs/${id}`,
               method: 'DELETE',
             });
@@ -123,13 +145,13 @@ const GiftConfigPage = () => {
 
     try {
       if (editingId) {
-        await Network.request({
+        await apiRequest({
           url: `/api/gift-configs/${editingId}`,
           method: 'PUT',
           data: formData,
         });
       } else {
-        await Network.request({
+        await apiRequest({
           url: '/api/gift-configs',
           method: 'POST',
           data: { ...formData, sortOrder: giftConfigs.length },
@@ -152,12 +174,12 @@ const GiftConfigPage = () => {
     const targetItem = giftConfigs[newIndex];
 
     try {
-      await Network.request({
+      await apiRequest({
         url: `/api/gift-configs/${currentItem.id}/sort`,
         method: 'PUT',
         data: { sortOrder: targetItem.sortOrder },
       });
-      await Network.request({
+      await apiRequest({
         url: `/api/gift-configs/${targetItem.id}/sort`,
         method: 'PUT',
         data: { sortOrder: currentItem.sortOrder },

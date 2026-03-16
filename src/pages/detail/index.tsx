@@ -771,15 +771,19 @@ const DetailPage = () => {
           </View>
           <View className="bg-blue-50 rounded-xl p-4 mb-3" style={{ textAlign: 'left' }}>
             <Textarea
-              style={{ width: '100%', minHeight: '100px', backgroundColor: 'transparent', textAlign: 'left', textAlignVertical: 'top' }}
+              style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', textAlign: 'left', textAlignVertical: 'top' }}
               placeholder="写下您的思念..."
               value={message}
               onInput={(e) => setMessage(e.detail.value)}
               maxlength={500}
             />
+            {/* 字数统计 - 右下角 */}
+            <View className="flex justify-end mt-2">
+              <Text className="text-xs text-slate-400">{message.length}/500</Text>
+            </View>
           </View>
-          <View className="flex items-center justify-end gap-2">
-            <Text className="text-xs text-slate-400">{message.length}/500</Text>
+          {/* 发送按钮 - 右侧与留言框对齐 */}
+          <View className="flex justify-end">
             <Button
               className="bg-blue-500 text-white rounded-full px-6 py-2 flex items-center gap-2"
               onClick={handleComment}

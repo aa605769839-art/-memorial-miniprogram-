@@ -11,7 +11,7 @@ const storage = new S3Storage({
 });
 
 const distPath = "./dist-web";
-const deployPrefix = "h5-admin/gift-configs-v7";
+const deployPrefix = "h5-admin/gift-configs-v8-" + Date.now();
 
 function getContentType(filename) {
   if (filename.endsWith(".html")) return "text/html";

@@ -3,22 +3,32 @@ import Taro, { useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Pencil, ArrowUp, ArrowDown } from 'lucide-react-taro';
 
-// API 请求封装 - H5 环境下使用相对路径
+// 从本地存储获取 API 基础地址
+const getApiBase = (): string => {
+  if (Taro.getEnv() === Taro.ENV_TYPE.WEB) {
+    // H5 环境下从本地存储读取后端地址
+    const savedBase = Taro.getStorageSync('admin_api_base');
+    if (savedBase) return savedBase;
+    // 默认使用当前域名（适用于同域部署）
+    return '';
+  }
+  return '';
+};
+
+// API 请求封装
 const apiRequest = async (options: any) => {
-  const isH5 = Taro.getEnv() === Taro.ENV_TYPE.WEB;
-  // H5 环境下使用相对路径，让浏览器使用当前域名
-  const url = isH5 && options.url.startsWith('/api') 
-    ? options.url 
+  const apiBase = getApiBase();
+  const url = options.url.startsWith('/api') 
+    ? `${apiBase}${options.url}`
     : options.url;
   
-  console.log('[API Request]', url, options.method || 'GET');
+  console.log('[API Request]', url);
   
   try {
     const res = await Taro.request({
       ...options,
       url,
     });
-    console.log('[API Response]', res.data);
     return res;
   } catch (error) {
     console.error('[API Error]', error);
@@ -48,8 +58,10 @@ const COLORS = [
 
 const GiftConfigPage = () => {
   const [giftConfigs, setGiftConfigs] = useState<GiftConfig[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [apiBase, setApiBase] = useState<string>('');
+  const [showApiConfig, setShowApiConfig] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -60,13 +72,20 @@ const GiftConfigPage = () => {
     isEnabled: true,
   });
 
+  // 初始化时读取保存的 API 地址
+  useEffect(() => {
+    const saved = Taro.getStorageSync('admin_api_base') || '';
+    setApiBase(saved);
+  }, []);
+
   // 调试信息
   console.log('[GiftConfig] 组件初始化');
 
   useEffect(() => {
-    console.log('[GiftConfig] useEffect 执行');
-    loadGiftConfigs();
-  }, []);
+    if (apiBase !== undefined) {
+      loadGiftConfigs();
+    }
+  }, [apiBase]);
 
   // 页面显示时重新加载数据（从其他页面返回时）- 仅在小程序环境
   useDidShow?.(() => {
@@ -192,6 +211,40 @@ const GiftConfigPage = () => {
 
   return (
     <View className="min-h-screen bg-gray-50">
+      {/* API 配置弹窗 */}
+      {showApiConfig && (
+        <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0 }}>
+          <View className="bg-white rounded-2xl mx-6 w-full max-w-sm p-6">
+            <Text className="text-lg font-bold text-gray-900 mb-4">配置后端地址</Text>
+            <Text className="text-sm text-gray-500 mb-4">请输入后端 API 地址，例如：https://your-api.com</Text>
+            <Input
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-gray-900 mb-4"
+              placeholder="https://your-api.com"
+              value={apiBase}
+              onInput={(e) => setApiBase(e.detail.value)}
+            />
+            <View className="flex gap-3">
+              <Button
+                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg"
+                onClick={() => setShowApiConfig(false)}
+              >
+                取消
+              </Button>
+              <Button
+                className="flex-1 bg-blue-500 text-white py-3 rounded-lg"
+                onClick={() => {
+                  Taro.setStorageSync('admin_api_base', apiBase);
+                  setShowApiConfig(false);
+                  loadGiftConfigs();
+                }}
+              >
+                保存
+              </Button>
+            </View>
+          </View>
+        </View>
+      )}
+
       {/* 头部 */}
       <View className="bg-white px-4 py-4 border-b border-gray-200">
         <View className="flex items-center justify-between">
@@ -199,15 +252,23 @@ const GiftConfigPage = () => {
             <Text className="text-xl font-bold text-gray-900">礼物配置管理</Text>
             <Text className="text-sm text-gray-500 mt-1">共 {giftConfigs.length} 个礼物</Text>
           </View>
-          <Button
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
-            onClick={handleAdd}
-          >
-            <View className="flex items-center gap-1">
-              <Plus size={16} />
-              <Text>新增礼物</Text>
-            </View>
-          </Button>
+          <View className="flex gap-2">
+            <Button
+              className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm"
+              onClick={() => setShowApiConfig(true)}
+            >
+              配置
+            </Button>
+            <Button
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
+              onClick={handleAdd}
+            >
+              <View className="flex items-center gap-1">
+                <Plus size={16} />
+                <Text>新增</Text>
+              </View>
+            </Button>
+          </View>
         </View>
       </View>
 
@@ -219,14 +280,25 @@ const GiftConfigPage = () => {
             <Text className="text-gray-500">加载中...</Text>
           </View>
         ) : error ? (
-          <View className="flex flex-col items-center justify-center py-12">
-            <Text className="text-red-500 mb-2">加载失败: {error}</Text>
-            <Button
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm mt-4"
-              onClick={loadGiftConfigs}
-            >
-              重新加载
-            </Button>
+          <View className="flex flex-col items-center justify-center py-12 px-6">
+            <Text className="text-red-500 mb-2 text-center">{error}</Text>
+            <Text className="text-gray-400 text-sm text-center mb-4">
+              请确保已正确配置后端 API 地址
+            </Text>
+            <View className="flex gap-3">
+              <Button
+                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm"
+                onClick={() => setShowApiConfig(true)}
+              >
+                配置地址
+              </Button>
+              <Button
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
+                onClick={loadGiftConfigs}
+              >
+                重新加载
+              </Button>
+            </View>
           </View>
         ) : giftConfigs.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-12">

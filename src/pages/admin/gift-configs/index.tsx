@@ -110,11 +110,13 @@ const GiftConfigPage = () => {
     const saved = Taro.getStorageSync('admin_api_base');
     if (saved === undefined || saved === null) {
       setApiBase('');
+      // 首次访问，显示配置弹窗
+      setShowApiConfig(true);
     } else {
       setApiBase(saved);
+      // 直接加载数据
+      loadGiftConfigs();
     }
-    // 直接加载数据
-    loadGiftConfigs();
   }, []);
 
   // 登录验证 - 简化版无需密码

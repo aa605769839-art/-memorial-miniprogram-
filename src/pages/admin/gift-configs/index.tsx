@@ -2,6 +2,7 @@ import { View, Text, Button, Input, Switch } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Pencil, ArrowUp, ArrowDown } from 'lucide-react-taro';
+import { Network } from '@/network';
 
 // 从本地存储获取 API 基础地址
 const getApiBase = (): string => {
@@ -25,14 +26,14 @@ const apiRequest = async (options: any) => {
   console.log('[API Request]', url);
   
   try {
-    const res = await Taro.request({
+    const res = await Network.request({
       ...options,
       url,
     });
     return res;
-  } catch (error) {
-    console.error('[API Error]', error);
-    throw error;
+  } catch (err) {
+    console.error('[API Error]', err);
+    throw err;
   }
 };
 
@@ -70,14 +71,7 @@ const COLORS = [
   { value: 'text-purple-500', label: '紫色', bg: 'bg-purple-500' },
 ];
 
-const ADMIN_PASSWORD = 'admin123'; // 管理密码
-
 const GiftConfigPage = () => {
-  // 身份验证状态 - 简化版默认已认证
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  
   // 标签页切换
   const [activeTab, setActiveTab] = useState<'config' | 'logs'>('config');
   
@@ -119,20 +113,6 @@ const GiftConfigPage = () => {
     }
   }, []);
 
-  // 登录验证 - 简化版无需密码
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-    Taro.setStorageSync('admin_authenticated', 'true');
-    setPasswordError('');
-    loadGiftConfigs();
-  };
-
-  // 退出登录
-  const handleLogout = () => {
-    Taro.removeStorageSync('admin_api_base');
-    window.location.reload();
-  };
-
   // 认证后才加载数据 - 简化版已在初始化时加载
   // 此 useEffect 已移除
 
@@ -152,9 +132,9 @@ const GiftConfigPage = () => {
       } else {
         setError(res.data?.msg || '加载失败: ' + JSON.stringify(res.data));
       }
-    } catch (error: any) {
-      console.error('[GiftConfig] 加载礼物配置失败:', error);
-      const errorMsg = error?.message || '未知错误';
+    } catch (err: any) {
+      console.error('[GiftConfig] 加载礼物配置失败:', err);
+      const errorMsg = err?.message || '未知错误';
       setError('请求失败: ' + errorMsg);
       // 如果请求失败，自动显示配置弹窗
       if (errorMsg.includes('fail') || errorMsg.includes('timeout')) {
@@ -183,9 +163,9 @@ const GiftConfigPage = () => {
       } else {
         setLogsError(res.data?.msg || '加载失败: ' + JSON.stringify(res.data));
       }
-    } catch (error: any) {
-      console.error('[GiftLogs] 加载礼物日志失败:', error);
-      setLogsError('请求失败: ' + (error?.message || '未知错误'));
+    } catch (err: any) {
+      console.error('[GiftLogs] 加载礼物日志失败:', err);
+      setLogsError('请求失败: ' + (err?.message || '未知错误'));
     } finally {
       setLogsLoading(false);
     }
@@ -230,7 +210,7 @@ const GiftConfigPage = () => {
             });
             Taro.showToast({ title: '删除成功', icon: 'success' });
             loadGiftConfigs();
-          } catch (error) {
+          } catch (_err) {
             Taro.showToast({ title: '删除失败', icon: 'none' });
           }
         }
@@ -261,7 +241,7 @@ const GiftConfigPage = () => {
       Taro.showToast({ title: '保存成功', icon: 'success' });
       setShowModal(false);
       loadGiftConfigs();
-    } catch (error) {
+    } catch (_err) {
       Taro.showToast({ title: '保存失败', icon: 'none' });
     }
   };
@@ -286,7 +266,7 @@ const GiftConfigPage = () => {
         data: { sortOrder: currentItem.sortOrder },
       });
       loadGiftConfigs();
-    } catch (error) {
+    } catch (_err) {
       Taro.showToast({ title: '排序失败', icon: 'none' });
     }
   };
@@ -510,7 +490,7 @@ const GiftConfigPage = () => {
                           <Text className="font-medium text-blue-600">{log.memorial_name}</Text>
                         </Text>
                         {log.message && (
-                          <Text className="text-sm text-gray-500 mt-1 italic">"{log.message}"</Text>
+                          <Text className="text-sm text-gray-500 mt-1 italic">&quot;{log.message}&quot;</Text>
                         )}
                       </View>
                       <Text className="text-xs text-gray-400">礼物ID: {log.gift_type}</Text>

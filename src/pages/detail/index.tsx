@@ -1,8 +1,24 @@
-import { View, Text, Image, Input, Button, Textarea } from '@tarojs/components';
+import { View, Text, Image, Button, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
 import { User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Pencil, Eye } from 'lucide-react-taro';
+
+// H5环境下从URL hash获取参数
+const getHashParams = () => {
+  if (typeof window === 'undefined') return {};
+  const hash = window.location.hash;
+  const queryString = hash.split('?')[1];
+  if (!queryString) return {};
+  const params: Record<string, string> = {};
+  queryString.split('&').forEach((pair) => {
+    const [key, value] = pair.split('=');
+    if (key && value !== undefined) {
+      params[key] = decodeURIComponent(value);
+    }
+  });
+  return params;
+};
 
 interface Photo {
   id: string;
@@ -55,7 +71,10 @@ interface Gift {
 
 const DetailPage = () => {
   const router = useRouter();
-  const { id } = router.params;
+  // H5 环境下 useRouter 可能获取不到 hash 参数，需要手动解析
+  const hashParams = getHashParams();
+  const { id } = router.params?.id ? router.params : hashParams;
+  console.log('Detail page params:', { routerParams: router.params, hashParams, resolvedId: id });
   const [memorial, setMemorial] = useState<Memorial | null>(null);
   const [message, setMessage] = useState('');
   const [visitorName, setVisitorName] = useState('');
@@ -771,7 +790,7 @@ const DetailPage = () => {
           </View>
           <View className="bg-blue-50 rounded-xl p-4 mb-3" style={{ textAlign: 'left' }}>
             <Textarea
-              style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', textAlign: 'left', textAlignVertical: 'top' }}
+              style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', textAlign: 'left' }}
               placeholder="写下您的思念..."
               value={message}
               onInput={(e) => setMessage(e.detail.value)}

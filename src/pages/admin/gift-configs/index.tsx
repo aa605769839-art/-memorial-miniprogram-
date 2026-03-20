@@ -1,16 +1,14 @@
-import { View, Text, Button, Input, Switch } from '@tarojs/components';
+import { View, Text, Button, Input, Switch, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Pencil, ArrowUp, ArrowDown } from 'lucide-react-taro';
+import { Plus, Trash2, Pencil, ArrowUp, ArrowDown, X } from 'lucide-react-taro';
 import { Network } from '@/network';
 
 // 从本地存储获取 API 基础地址
 const getApiBase = (): string => {
   if (Taro.getEnv() === Taro.ENV_TYPE.WEB) {
-    // H5 环境下从本地存储读取后端地址
     const savedBase = Taro.getStorageSync('admin_api_base');
     if (savedBase) return savedBase;
-    // 默认使用相对路径（同域部署）
     return '';
   }
   return '';
@@ -26,15 +24,29 @@ const apiRequest = async (options: any) => {
   console.log('[API Request]', url);
   
   try {
-    const res = await Network.request({
-      ...options,
-      url,
-    });
+    const res = await Network.request({ ...options, url });
     return res;
   } catch (err) {
     console.error('[API Error]', err);
     throw err;
   }
+};
+
+// 判断是否为图片URL
+const isImageUrl = (icon: string | null | undefined): boolean => {
+  if (!icon) return false;
+  return icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('//');
+};
+
+// 礼物图标组件
+const GiftIconDisplay = ({ icon, size = 'normal' }: { icon: string | null | undefined; size?: 'small' | 'normal' | 'large' }) => {
+  const sizeClass = size === 'large' ? 'w-16 h-16' : size === 'small' ? 'w-6 h-6' : 'w-10 h-10';
+  const textSize = size === 'large' ? 'text-5xl' : size === 'small' ? 'text-lg' : 'text-3xl';
+  
+  if (isImageUrl(icon)) {
+    return <Image src={icon!} className={`${sizeClass} object-contain`} mode="aspectFit" />;
+  }
+  return <Text className={`${textSize}`}>{icon || '🎁'}</Text>;
 };
 
 interface GiftConfig {
@@ -47,7 +59,6 @@ interface GiftConfig {
   isEnabled: boolean;
 }
 
-// 礼物日志类型
 interface GiftLog {
   id: string;
   memorial_id: string;
@@ -71,16 +82,15 @@ const COLORS = [
   { value: 'text-purple-500', label: '紫色', bg: 'bg-purple-500' },
 ];
 
+// 预设 Emoji 礼物
+const PRESET_EMOJIS = ['🌸', '🕯️', '🌹', '🌻', '🌷', '💐', '🕊️', '🦋', '⭐', '❤️', '🧡', '💛', '💚', '💙', '💜', '🤍'];
+
 const GiftConfigPage = () => {
-  // 标签页切换
   const [activeTab, setActiveTab] = useState<'config' | 'logs'>('config');
-  
-  // 礼物配置状态
   const [giftConfigs, setGiftConfigs] = useState<GiftConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   
-  // 礼物日志状态
   const [giftLogs, setGiftLogs] = useState<GiftLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState<string>('');
@@ -91,6 +101,11 @@ const GiftConfigPage = () => {
   const [showApiConfig, setShowApiConfig] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // 图标类型：emoji 或 image
+  const [iconType, setIconType] = useState<'emoji' | 'image'>('emoji');
+  const [uploading, setUploading] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: '',
     icon: '',
@@ -99,22 +114,16 @@ const GiftConfigPage = () => {
     isEnabled: true,
   });
 
-  // 初始化时直接加载数据（简化版无需登录）
   useEffect(() => {
     const saved = Taro.getStorageSync('admin_api_base');
     if (saved === undefined || saved === null) {
       setApiBase('');
-      // 首次访问，显示配置弹窗
       setShowApiConfig(true);
     } else {
       setApiBase(saved);
-      // 直接加载数据
       loadGiftConfigs();
     }
   }, []);
-
-  // 认证后才加载数据 - 简化版已在初始化时加载
-  // 此 useEffect 已移除
 
   const loadGiftConfigs = async () => {
     console.log('[GiftConfig] 开始加载礼物配置, apiBase:', apiBase);
@@ -130,14 +139,12 @@ const GiftConfigPage = () => {
       if (res.data?.code === 200) {
         setGiftConfigs(res.data.data || []);
       } else {
-        setError(res.data?.msg || '加载失败: ' + JSON.stringify(res.data));
+        setError(res.data?.msg || '加载失败');
       }
     } catch (err: any) {
-      console.error('[GiftConfig] 加载礼物配置失败:', err);
-      const errorMsg = err?.message || '未知错误';
-      setError('请求失败: ' + errorMsg);
-      // 如果请求失败，自动显示配置弹窗
-      if (errorMsg.includes('fail') || errorMsg.includes('timeout')) {
+      console.error('[GiftConfig] 加载失败:', err);
+      setError('请求失败: ' + (err?.message || '未知错误'));
+      if (err?.message?.includes('fail') || err?.message?.includes('timeout')) {
         setShowApiConfig(true);
       }
     } finally {
@@ -145,9 +152,8 @@ const GiftConfigPage = () => {
     }
   };
 
-  // 加载礼物日志
   const loadGiftLogs = async (page: number = 1) => {
-    console.log('[GiftLogs] 开始加载礼物日志, page:', page);
+    console.log('[GiftLogs] 开始加载, page:', page);
     setLogsLoading(true);
     setLogsError('');
     try {
@@ -156,22 +162,19 @@ const GiftConfigPage = () => {
         method: 'GET',
         timeout: 10000,
       });
-      console.log('[GiftLogs] API 响应:', res.data);
       if (res.data?.code === 200) {
         setGiftLogs(res.data.data?.data || []);
         setLogsTotal(res.data.data?.pagination?.total || 0);
       } else {
-        setLogsError(res.data?.msg || '加载失败: ' + JSON.stringify(res.data));
+        setLogsError(res.data?.msg || '加载失败');
       }
     } catch (err: any) {
-      console.error('[GiftLogs] 加载礼物日志失败:', err);
       setLogsError('请求失败: ' + (err?.message || '未知错误'));
     } finally {
       setLogsLoading(false);
     }
   };
 
-  // 切换标签页时加载对应数据
   const handleTabChange = (tab: 'config' | 'logs') => {
     setActiveTab(tab);
     if (tab === 'logs' && giftLogs.length === 0) {
@@ -181,26 +184,35 @@ const GiftConfigPage = () => {
 
   const handleAdd = () => {
     setEditingId(null);
-    setFormData({ name: '', icon: '', color: 'text-pink-500', price: 0, isEnabled: true });
+    setIconType('emoji');
+    setFormData({
+      name: '',
+      icon: '',
+      color: 'text-pink-500',
+      price: 0,
+      isEnabled: true,
+    });
     setShowModal(true);
   };
 
   const handleEdit = (config: GiftConfig) => {
     setEditingId(config.id);
+    // 根据现有 icon 判断类型
+    setIconType(isImageUrl(config.icon) ? 'image' : 'emoji');
     setFormData({
       name: config.name,
       icon: config.icon,
       color: config.color,
-      price: config.price || 0,
+      price: config.price,
       isEnabled: config.isEnabled,
     });
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     Taro.showModal({
       title: '确认删除',
-      content: '删除后无法恢复，是否继续？',
+      content: '确定要删除这个礼物配置吗？',
       success: async (res) => {
         if (res.confirm) {
           try {
@@ -218,9 +230,49 @@ const GiftConfigPage = () => {
     });
   };
 
+  const handleUploadImage = async () => {
+    try {
+      setUploading(true);
+      const res = await Taro.chooseImage({
+        count: 1,
+        sizeType: ['compressed'],
+        sourceType: ['album', 'camera'],
+      });
+
+      if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+        const tempFilePath = res.tempFilePaths[0];
+        
+        // 上传图片
+        const baseUrl = getApiBase();
+        const uploadRes = await Network.uploadFile({
+          url: `${baseUrl}/api/upload`,
+          filePath: tempFilePath,
+          name: 'file',
+        });
+
+        const data = JSON.parse(uploadRes.data);
+        if (data.code === 200 && data.data?.url) {
+          setFormData({ ...formData, icon: data.data.url });
+          Taro.showToast({ title: '上传成功', icon: 'success' });
+        } else {
+          throw new Error(data.msg || '上传失败');
+        }
+      }
+    } catch (err: any) {
+      console.error('上传失败:', err);
+      Taro.showToast({ title: err?.message || '上传失败', icon: 'none' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!formData.name || !formData.icon) {
-      Taro.showToast({ title: '请填写完整信息', icon: 'none' });
+    if (!formData.name.trim()) {
+      Taro.showToast({ title: '请输入礼物名称', icon: 'none' });
+      return;
+    }
+    if (!formData.icon.trim()) {
+      Taro.showToast({ title: iconType === 'emoji' ? '请选择或输入图标' : '请上传图片', icon: 'none' });
       return;
     }
 
@@ -235,7 +287,7 @@ const GiftConfigPage = () => {
         await apiRequest({
           url: '/api/gift-configs',
           method: 'POST',
-          data: { ...formData, sortOrder: giftConfigs.length },
+          data: formData,
         });
       }
       Taro.showToast({ title: '保存成功', icon: 'success' });
@@ -273,14 +325,12 @@ const GiftConfigPage = () => {
 
   return (
     <View className="min-h-screen bg-gray-50">
-      {/* 简化版：无需登录界面，直接进入管理 */}
-
       {/* API 配置弹窗 */}
       {showApiConfig && (
         <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0 }}>
           <View className="bg-white rounded-2xl mx-6 w-full max-w-sm p-6">
             <Text className="text-lg font-bold text-gray-900 mb-4">配置后端地址</Text>
-            <Text className="text-sm text-gray-500 mb-4">请输入后端 API 地址，例如：https://your-api.com</Text>
+            <Text className="text-sm text-gray-500 mb-4">请输入后端 API 地址</Text>
             <Input
               className="w-full bg-gray-100 rounded-lg px-4 py-3 text-gray-900 mb-4"
               placeholder="https://your-api.com"
@@ -288,10 +338,7 @@ const GiftConfigPage = () => {
               onInput={(e) => setApiBase(e.detail.value)}
             />
             <View className="flex gap-3">
-              <Button
-                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg"
-                onClick={() => setShowApiConfig(false)}
-              >
+              <Button className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg" onClick={() => setShowApiConfig(false)}>
                 取消
               </Button>
               <Button
@@ -309,21 +356,18 @@ const GiftConfigPage = () => {
         </View>
       )}
 
-      {/* 头部 - 简化版 */}
+      {/* 头部 */}
       <View className="bg-white px-4 py-4 border-b border-gray-200">
         <View className="flex items-center justify-between mb-4">
           <View>
             <Text className="text-xl font-bold text-gray-900">礼物管理中台</Text>
             <Text className="text-sm text-gray-500 mt-1">
-              {activeTab === 'config' ? `共 ${giftConfigs.length} 个礼物配置` : `共 ${logsTotal} 条赠送记录`}
+              {activeTab === 'config' ? `共 ${giftConfigs.length} 个礼物` : `共 ${logsTotal} 条记录`}
             </Text>
           </View>
           <View className="flex gap-2">
             {activeTab === 'config' && (
-              <Button
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
-                onClick={handleAdd}
-              >
+              <Button className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm" onClick={handleAdd}>
                 <View className="flex items-center gap-1">
                   <Plus size={16} />
                   <Text>新增</Text>
@@ -333,7 +377,7 @@ const GiftConfigPage = () => {
           </View>
         </View>
         
-        {/* 标签页切换 */}
+        {/* 标签页 */}
         <View className="flex border-b border-gray-200">
           <View
             className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'config' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
@@ -352,7 +396,6 @@ const GiftConfigPage = () => {
 
       {/* 内容区域 */}
       {activeTab === 'config' ? (
-        /* 礼物配置列表 */
         <View className="p-4">
           {loading ? (
             <View className="flex flex-col items-center justify-center py-12">
@@ -362,20 +405,11 @@ const GiftConfigPage = () => {
           ) : error ? (
             <View className="flex flex-col items-center justify-center py-12 px-6">
               <Text className="text-red-500 mb-2 text-center">{error}</Text>
-              <Text className="text-gray-400 text-sm text-center mb-4">
-                请确保已正确配置后端 API 地址
-              </Text>
               <View className="flex gap-3">
-                <Button
-                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm"
-                  onClick={() => setShowApiConfig(true)}
-                >
+                <Button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm" onClick={() => setShowApiConfig(true)}>
                   配置地址
                 </Button>
-                <Button
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
-                  onClick={loadGiftConfigs}
-                >
+                <Button className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm" onClick={loadGiftConfigs}>
                   重新加载
                 </Button>
               </View>
@@ -388,64 +422,43 @@ const GiftConfigPage = () => {
           ) : (
             <View className="space-y-3">
               {giftConfigs.map((config, index) => (
-                <View
-                  key={config.id}
-                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
-                >
+                <View key={config.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                   <View className="flex items-center justify-between">
                     <View className="flex items-center gap-3">
-                      <Text className="text-3xl">{config.icon}</Text>
-                    <View>
-                      <Text className="text-base font-semibold text-gray-900">
-                        {config.name}
-                      </Text>
-                      <View className="flex items-center gap-2 mt-1">
-                        <View className={`w-3 h-3 rounded-full ${config.color.replace('text-', 'bg-')}`} />
-                        <Text className="text-xs text-gray-500">
-                          {config.isEnabled ? '已启用' : '已禁用'}
-                        </Text>
-                        <Text className="text-xs text-orange-500 font-medium">
-                          ¥{config.price || 0}
-                        </Text>
+                      <View className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-lg">
+                        <GiftIconDisplay icon={config.icon} size="normal" />
+                      </View>
+                      <View>
+                        <Text className="text-base font-semibold text-gray-900">{config.name}</Text>
+                        <View className="flex items-center gap-2 mt-1">
+                          <View className={`w-3 h-3 rounded-full ${config.color.replace('text-', 'bg-')}`} />
+                          <Text className="text-xs text-gray-500">{config.isEnabled ? '已启用' : '已禁用'}</Text>
+                          <Text className="text-xs text-orange-500 font-medium">¥{config.price || 0}</Text>
+                          {isImageUrl(config.icon) && <Text className="text-xs text-blue-500">图片</Text>}
+                        </View>
+                      </View>
+                    </View>
+                    <View className="flex items-center gap-1">
+                      <View className="p-2" onClick={() => handleMove(index, 'up')} style={{ opacity: index === 0 ? 0.3 : 1 }}>
+                        <ArrowUp size={18} color="#6b7280" />
+                      </View>
+                      <View className="p-2" onClick={() => handleMove(index, 'down')} style={{ opacity: index === giftConfigs.length - 1 ? 0.3 : 1 }}>
+                        <ArrowDown size={18} color="#6b7280" />
+                      </View>
+                      <View className="p-2" onClick={() => handleEdit(config)}>
+                        <Pencil size={18} color="#3b82f6" />
+                      </View>
+                      <View className="p-2" onClick={() => handleDelete(config.id)}>
+                        <Trash2 size={18} color="#ef4444" />
                       </View>
                     </View>
                   </View>
-                  <View className="flex items-center gap-2">
-                    <View
-                      className="p-2 cursor-pointer"
-                      onClick={() => handleMove(index, 'up')}
-                      style={{ opacity: index === 0 ? 0.3 : 1 }}
-                    >
-                      <ArrowUp size={18} color="#6b7280" />
-                    </View>
-                    <View
-                      className="p-2 cursor-pointer"
-                      onClick={() => handleMove(index, 'down')}
-                      style={{ opacity: index === giftConfigs.length - 1 ? 0.3 : 1 }}
-                    >
-                      <ArrowDown size={18} color="#6b7280" />
-                    </View>
-                    <View
-                      className="p-2 cursor-pointer"
-                      onClick={() => handleEdit(config)}
-                    >
-                      <Pencil size={18} color="#3b82f6" />
-                    </View>
-                    <View
-                      className="p-2 cursor-pointer"
-                      onClick={() => handleDelete(config.id)}
-                    >
-                      <Trash2 size={18} color="#ef4444" />
-                    </View>
-                  </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        )}
-      </View>
+              ))}
+            </View>
+          )}
+        </View>
       ) : (
-        /* 礼物日志列表 */
         <View className="p-4">
           {logsLoading ? (
             <View className="flex flex-col items-center justify-center py-12">
@@ -453,31 +466,24 @@ const GiftConfigPage = () => {
               <Text className="text-gray-500">加载中...</Text>
             </View>
           ) : logsError ? (
-            <View className="flex flex-col items-center justify-center py-12 px-6">
-              <Text className="text-red-500 mb-2 text-center">{logsError}</Text>
-              <View className="flex gap-3">
-                <Button
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
-                  onClick={() => loadGiftLogs(logsPage)}
-                >
-                  重新加载
-                </Button>
-              </View>
+            <View className="flex flex-col items-center justify-center py-12">
+              <Text className="text-red-500 mb-2">{logsError}</Text>
+              <Button className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm" onClick={() => loadGiftLogs(logsPage)}>
+                重新加载
+              </Button>
             </View>
           ) : giftLogs.length === 0 ? (
             <View className="flex flex-col items-center justify-center py-12">
               <Text className="text-gray-400">暂无赠送记录</Text>
-              <Text className="text-gray-400 text-sm mt-2">用户赠送的礼物将显示在这里</Text>
             </View>
           ) : (
             <View className="space-y-3">
               {giftLogs.map((log) => (
-                <View
-                  key={log.id}
-                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
-                >
+                <View key={log.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                   <View className="flex items-start gap-3">
-                    <Text className="text-3xl">{log.gift_icon}</Text>
+                    <View className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-lg flex-shrink-0">
+                      <GiftIconDisplay icon={log.gift_icon} size="normal" />
+                    </View>
                     <View className="flex-1">
                       <View className="flex items-center justify-between mb-2">
                         <Text className="font-semibold text-gray-900">{log.gift_name}</Text>
@@ -493,39 +499,24 @@ const GiftConfigPage = () => {
                           <Text className="text-sm text-gray-500 mt-1 italic">&quot;{log.message}&quot;</Text>
                         )}
                       </View>
-                      <Text className="text-xs text-gray-400">礼物ID: {log.gift_type}</Text>
                     </View>
                   </View>
                 </View>
               ))}
               
-              {/* 分页控制 */}
               {logsTotal > 20 && (
                 <View className="flex items-center justify-center gap-4 mt-6">
                   <Button
                     className={`px-4 py-2 rounded-lg text-sm ${logsPage === 1 ? 'bg-gray-200 text-gray-400' : 'bg-blue-500 text-white'}`}
-                    onClick={() => {
-                      if (logsPage > 1) {
-                        const newPage = logsPage - 1;
-                        setLogsPage(newPage);
-                        loadGiftLogs(newPage);
-                      }
-                    }}
+                    onClick={() => { if (logsPage > 1) { const p = logsPage - 1; setLogsPage(p); loadGiftLogs(p); }}}
                     disabled={logsPage === 1}
                   >
                     上一页
                   </Button>
-                  <Text className="text-gray-600">第 {logsPage} 页 / 共 {Math.ceil(logsTotal / 20)} 页</Text>
+                  <Text className="text-gray-600">第 {logsPage} 页</Text>
                   <Button
                     className={`px-4 py-2 rounded-lg text-sm ${logsPage >= Math.ceil(logsTotal / 20) ? 'bg-gray-200 text-gray-400' : 'bg-blue-500 text-white'}`}
-                    onClick={() => {
-                      const totalPages = Math.ceil(logsTotal / 20);
-                      if (logsPage < totalPages) {
-                        const newPage = logsPage + 1;
-                        setLogsPage(newPage);
-                        loadGiftLogs(newPage);
-                      }
-                    }}
+                    onClick={() => { const total = Math.ceil(logsTotal / 20); if (logsPage < total) { const p = logsPage + 1; setLogsPage(p); loadGiftLogs(p); }}}
                     disabled={logsPage >= Math.ceil(logsTotal / 20)}
                   >
                     下一页
@@ -537,22 +528,14 @@ const GiftConfigPage = () => {
         </View>
       )}
 
-      {/* 弹窗 */}
+      {/* 新增/编辑弹窗 */}
       {showModal && (
-        <View
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
-          onClick={() => setShowModal(false)}
-        >
-          <View
-            className="bg-white rounded-2xl w-11/12 max-w-md p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              {editingId ? '编辑礼物' : '新增礼物'}
-            </Text>
+        <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0 }} onClick={() => setShowModal(false)}>
+          <View className="bg-white rounded-2xl w-11/12 max-w-md p-6 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <Text className="text-lg font-bold text-gray-900 mb-4">{editingId ? '编辑礼物' : '新增礼物'}</Text>
 
             <View className="space-y-4">
+              {/* 礼物名称 */}
               <View>
                 <Text className="text-sm text-gray-600 mb-2">礼物名称</Text>
                 <Input
@@ -563,26 +546,90 @@ const GiftConfigPage = () => {
                 />
               </View>
 
+              {/* 图标类型切换 */}
               <View>
-                <Text className="text-sm text-gray-600 mb-2">图标（Emoji）</Text>
-                <Input
-                  className="w-full bg-gray-50 rounded-lg px-4 py-3 text-gray-900"
-                  placeholder="如：🌸、🕯️"
-                  value={formData.icon}
-                  onInput={(e) => setFormData({ ...formData, icon: e.detail.value })}
-                />
-                <Text className="text-xs text-gray-400 mt-1">建议使用 Emoji 表情</Text>
+                <Text className="text-sm text-gray-600 mb-2">图标类型</Text>
+                <View className="flex gap-2">
+                  <View
+                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'emoji' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+                    onClick={() => { setIconType('emoji'); setFormData({ ...formData, icon: '' }); }}
+                  >
+                    <Text>Emoji 表情</Text>
+                  </View>
+                  <View
+                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'image' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+                    onClick={() => { setIconType('image'); setFormData({ ...formData, icon: '' }); }}
+                  >
+                    <Text>上传图片</Text>
+                  </View>
+                </View>
               </View>
 
+              {/* Emoji 选择 */}
+              {iconType === 'emoji' && (
+                <View>
+                  <Text className="text-sm text-gray-600 mb-2">选择图标</Text>
+                  <View className="flex flex-wrap gap-2 mb-3">
+                    {PRESET_EMOJIS.map((emoji) => (
+                      <View
+                        key={emoji}
+                        className={`w-10 h-10 flex items-center justify-center text-2xl rounded-lg cursor-pointer ${formData.icon === emoji ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-50'}`}
+                        onClick={() => setFormData({ ...formData, icon: emoji })}
+                      >
+                        <Text>{emoji}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <Input
+                    className="w-full bg-gray-50 rounded-lg px-4 py-3 text-gray-900"
+                    placeholder="或输入自定义 Emoji"
+                    value={formData.icon}
+                    onInput={(e) => setFormData({ ...formData, icon: e.detail.value })}
+                  />
+                </View>
+              )}
+
+              {/* 图片上传 */}
+              {iconType === 'image' && (
+                <View>
+                  <Text className="text-sm text-gray-600 mb-2">上传图片</Text>
+                  {formData.icon ? (
+                    <View className="relative w-32 h-32 mb-2">
+                      <Image src={formData.icon} className="w-full h-full rounded-lg object-contain bg-gray-50" mode="aspectFit" />
+                      <View
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                        onClick={() => setFormData({ ...formData, icon: '' })}
+                      >
+                        <X size={14} color="#ffffff" />
+                      </View>
+                    </View>
+                  ) : (
+                    <View
+                      className="w-32 h-32 bg-gray-50 rounded-lg flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-gray-300"
+                      onClick={handleUploadImage}
+                    >
+                      {uploading ? (
+                        <View className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Text className="text-3xl text-gray-400 mb-1">🖼️</Text>
+                          <Text className="text-xs text-gray-400">点击上传</Text>
+                        </>
+                      )}
+                    </View>
+                  )}
+                  <Text className="text-xs text-gray-400 mt-1">建议尺寸 200x200，支持 JPG、PNG</Text>
+                </View>
+              )}
+
+              {/* 颜色 */}
               <View>
                 <Text className="text-sm text-gray-600 mb-2">颜色</Text>
                 <View className="flex flex-wrap gap-2">
                   {COLORS.map((color) => (
                     <View
                       key={color.value}
-                      className={`w-8 h-8 rounded-full cursor-pointer border-2 ${
-                        formData.color === color.value ? 'border-gray-900' : 'border-transparent'
-                      }`}
+                      className={`w-8 h-8 rounded-full cursor-pointer border-2 ${formData.color === color.value ? 'border-gray-900' : 'border-transparent'}`}
                       style={{ backgroundColor: color.bg.replace('bg-', '') }}
                       onClick={() => setFormData({ ...formData, color: color.value })}
                     />
@@ -590,6 +637,7 @@ const GiftConfigPage = () => {
                 </View>
               </View>
 
+              {/* 价格 */}
               <View>
                 <Text className="text-sm text-gray-600 mb-2">价格（虚拟货币）</Text>
                 <Input
@@ -601,26 +649,18 @@ const GiftConfigPage = () => {
                 />
               </View>
 
+              {/* 启用状态 */}
               <View className="flex items-center justify-between">
                 <Text className="text-sm text-gray-600">启用状态</Text>
-                <Switch
-                  checked={formData.isEnabled}
-                  onChange={(e) => setFormData({ ...formData, isEnabled: e.detail.value })}
-                />
+                <Switch checked={formData.isEnabled} onChange={(e) => setFormData({ ...formData, isEnabled: e.detail.value })} />
               </View>
             </View>
 
             <View className="flex gap-3 mt-6">
-              <Button
-                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg"
-                onClick={() => setShowModal(false)}
-              >
+              <Button className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg" onClick={() => setShowModal(false)}>
                 取消
               </Button>
-              <Button
-                className="flex-1 bg-blue-500 text-white py-3 rounded-lg"
-                onClick={handleSubmit}
-              >
+              <Button className="flex-1 bg-blue-500 text-white py-3 rounded-lg" onClick={handleSubmit}>
                 保存
               </Button>
             </View>

@@ -29,6 +29,29 @@ const handleApiResponse = (res: any) => {
   throw new Error(res.data?.msg || '请求失败');
 };
 
+// 判断是否为图片URL（以http开头）
+const isImageUrl = (icon: string | null | undefined): boolean => {
+  if (!icon) return false;
+  return icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('//');
+};
+
+// 礼物图标组件
+const GiftIcon = ({ icon, size = 'normal' }: { icon: string | null | undefined; size?: 'small' | 'normal' | 'large' }) => {
+  const sizeClass = size === 'large' ? 'w-16 h-16' : size === 'small' ? 'w-8 h-8' : 'w-12 h-12';
+  const textSize = size === 'large' ? 'text-5xl' : size === 'small' ? 'text-xl' : 'text-4xl';
+  
+  if (isImageUrl(icon)) {
+    return (
+      <Image
+        src={icon!}
+        className={`${sizeClass} object-contain`}
+        mode="aspectFit"
+      />
+    );
+  }
+  return <Text className={`${textSize}`}>{icon || '🎁'}</Text>;
+};
+
 interface Photo {
   id: string;
   memorial_id: string;
@@ -626,7 +649,9 @@ const DetailPage = () => {
                       <Text className="block text-xs text-pink-400">{formatTime(msg.created_at)}</Text>
                     </View>
                     <View className="flex items-start gap-3">
-                      <Text className="text-4xl">{msg.gift_icon}</Text>
+                      <View className="flex-shrink-0">
+                        <GiftIcon icon={msg.gift_icon} size="large" />
+                      </View>
                       {msg.message && (
                         <View className="flex-1 bg-white/50 rounded-lg p-2">
                           <Text className="block text-sm text-slate-700 leading-relaxed">{msg.message}</Text>
@@ -747,7 +772,9 @@ const DetailPage = () => {
                     }`}
                     onClick={() => setSelectedGift(gift)}
                   >
-                    <Text className="text-4xl mb-2">{gift.icon}</Text>
+                    <View className="mb-2">
+                      <GiftIcon icon={gift.icon} size="normal" />
+                    </View>
                     <Text className={`text-sm font-semibold ${gift.color}`}>{gift.name}</Text>
                     <Text className="text-xs text-gray-500 mt-1">¥{gift.price || 0}</Text>
                   </View>

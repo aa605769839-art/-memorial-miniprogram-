@@ -648,8 +648,8 @@ const DetailPage = () => {
                       </View>
                       <Text className="block text-xs text-pink-400">{formatTime(msg.created_at)}</Text>
                     </View>
-                    <View className="flex items-start gap-3">
-                      <View className="flex-shrink-0">
+                    <View className="flex items-end gap-3">
+                      <View className="flex-shrink-0 flex items-center justify-center">
                         <GiftIcon icon={msg.gift_icon} size="large" />
                       </View>
                       {msg.message && (

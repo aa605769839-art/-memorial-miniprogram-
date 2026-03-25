@@ -460,7 +460,7 @@ const DetailPage = () => {
   return (
     <View className="min-h-screen bg-blue-50 pb-32">
       {/* 顶部操作栏 */}
-      <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-12 pb-3 flex justify-end">
+      <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-[33px] pb-3 flex justify-end">
         {isCreator && (
           <View className="flex gap-2">
             <View className="p-2" onClick={handleEdit}>
@@ -474,7 +474,7 @@ const DetailPage = () => {
       </View>
 
       {/* 头像和基本信息 */}
-      <View className="bg-white pt-16">
+      <View className="bg-white pt-10">
         {/* 正方形头像 */}
         <View className="w-full aspect-square bg-blue-100 flex items-center justify-center overflow-hidden">
           {memorial.avatar_url ? (

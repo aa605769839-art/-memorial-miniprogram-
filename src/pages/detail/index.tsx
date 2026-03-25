@@ -460,7 +460,7 @@ const DetailPage = () => {
   return (
     <View className="min-h-screen bg-blue-50 pb-32">
       {/* 顶部操作栏 */}
-      <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-[33px] pb-3 flex justify-end">
+      <View className="fixed top-0 left-0 right-0 z-50 px-4 pt-[33px] pb-3 flex justify-end">
         {isCreator && (
           <View className="flex gap-2">
             <View className="p-2" onClick={handleEdit}>

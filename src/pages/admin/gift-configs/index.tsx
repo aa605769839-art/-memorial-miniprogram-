@@ -433,7 +433,7 @@ const GiftConfigPage = () => {
                         <View className="flex items-center gap-2 mt-1">
                           <View className={`w-3 h-3 rounded-full ${config.color.replace('text-', 'bg-')}`} />
                           <Text className="text-xs text-gray-500">{config.isEnabled ? '已启用' : '已禁用'}</Text>
-                          <Text className="text-xs text-orange-500 font-medium">¥{config.price || 0}</Text>
+                          <Text className="text-xs text-orange-500 font-medium">{config.price || 0}积分</Text>
                           {isImageUrl(config.icon) && <Text className="text-xs text-blue-500">图片</Text>}
                         </View>
                       </View>

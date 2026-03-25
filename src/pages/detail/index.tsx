@@ -776,7 +776,7 @@ const DetailPage = () => {
                       <GiftIcon icon={gift.icon} size="normal" />
                     </View>
                     <Text className={`text-sm font-semibold ${gift.color}`}>{gift.name}</Text>
-                    <Text className="text-xs text-gray-500 mt-1">¥{gift.price || 0}</Text>
+                    <Text className="text-xs text-gray-500 mt-1">{gift.price || 0}积分</Text>
                   </View>
                 ))}
               </View>

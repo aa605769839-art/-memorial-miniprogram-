@@ -767,12 +767,12 @@ const DetailPage = () => {
                 {giftConfigs.map((gift) => (
                   <View
                     key={gift.id}
-                    className={`flex flex-col items-center p-4 rounded-2xl border-2 ${
+                    className={`flex flex-col items-center justify-end p-4 rounded-2xl border-2 min-h-[140px] ${
                       selectedGift?.id === gift.id ? 'border-blue-500 bg-blue-50' : 'border-transparent bg-gray-50'
                     }`}
                     onClick={() => setSelectedGift(gift)}
                   >
-                    <View className="mb-2">
+                    <View className="flex-1 flex items-center justify-center w-full mb-2">
                       <GiftIcon icon={gift.icon} size="normal" />
                     </View>
                     <Text className={`text-sm font-semibold ${gift.color}`}>{gift.name}</Text>

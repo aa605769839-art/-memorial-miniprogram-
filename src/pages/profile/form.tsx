@@ -582,9 +582,9 @@ const FormPage = () => {
                     placeholder="请输入简介..."
                     value={formData.description}
                     onInput={(e) => handleInputChange('description', e.detail.value)}
-                    maxlength={200}
+                    maxlength={600}
                   />
-                  <Text className="block text-xs text-slate-400 mt-1 text-right">{formData.description.length}/200</Text>
+                  <Text className="block text-xs text-slate-400 mt-1 text-right">{formData.description.length}/600</Text>
                 </View>
               </View>
 
@@ -600,9 +600,9 @@ const FormPage = () => {
                     placeholder="请输入主要成就，用逗号分隔..."
                     value={formData.achievements}
                     onInput={(e) => handleInputChange('achievements', e.detail.value)}
-                    maxlength={300}
+                    maxlength={1000}
                   />
-                  <Text className="block text-xs text-slate-400 mt-1 text-right">{formData.achievements.length}/300</Text>
+                  <Text className="block text-xs text-slate-400 mt-1 text-right">{formData.achievements.length}/1000</Text>
                 </View>
               </View>
 

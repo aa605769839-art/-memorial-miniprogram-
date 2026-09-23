@@ -1,0 +1,195 @@
+import { View, Text, Image } from '@tarojs/components';
+import Taro from '@tarojs/taro';
+import { useState, useEffect, useRef } from 'react';
+import { Network } from '@/network';
+import { User, Flame, Eye } from 'lucide-react-taro';
+
+interface Memorial {
+  id: string;
+  name: string;
+  birth_date: string | null;
+  death_date: string | null;
+  avatar_url: string | null;
+  description: string | null;
+  mourning_count: number;
+  visit_count: number;
+  gender?: string;
+}
+
+const IndexPage = () => {
+  const [memorials, setMemorials] = useState<Memorial[]>([]);
+  const [loading, setLoading] = useState(true);
+  const lastTapTime = useRef(0);
+
+  useEffect(() => {
+    fetchMemorials();
+  }, []);
+
+  // TabBar 双击刷新
+  useEffect(() => {
+    if (Taro.getEnv() === Taro.ENV_TYPE.WEAPP) {
+      const handleTabTap = (item: any) => {
+        if (item.index === 0) {
+          const currentTime = Date.now();
+          const timeDiff = currentTime - lastTapTime.current;
+          if (timeDiff < 300) {
+            setLoading(true);
+            fetchMemorials();
+            Taro.showToast({ title: '刷新成功', icon: 'success', duration: 1000 });
+          }
+          lastTapTime.current = currentTime;
+        }
+      };
+      // @ts-ignore
+      Taro.onTabItemTap?.(handleTabTap);
+      return () => {
+        // @ts-ignore
+        Taro.offTabItemTap?.(handleTabTap);
+      };
+    }
+  }, []);
+
+  const fetchMemorials = async () => {
+    try {
+      const res = await Network.request({
+        url: '/api/memorials',
+        method: 'GET'
+      });
+      console.log('Memorials response:', res.data);
+      if (res.data?.code === 200) {
+        setMemorials(res.data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch memorials:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const goToDetail = (id: string) => {
+    Taro.navigateTo({
+      url: `/pages/detail/index?id=${id}`
+    });
+  };
+
+  const calculateAge = (birthDate: string | null, deathDate: string | null) => {
+    if (!birthDate || !deathDate) return null;
+    const birth = new Date(birthDate);
+    const death = new Date(deathDate);
+    return death.getFullYear() - birth.getFullYear();
+  };
+
+  if (loading) {
+    return (
+      <View className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
+        <View className="flex flex-col items-center gap-3">
+          <View className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+          <Text className="block text-sm text-slate-500 font-medium">
+            加载中...
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
+      {/* 头部 - 直接从顶部开始，增加高度 */}
+      <View className="bg-gradient-to-b from-white to-blue-50 px-4 py-4 border-b border-blue-200" style={{ paddingTop: '44px' }}>
+        <View className="flex items-center justify-between">
+          <View>
+            <Text className="block text-2xl font-bold text-blue-900">
+              温故
+            </Text>
+            <Text className="block text-xs text-slate-500 mt-0.5">
+              温暖回忆，永存心间
+            </Text>
+          </View>
+          {/* 右侧装饰图标 - 蜡烛 */}
+          <View className="flex flex-col items-center opacity-30">
+            <Flame color="#3b82f6" size={40} />
+            <View className="w-4 h-5 bg-blue-400 rounded-sm -mt-1" />
+          </View>
+        </View>
+      </View>
+
+      {/* 故人列表 */}
+      <View className="px-4 py-4">
+        {memorials.length === 0 ? (
+          <View className="flex flex-col items-center justify-center py-24">
+            <View className="w-24 h-24 mb-4 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center shadow-sm">
+              <Flame color="#3b82f6" size={48} strokeWidth={1.5} />
+            </View>
+            <Text className="block text-base font-medium text-slate-600 mb-2">
+              暂无纪念空间
+            </Text>
+            <Text className="block text-sm text-slate-400 mb-6">
+              前往&ldquo;我的&rdquo;页面创建纪念空间
+            </Text>
+            <View
+              className="px-6 py-2.5 bg-blue-500 text-white rounded-full shadow-md cursor-pointer"
+              onClick={() => Taro.switchTab({ url: '/pages/profile/index' })}
+            >
+              <Text className="text-sm font-medium">前往创建</Text>
+            </View>
+          </View>
+        ) : (
+          <View className="grid grid-cols-2 gap-3">
+            {memorials.map((memorial) => (
+              <View
+                key={memorial.id}
+                className="bg-white rounded-2xl overflow-hidden shadow-md border border-blue-100"
+                onClick={() => goToDetail(memorial.id)}
+              >
+                {/* 正方形图片区域 - 添加渐变背景 */}
+                <View className="aspect-square relative bg-gradient-to-br from-blue-100 via-blue-50 to-white flex items-center justify-center overflow-hidden">
+                  {memorial.avatar_url ? (
+                    <Image
+                      src={memorial.avatar_url}
+                      className="w-full h-full"
+                      mode="aspectFill"
+                      onError={() => {
+                        console.log('Image load failed:', memorial.avatar_url);
+                      }}
+                    />
+                  ) : (
+                    <View className="flex flex-col items-center gap-2">
+                      <View className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
+                        <User color="#3b82f6" size={32} strokeWidth={1.5} />
+                      </View>
+                      <Text className="text-xs text-slate-400">暂无头像</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* 信息区域 - 两行布局 */}
+                <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
+                  {/* 第一行：姓名 */}
+                  <Text className="text-base font-bold text-blue-900 truncate mb-1">
+                    {memorial.name}
+                  </Text>
+                  {/* 第二行：享岁居右 + 访问icon */}
+                  <View className="flex items-center justify-between">
+                    {calculateAge(memorial.birth_date, memorial.death_date) && (
+                      <Text className="text-sm text-slate-400">
+                        享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
+                      </Text>
+                    )}
+                    <View className="flex items-center gap-1">
+                      <Eye size={14} color="#94a3b8" />
+                      <Text className="text-xs text-slate-400">
+                        {memorial.visit_count}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    </View>
+  );
+};
+
+export default IndexPage;

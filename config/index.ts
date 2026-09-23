@@ -10,6 +10,9 @@ import devConfig from './dev';
 import prodConfig from './prod';
 import pkg from '../package.json';
 
+// 子路径部署的基础路径，例如部署在 https://host/memorial/ 时传 PROJECT_DOMAIN=/memorial
+const BASE_PATH = process.env.PROJECT_DOMAIN || '';
+
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 const generateTTProjectConfig = () => {
@@ -166,7 +169,7 @@ export default defineConfig<'vite'>(async (merge, _env) => {
       },
     },
     h5: {
-      publicPath: './',
+      publicPath: BASE_PATH ? `${BASE_PATH}/` : './',
       staticDirectory: 'static',
       router: {
         mode: 'hash',

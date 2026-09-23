@@ -1,45 +1,56 @@
-import { Controller, Post, Body, Request } from '@nestjs/common';
-import { ImageGenerationClient, Config, HeaderUtils, APIError } from 'coze-coding-dev-sdk';
+import { Controller, Post, Body } from '@nestjs/common';
 
 @Controller('generate-avatar')
 export class ImageGenerationController {
   @Post()
-  async generateAvatar(@Body() body: { prompt: string }, @Request() req) {
+  async generateAvatar(@Body() body: { prompt: string }) {
     try {
-      // 提取请求头并转发
-      const customHeaders = HeaderUtils.extractForwardHeaders(req.headers as Record<string, string>);
+      const apiUrl = process.env.IMAGE_API_URL;
+      const apiKey = process.env.IMAGE_API_KEY;
+      const model = process.env.IMAGE_API_MODEL;
 
-      const config = new Config();
-      const client = new ImageGenerationClient(config, customHeaders);
+      if (!apiUrl || !apiKey) {
+        return {
+          code: 503,
+          msg: 'AI图像生成服务未配置，请设置 IMAGE_API_URL / IMAGE_API_KEY 环境变量',
+        };
+      }
 
-      console.log('Generating avatar with prompt:', body.prompt);
-
-      // 清理 prompt 中的可能引起问题的字符
-      const cleanPrompt = body.prompt
+      const cleanPrompt = (body.prompt || '')
         .replace(/[\n\r\t]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
 
-      const response = await client.generate({
-        prompt: cleanPrompt,
-        size: '1024x1024',
-        watermark: false,
+      const response = await fetch(`${apiUrl.replace(/\/$/, '')}/images/generations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: model || 'dall-e-3',
+          prompt: cleanPrompt,
+          n: 1,
+          size: '1024x1024',
+        }),
+        signal: AbortSignal.timeout(60000),
       });
 
-      const helper = client.getResponseHelper(response);
-
-      if (helper.success && helper.imageUrls.length > 0) {
-        return { code: 200, msg: 'success', data: helper.imageUrls[0] };
-      } else {
-        console.error('Image generation failed:', helper.errorMessages);
-        return { code: 500, msg: 'Image generation failed', error: helper.errorMessages };
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        console.error('Image generation failed:', response.status, errText);
+        return { code: response.status || 500, msg: 'AI图像生成服务暂不可用' };
       }
+
+      const data = await response.json() as { data?: Array<{ url?: string }> };
+      const imageUrl = data.data?.[0]?.url;
+      if (!imageUrl) {
+        return { code: 500, msg: 'AI图像生成服务无有效返回' };
+      }
+
+      return { code: 200, msg: 'success', data: imageUrl };
     } catch (error) {
       console.error('Error generating avatar:', error);
-      if (error instanceof APIError) {
-        console.error('API Error status:', error.statusCode);
-        return { code: error.statusCode || 500, msg: error.message };
-      }
       return { code: 500, msg: 'Internal server error' };
     }
   }

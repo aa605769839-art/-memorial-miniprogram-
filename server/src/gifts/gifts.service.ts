@@ -90,7 +90,7 @@ export class GiftsService {
       memorialId: insertGift.memorialId!,
       giftType: insertGift.giftType!,
       giftName: insertGift.giftName!,
-      senderName: insertGift.senderName!,
+      senderName: insertGift.senderName || '访客',
       ...(insertGift.giftIcon ? { giftIcon: insertGift.giftIcon } : {}),
       ...(insertGift.senderAvatar ? { senderAvatar: insertGift.senderAvatar } : {}),
       ...(insertGift.message ? { message: insertGift.message } : {}),

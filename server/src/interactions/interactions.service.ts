@@ -9,7 +9,7 @@ export class InteractionsService {
   async createMourning(createMourningDto: InsertMourningRecord) {
     const [record] = await db.insert(mourningRecords).values({
       memorialId: createMourningDto.memorialId,
-      visitorName: createMourningDto.visitorName,
+      visitorName: createMourningDto.visitorName || '访客',
       ...(createMourningDto.visitorAvatar ? { visitorAvatar: createMourningDto.visitorAvatar } : {}),
       ...(createMourningDto.message ? { message: createMourningDto.message } : {}),
     }).returning();
@@ -30,7 +30,7 @@ export class InteractionsService {
   async createVisit(createVisitDto: InsertVisitRecord) {
     const [record] = await db.insert(visitRecords).values({
       memorialId: createVisitDto.memorialId,
-      visitorName: createVisitDto.visitorName,
+      visitorName: createVisitDto.visitorName || '访客',
       ...(createVisitDto.visitorAvatar ? { visitorAvatar: createVisitDto.visitorAvatar } : {}),
     }).returning();
 

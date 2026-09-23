@@ -1,103 +1,67 @@
 import { Injectable } from '@nestjs/common';
-import { getSupabaseClient } from '../storage/database/supabase-client';
+import { eq, asc, desc } from 'drizzle-orm';
+import { db } from '../storage/database/drizzle';
+import { giftConfigs } from '../storage/database/shared/schema';
 import { InsertGiftConfig, UpdateGiftConfig } from '../storage/database/shared/schema';
 
 @Injectable()
 export class GiftConfigsService {
-  private client = getSupabaseClient();
-
   async findAll() {
-    const { data, error } = await this.client
-      .from('gift_configs')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data;
+    return db.select().from(giftConfigs)
+      .orderBy(asc(giftConfigs.sortOrder), desc(giftConfigs.createdAt));
   }
 
   async findEnabled() {
-    const { data, error } = await this.client
-      .from('gift_configs')
-      .select('*')
-      .eq('is_enabled', true)
-      .order('sort_order', { ascending: true });
-
-    if (error) throw error;
-    return data;
+    return db.select().from(giftConfigs)
+      .where(eq(giftConfigs.isEnabled, true))
+      .orderBy(asc(giftConfigs.sortOrder));
   }
 
   async findOne(id: string) {
-    const { data, error } = await this.client
-      .from('gift_configs')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return data;
+    const [row] = await db.select().from(giftConfigs)
+      .where(eq(giftConfigs.id, id))
+      .limit(1);
+    return row ?? null;
   }
 
   async create(createGiftConfigDto: InsertGiftConfig) {
-    const dbData: Record<string, any> = {
+    const [row] = await db.insert(giftConfigs).values({
       name: createGiftConfigDto.name,
       icon: createGiftConfigDto.icon,
-      color: createGiftConfigDto.color,
+      color: createGiftConfigDto.color ?? 'text-pink-500',
       price: createGiftConfigDto.price ?? 0,
-      sort_order: createGiftConfigDto.sortOrder ?? 0,
-      is_enabled: createGiftConfigDto.isEnabled ?? true,
-    };
-
-    const { data, error } = await this.client
-      .from('gift_configs')
-      .insert(dbData)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+      sortOrder: createGiftConfigDto.sortOrder ?? 0,
+      isEnabled: createGiftConfigDto.isEnabled ?? true,
+    }).returning();
+    return row;
   }
 
   async update(id: string, updateGiftConfigDto: UpdateGiftConfig) {
-    const dbData: Record<string, any> = {};
-    if (updateGiftConfigDto.name !== undefined) dbData.name = updateGiftConfigDto.name;
-    if (updateGiftConfigDto.icon !== undefined) dbData.icon = updateGiftConfigDto.icon;
-    if (updateGiftConfigDto.color !== undefined) dbData.color = updateGiftConfigDto.color;
-    if (updateGiftConfigDto.price !== undefined) dbData.price = updateGiftConfigDto.price;
-    if (updateGiftConfigDto.sortOrder !== undefined) dbData.sort_order = updateGiftConfigDto.sortOrder;
-    if (updateGiftConfigDto.isEnabled !== undefined) dbData.is_enabled = updateGiftConfigDto.isEnabled;
+    const values: Record<string, any> = {};
+    if (updateGiftConfigDto.name !== undefined) values.name = updateGiftConfigDto.name;
+    if (updateGiftConfigDto.icon !== undefined) values.icon = updateGiftConfigDto.icon;
+    if (updateGiftConfigDto.color !== undefined) values.color = updateGiftConfigDto.color;
+    if (updateGiftConfigDto.price !== undefined) values.price = updateGiftConfigDto.price;
+    if (updateGiftConfigDto.sortOrder !== undefined) values.sortOrder = updateGiftConfigDto.sortOrder;
+    if (updateGiftConfigDto.isEnabled !== undefined) values.isEnabled = updateGiftConfigDto.isEnabled;
 
-    const { data, error } = await this.client
-      .from('gift_configs')
-      .update(dbData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const [row] = await db.update(giftConfigs)
+      .set(values)
+      .where(eq(giftConfigs.id, id))
+      .returning();
+    return row ?? null;
   }
 
   async updateSort(id: string, sortOrder: number) {
-    const { data, error } = await this.client
-      .from('gift_configs')
-      .update({ sort_order: sortOrder })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const [row] = await db.update(giftConfigs)
+      .set({ sortOrder })
+      .where(eq(giftConfigs.id, id))
+      .returning();
+    return row ?? null;
   }
 
   async remove(id: string) {
-    const { error } = await this.client
-      .from('gift_configs')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    await db.delete(giftConfigs).where(eq(giftConfigs.id, id));
     return { id };
   }
 }

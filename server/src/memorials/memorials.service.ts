@@ -1,121 +1,88 @@
 import { Injectable } from '@nestjs/common';
-import { getSupabaseClient } from '../storage/database/supabase-client';
+import { eq, desc, and, gte } from 'drizzle-orm';
+import { db } from '../storage/database/drizzle';
+import { memorials, photos, comments } from '../storage/database/shared/schema';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
 
 @Injectable()
 export class MemorialsService {
-  private client = getSupabaseClient();
-
   async findAll(userId?: string) {
-    let query = this.client
-      .from('memorials')
-      .select('*')
-      .order('created_at', { ascending: false });
+    let query = db.select().from(memorials);
 
-    // 如果提供了 userId，只返回该用户的故友
     if (userId) {
-      query = query.eq('user_id', userId);
+      const rows = await query.where(eq(memorials.userId, userId)).orderBy(desc(memorials.createdAt));
+      return rows;
     }
-
-    const { data, error } = await query;
-
-    if (error) throw error;
-    return data;
+    return query.orderBy(desc(memorials.createdAt));
   }
 
   async findOne(id: string) {
-    const { data, error } = await this.client
-      .from('memorials')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return data;
+    const [row] = await db.select().from(memorials).where(eq(memorials.id, id)).limit(1);
+    return row ?? null;
   }
 
   async findPhotos(memorialId: string) {
-    const { data, error } = await this.client
-      .from('photos')
-      .select('*')
-      .eq('memorial_id', memorialId)
-      .order('order_index', { ascending: true });
-
-    if (error) throw error;
-    return data;
+    return db.select().from(photos)
+      .where(eq(photos.memorialId, memorialId))
+      .orderBy(photos.orderIndex);
   }
 
   async findOneWithPhotos(id: string) {
     const memorial = await this.findOne(id);
-    const photos = await this.findPhotos(id);
+    const photoList = await this.findPhotos(id);
     return {
-      ...memorial,
-      photos
+      ...(memorial ?? {}),
+      photos: photoList
     };
   }
 
   async findComments(memorialId: string) {
-    const { data, error } = await this.client
-      .from('comments')
-      .select('*')
-      .eq('memorial_id', memorialId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data;
+    return db.select().from(comments)
+      .where(eq(comments.memorialId, memorialId))
+      .orderBy(desc(comments.createdAt));
   }
 
   async create(createMemorialDto: InsertMemorial) {
-    // 转换 camelCase 为 snake_case，因为 Supabase SDK 使用数据库字段名
-    const dbData: Record<string, any> = {};
-    if (createMemorialDto.userId) dbData.user_id = createMemorialDto.userId;
-    if (createMemorialDto.name) dbData.name = createMemorialDto.name;
-    if (createMemorialDto.gender !== undefined) dbData.gender = createMemorialDto.gender;
-    if (createMemorialDto.birthDate) dbData.birth_date = createMemorialDto.birthDate;
-    if (createMemorialDto.deathDate) dbData.death_date = createMemorialDto.deathDate;
-    if (createMemorialDto.avatarUrl) dbData.avatar_url = createMemorialDto.avatarUrl;
-    if (createMemorialDto.description) dbData.description = createMemorialDto.description;
-    if (createMemorialDto.achievements) dbData.achievements = createMemorialDto.achievements;
-
-    const { data, error } = await this.client
-      .from('memorials')
-      .insert(dbData)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const row = await db.insert(memorials).values({
+      userId: createMemorialDto.userId!,
+      name: createMemorialDto.name!,
+      ...(createMemorialDto.gender !== undefined ? { gender: createMemorialDto.gender } : {}),
+      ...(createMemorialDto.birthDate ? { birthDate: createMemorialDto.birthDate } : {}),
+      ...(createMemorialDto.deathDate ? { deathDate: createMemorialDto.deathDate } : {}),
+      ...(createMemorialDto.avatarUrl !== undefined ? { avatarUrl: createMemorialDto.avatarUrl } : {}),
+      ...(createMemorialDto.description !== undefined ? { description: createMemorialDto.description } : {}),
+      ...(createMemorialDto.achievements !== undefined ? { achievements: createMemorialDto.achievements } : {}),
+    }).returning();
+    return row[0];
   }
 
   async update(id: string, updateMemorialDto: UpdateMemorial) {
-    // 转换 camelCase 为 snake_case
-    const dbData: Record<string, any> = {};
-    if (updateMemorialDto.name !== undefined) dbData.name = updateMemorialDto.name;
-    if (updateMemorialDto.gender !== undefined) dbData.gender = updateMemorialDto.gender;
-    if (updateMemorialDto.birthDate !== undefined) dbData.birth_date = updateMemorialDto.birthDate;
-    if (updateMemorialDto.deathDate !== undefined) dbData.death_date = updateMemorialDto.deathDate;
-    if (updateMemorialDto.avatarUrl !== undefined) dbData.avatar_url = updateMemorialDto.avatarUrl;
-    if (updateMemorialDto.description !== undefined) dbData.description = updateMemorialDto.description;
-    if (updateMemorialDto.achievements !== undefined) dbData.achievements = updateMemorialDto.achievements;
+    const values: Partial<typeof memorials.$inferInsert> = {};
+    if (updateMemorialDto.name !== undefined) values.name = updateMemorialDto.name;
+    if (updateMemorialDto.gender !== undefined) values.gender = updateMemorialDto.gender;
+    if (updateMemorialDto.birthDate !== undefined) values.birthDate = updateMemorialDto.birthDate;
+    if (updateMemorialDto.deathDate !== undefined) values.deathDate = updateMemorialDto.deathDate;
+    if (updateMemorialDto.avatarUrl !== undefined) values.avatarUrl = updateMemorialDto.avatarUrl;
+    if (updateMemorialDto.description !== undefined) values.description = updateMemorialDto.description;
+    if (updateMemorialDto.achievements !== undefined) values.achievements = updateMemorialDto.achievements;
 
-    const { data, error } = await this.client
-      .from('memorials')
-      .update(dbData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const [row] = await db.update(memorials)
+      .set(values)
+      .where(eq(memorials.id, id))
+      .returning();
+    return row ?? null;
   }
 
   async remove(id: string) {
-    const { error } = await this.client
-      .from('memorials')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    await db.delete(memorials).where(eq(memorials.id, id));
     return { id };
+  }
+
+  // 用于排行榜筛选（保留按计数排序，兼容原接口语义）
+  async findTopByCount(column: 'mourning_count' | 'visit_count', limit = 20) {
+    if (column === 'visit_count') {
+      return db.select().from(memorials).orderBy(desc(memorials.visitCount)).limit(limit);
+    }
+    return db.select().from(memorials).orderBy(desc(memorials.mourningCount)).limit(limit);
   }
 }

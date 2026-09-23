@@ -1,20 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { getSupabaseClient } from '../storage/database/supabase-client';
+import { desc } from 'drizzle-orm';
+import { db } from '../storage/database/drizzle';
+import { memorials } from '../storage/database/shared/schema';
 
 @Injectable()
 export class RankingsService {
-  private client = getSupabaseClient();
-
   async getRankings(type: string = 'mourning') {
-    const column = type === 'visit' ? 'visit_count' : 'mourning_count';
-
-    const { data, error } = await this.client
-      .from('memorials')
-      .select('*')
-      .order(column, { ascending: false })
-      .limit(20);
-
-    if (error) throw error;
-    return data;
+    const column = type === 'visit' ? memorials.visitCount : memorials.mourningCount;
+    return db.select().from(memorials).orderBy(desc(column)).limit(20);
   }
 }

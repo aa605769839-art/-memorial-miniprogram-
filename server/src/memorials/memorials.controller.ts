@@ -87,7 +87,7 @@ export class MemorialsController {
     }
 
     // 验证是否是创建者
-    if (memorial.user_id !== userId) {
+    if (memorial.userId !== userId) {
       throw new HttpException('无权删除此故友', HttpStatus.FORBIDDEN);
     }
 

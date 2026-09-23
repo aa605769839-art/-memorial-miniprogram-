@@ -1,71 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { getSupabaseClient } from '../storage/database/supabase-client';
+import { eq } from 'drizzle-orm';
+import { db } from '../storage/database/drizzle';
+import { photos } from '../storage/database/shared/schema';
 import { InsertPhoto } from '../storage/database/shared/schema';
 
 @Injectable()
 export class PhotosService {
-  private client = getSupabaseClient();
-
   async findByMemorialId(memorialId: string) {
-    const { data, error } = await this.client
-      .from('photos')
-      .select('*')
-      .eq('memorial_id', memorialId)
-      .order('order_index', { ascending: true });
-
-    if (error) throw error;
-    return data;
+    return db.select().from(photos)
+      .where(eq(photos.memorialId, memorialId))
+      .orderBy(photos.orderIndex);
   }
 
   async create(createPhotoDto: InsertPhoto) {
-    const dbData: Record<string, any> = {};
-    if (createPhotoDto.memorialId) dbData.memorial_id = createPhotoDto.memorialId;
-    if (createPhotoDto.url) dbData.url = createPhotoDto.url;
-    if (createPhotoDto.orderIndex !== undefined) dbData.order_index = createPhotoDto.orderIndex;
-
-    const { data, error } = await this.client
-      .from('photos')
-      .insert(dbData)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const row = await db.insert(photos).values({
+      memorialId: createPhotoDto.memorialId!,
+      url: createPhotoDto.url!,
+      ...(createPhotoDto.orderIndex !== undefined ? { orderIndex: createPhotoDto.orderIndex } : {}),
+    }).returning();
+    return row[0];
   }
 
   async createBatch(memorialId: string, urls: string[]) {
-    const photos = urls.map((url, index) => ({
-      memorial_id: memorialId,
+    const rows = urls.map((url, index) => ({
+      memorialId,
       url,
-      order_index: index
+      orderIndex: index,
     }));
-
-    const { data, error } = await this.client
-      .from('photos')
-      .insert(photos)
-      .select();
-
-    if (error) throw error;
-    return data;
+    return db.insert(photos).values(rows).returning();
   }
 
   async remove(id: string) {
-    const { error } = await this.client
-      .from('photos')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    await db.delete(photos).where(eq(photos.id, id));
     return { id };
   }
 
   async removeByMemorialId(memorialId: string) {
-    const { error } = await this.client
-      .from('photos')
-      .delete()
-      .eq('memorial_id', memorialId);
-
-    if (error) throw error;
+    await db.delete(photos).where(eq(photos.memorialId, memorialId));
     return { memorialId };
   }
 }

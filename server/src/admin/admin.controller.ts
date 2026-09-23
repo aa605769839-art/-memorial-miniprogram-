@@ -1,23 +1,16 @@
 import { Controller, Post } from '@nestjs/common';
-import { getSupabaseClient } from '../storage/database/supabase-client';
+import { eq } from 'drizzle-orm';
+import { db } from '../storage/database/drizzle';
+import { photos } from '../storage/database/shared/schema';
 
 @Controller('admin')
 export class AdminController {
-  private client = getSupabaseClient();
-
   @Post('clean-photo-urls')
   async cleanPhotoUrls() {
-    const { data: photos, error } = await this.client
-      .from('photos')
-      .select('*');
-
-    if (error) {
-      return { code: 500, msg: '查询照片失败', error };
-    }
-
+    const photoRows = await db.select().from(photos);
     let cleanedCount = 0;
 
-    for (const photo of photos || []) {
+    for (const photo of photoRows) {
       const urlValue = photo.url;
 
       if (typeof urlValue === 'string' && urlValue.startsWith('{')) {
@@ -26,14 +19,10 @@ export class AdminController {
           const realUrl = parsed.url;
 
           if (realUrl) {
-            const { error: updateError } = await this.client
-              .from('photos')
-              .update({ url: realUrl })
-              .eq('id', photo.id);
-
-            if (!updateError) {
-              cleanedCount++;
-            }
+            await db.update(photos)
+              .set({ url: realUrl })
+              .where(eq(photos.id, photo.id));
+            cleanedCount++;
           }
         } catch (e) {
           console.error(`处理照片 ${photo.id} 时出错:`, e);
@@ -44,7 +33,7 @@ export class AdminController {
     return {
       code: 200,
       msg: '清理完成',
-      data: { total: photos?.length || 0, cleaned: cleanedCount }
+      data: { total: photoRows.length, cleaned: cleanedCount }
     };
   }
 }

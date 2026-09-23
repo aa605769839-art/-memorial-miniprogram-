@@ -1,0 +1,91 @@
+# ============================================================
+# 纪念小程序 - 独立部署 (A 方案)
+# 与 tailplanet 完全隔离：独立项目名、独立网络、独立端口、独立路径
+#
+# 使用方式 (在 ECS 上 /opt/memorial 目录)：
+#   docker compose up -d --build
+#
+# 前端访问前缀默认 /memorial（可与 tailplanet 的 80 端口共存，
+# 通过上层 nginx 或本 compose 自己的端口映射对外暴露）
+# ============================================================
+name: memorial
+
+services:
+  # ---- 独立 PostgreSQL ----
+  postgres:
+    image: postgres:15-alpine
+    container_name: memorial-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PG_DATABASE:-memorial}
+      POSTGRES_USER: ${PG_USER:-memorial_app}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-memorial_pass_2024}
+      TZ: Asia/Shanghai
+      LANG: C.UTF-8
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-memorial_app} -d ${PG_DATABASE:-memorial}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - memorial
+
+  # ---- 后端 API (NestJS + Drizzle) ----
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/api/Dockerfile
+    image: memorial-api:latest
+    container_name: memorial-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      TZ: Asia/Shanghai
+      DATABASE_URL: postgres://${PG_USER:-memorial_app}:${PG_PASSWORD:-memorial_pass_2024}@postgres:5432/${PG_DATABASE:-memorial}
+      # 对象存储（按实际服务填写，可为空则上传接口返回错误）
+      BUCKET_ENDPOINT_URL: ${BUCKET_ENDPOINT_URL:-}
+      BUCKET_ACCESS_KEY: ${BUCKET_ACCESS_KEY:-}
+      BUCKET_SECRET_KEY: ${BUCKET_SECRET_KEY:-}
+      BUCKET_NAME: ${BUCKET_NAME:-}
+      BUCKET_REGION: ${BUCKET_REGION:-cn-beijing}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/hello >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - memorial
+
+  # ---- 前端 H5 (nginx + 静态资源 + 反向代理) ----
+  web:
+    image: nginx:1.25-alpine
+    container_name: memorial-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-18080}:80"
+    environment:
+      MEMORIAL_PREFIX: ${MEMORIAL_PREFIX:-/memorial}
+    volumes:
+      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../dist-web:/usr/share/nginx/html:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - memorial
+
+volumes:
+  pgdata:
+
+networks:
+  memorial:
+    name: memorial

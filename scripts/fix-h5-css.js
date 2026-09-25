@@ -61,14 +61,32 @@ const PROPERTY_BLOCK = `
 
 const cssDir = path.resolve(__dirname, '../dist-web/css');
 
+/**
+ * 将 CSS 中 H5 不支持的 rpx 单位转为 rem。
+ * weapp-tailwindcss 的 rem2rpx 会把整个产物转成 rpx，但 H5 浏览器不识别 rpx，
+ * 导致 spacing/padding/margin/尺寸全部失效。此处按 1rem = 32rpx（Taro 设计稿 750
+ * 下 1/10 逻辑换算的常见基准）转回 rem，与原 Tailwind rem 产物像素一致。
+ */
+function rpxToRem(css) {
+  // 数值型 rpx：192rpx/8rpx/0.8rpx -> x/32 rem
+  return css.replace(/(-?[\d.]+)rpx/g, (_m, num) => {
+    const remVal = parseFloat(num) / 32;
+    const rounded = Math.round(remVal * 10000) / 10000;
+    return `${rounded}rem`;
+  });
+}
+
 function fixCss(file) {
   let css = fs.readFileSync(file, 'utf8');
 
-  // 1) 主题变量 :host -> :root,:host
-  css = css.replace(/:host\{/g, ':root,:host{');
+  // 0) 先修复 rounded-full 的极值非法值（含 rem2rpx 产生的 3.40282e30.4rpx / 3.40282e30rpx）
+  css = css.replace(/3\.40282e30(?:\.4)?rpx|\b3\.40282e30(?:\.4)?\b/g, '9999px');
 
-  // 2) 修复 rounded-full 非法值
-  css = css.replace(/3\.40282e30\.4rpx/g, '9999px');
+  // 1) rpx 单位转 rem（H5 浏览器不识别 rpx）——必须在数值型替换前完成
+  css = rpxToRem(css);
+
+  // 2) 主题变量 :host -> :root,:host
+  css = css.replace(/:host\{/g, ':root,:host{');
 
   // 3) 补 @property 注册（若缺失）
   if (!css.includes('@property --tw-gradient-stops')) {

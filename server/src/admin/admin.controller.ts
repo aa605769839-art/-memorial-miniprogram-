@@ -1,11 +1,14 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { db } from '../storage/database/drizzle';
 import { photos } from '../storage/database/shared/schema';
+import { AuthGuard, Roles } from '../auth/auth.guard';
 
 @Controller('admin')
 export class AdminController {
   @Post('clean-photo-urls')
+  @UseGuards(AuthGuard)
+  @Roles('admin')
   async cleanPhotoUrls() {
     const photoRows = await db.select().from(photos);
     let cleanedCount = 0;

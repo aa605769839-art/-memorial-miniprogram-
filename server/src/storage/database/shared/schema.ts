@@ -169,6 +169,28 @@ export const gifts = pgTable(
   ]
 );
 
+// 用户表（登录账号体系）
+export const users = pgTable(
+  "users",
+  {
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    username: varchar("username", { length: 64 }).notNull().unique(), // 登录账号
+    passwordHash: varchar("password_hash", { length: 255 }).notNull(), // 密码哈希
+    nickname: varchar("nickname", { length: 64 }), // 昵称
+    avatarUrl: text("avatar_url"), // 头像
+    role: varchar("role", { length: 20 }).notNull().default("user"), // user / admin
+    isEnabled: boolean("is_enabled").notNull().default(true), // 是否启用
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("users_username_idx").on(table.username),
+  ]
+);
+
 // Zod schemas for validation
 const { createInsertSchema: createCoercedInsertSchema } = createSchemaFactory({
   coerce: { date: true },
@@ -278,3 +300,7 @@ export const updateGiftConfigSchema = createCoercedInsertSchema(giftConfigs)
 export type GiftConfig = typeof giftConfigs.$inferSelect;
 export type InsertGiftConfig = z.infer<typeof insertGiftConfigSchema>;
 export type UpdateGiftConfig = z.infer<typeof updateGiftConfigSchema>;
+
+// User types
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;

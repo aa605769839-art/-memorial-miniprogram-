@@ -2,6 +2,7 @@ import { View, Text, Image, Button, Input, Textarea, Picker } from '@tarojs/comp
 import Taro, { useRouter } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
+import { Auth } from '@/auth';
 import { User } from 'lucide-react-taro';
 
 interface NewMemorial {
@@ -363,6 +364,7 @@ const FormPage = () => {
         const updateRes = await Network.request({
           url: `/api/memorials/${id}`,
           method: 'PUT',
+          header: Auth.headers(),
           data: {
             name: formData.name,
             gender: formData.gender,
@@ -375,11 +377,12 @@ const FormPage = () => {
         });
 
         if (updateRes.data?.code === 200) {
-          await Network.request({ url: `/api/photos/memorial/${id}`, method: 'DELETE' });
+          await Network.request({ url: `/api/photos/memorial/${id}`, method: 'DELETE', header: Auth.headers() });
           if (photos.length > 0) {
             await Network.request({
               url: `/api/photos/batch/${id}`,
               method: 'POST',
+              header: Auth.headers(),
               data: { urls: photos }
             });
           }
@@ -387,17 +390,17 @@ const FormPage = () => {
           setTimeout(() => Taro.navigateBack(), 1000);
         }
       } else {
-        let userId = Taro.getStorageSync('userId');
-        if (!userId) {
-          userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-          Taro.setStorageSync('userId', userId);
+        if (!Auth.isLoggedIn()) {
+          Taro.showToast({ title: '请先登录', icon: 'none' });
+          setTimeout(() => Taro.navigateTo({ url: '/pages/profile/index' }), 800);
+          return;
         }
 
         const res = await Network.request({
           url: '/api/memorials',
           method: 'POST',
+          header: Auth.headers(),
           data: {
-            userId,
             name: formData.name,
             gender: formData.gender,
             birthDate: toISODate(formData.birthDate),
@@ -414,6 +417,7 @@ const FormPage = () => {
             await Network.request({
               url: `/api/photos/batch/${memorialId}`,
               method: 'POST',
+              header: Auth.headers(),
               data: { urls: photos }
             });
           }

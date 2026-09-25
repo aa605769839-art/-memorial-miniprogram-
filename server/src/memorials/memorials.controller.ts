@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpException, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { MemorialsService } from './memorials.service';
 import { PhotosService } from '../photos/photos.service';
 import { GiftsService } from '../gifts/gifts.service';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('memorials')
 export class MemorialsController {
@@ -92,29 +93,37 @@ export class MemorialsController {
   }
 
   @Post()
-  async create(@Body() createMemorialDto: InsertMemorial) {
-    return this.memorialsService.create(createMemorialDto);
+  @UseGuards(AuthGuard)
+  async create(@Req() req: any, @Body() createMemorialDto: InsertMemorial) {
+    // 强制使用登录用户作为创建者
+    return this.memorialsService.create({ ...createMemorialDto, userId: req.user.id });
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateMemorialDto: UpdateMemorial) {
+  @UseGuards(AuthGuard)
+  async update(@Req() req: any, @Param('id') id: string, @Body() updateMemorialDto: UpdateMemorial) {
+    // 仅创建者可编辑
+    const memorial = await this.memorialsService.findOne(id);
+    if (!memorial) {
+      throw new HttpException('故友不存在', HttpStatus.NOT_FOUND);
+    }
+    if (memorial.userId !== req.user.id) {
+      throw new HttpException('无权编辑此故友', HttpStatus.FORBIDDEN);
+    }
     return this.memorialsService.update(id, updateMemorialDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Query('userId') userId: string) {
-    if (!userId) {
-      throw new HttpException('用户ID不能为空', HttpStatus.BAD_REQUEST);
-    }
-
+  @UseGuards(AuthGuard)
+  async remove(@Req() req: any, @Param('id') id: string) {
     // 先查询 memorial 验证权限
     const memorial = await this.memorialsService.findOne(id);
     if (!memorial) {
       throw new HttpException('故友不存在', HttpStatus.NOT_FOUND);
     }
 
-    // 验证是否是创建者
-    if (memorial.userId !== userId) {
+    // 验证是否是创建者（管理员可删除任意）
+    if (memorial.userId !== req.user.id && req.user.role !== 'admin') {
       throw new HttpException('无权删除此故友', HttpStatus.FORBIDDEN);
     }
 

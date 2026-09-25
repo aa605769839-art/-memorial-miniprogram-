@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Pencil, ArrowUp, ArrowDown, X } from 'lucide-react-taro';
 import { Network } from '@/network';
+import { Auth } from '@/auth';
 
 // 从本地存储获取 API 基础地址
 const getApiBase = (): string => {
@@ -14,8 +15,24 @@ const getApiBase = (): string => {
   return '';
 };
 
-// API 请求封装
+// 校验管理员登录态
+const requireAdmin = (): boolean => {
+  if (!Auth.isLoggedIn() || !Auth.isAdmin()) {
+    Taro.showToast({ title: '请使用管理员账号登录', icon: 'none' });
+    setTimeout(() => Taro.navigateTo({ url: '/pages/profile/index' }), 800);
+    return false;
+  }
+  return true;
+};
+
+// API 请求封装（自动携带鉴权头；非 GET 写操作需管理员）
 const apiRequest = async (options: any) => {
+  const method = (options.method || 'GET').toUpperCase();
+  if (method !== 'GET' && !requireAdmin()) {
+    const err: any = new Error('无管理员权限');
+    err.unauthorized = true;
+    throw err;
+  }
   const apiBase = getApiBase();
   const url = options.url.startsWith('/api') 
     ? `${apiBase}${options.url}`
@@ -24,7 +41,7 @@ const apiRequest = async (options: any) => {
   console.log('[API Request]', url);
   
   try {
-    const res = await Network.request({ ...options, url });
+    const res = await Network.request({ ...options, url, header: { ...(options.header || {}), ...Auth.headers() } });
     return res;
   } catch (err) {
     console.error('[API Error]', err);

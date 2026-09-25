@@ -2,6 +2,7 @@ import { View, Text, Image, Button, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
+import { Auth } from '@/auth';
 import { User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Pencil, Eye } from 'lucide-react-taro';
 
 // H5环境下从URL hash获取参数
@@ -172,8 +173,9 @@ const DetailPage = () => {
       setMemorial(data);
       
       // 检查是否是创建者
-      const currentUserId = Taro.getStorageSync('userId');
-      setIsCreator(data.user_id === currentUserId);
+      const currentUser = Auth.getUser();
+      const memorialUserId = (data as any)?.userId ?? (data as any)?.user_id;
+      setIsCreator(!!currentUser && memorialUserId === currentUser.id);
     } catch (error) {
       console.error('Failed to fetch memorial:', error);
       Taro.showToast({ title: '加载失败', icon: 'none' });
@@ -362,10 +364,10 @@ const DetailPage = () => {
       success: async (res) => {
         if (res.confirm) {
           try {
-            const userId = Taro.getStorageSync('userId');
             const deleteRes = await Network.request({
-              url: `/api/memorials/${id}?userId=${userId}`,
-              method: 'DELETE'
+              url: `/api/memorials/${id}`,
+              method: 'DELETE',
+              header: Auth.headers()
             });
             handleApiResponse(deleteRes);
             

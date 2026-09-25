@@ -1,8 +1,9 @@
 import { View, Text, Button, Input, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
-import { Heart, User, ChevronRight } from 'lucide-react-taro';
+import { Heart, User, ChevronRight, LogIn, ShieldCheck } from 'lucide-react-taro';
 import { Network } from '@/network';
+import { Auth, type LoginUser } from '@/auth';
 
 interface UserProfile {
   name: string;
@@ -23,8 +24,17 @@ const ProfilePage = () => {
   });
   const [tempAvatar, setTempAvatar] = useState<string | null>(null); // 编辑模式下的临时头像
 
+  // 登录相关状态
+  const [loginUser, setLoginUser] = useState<LoginUser | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
+  const [authForm, setAuthForm] = useState({ username: '', password: '', nickname: '' });
+  const [authSubmitting, setAuthSubmitting] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
   useEffect(() => {
     loadUserProfile();
+    setLoginUser(Auth.getUser());
   }, []);
 
   const loadUserProfile = () => {
@@ -140,9 +150,76 @@ const ProfilePage = () => {
   };
 
   const handleAddMemorial = () => {
+    if (!Auth.isLoggedIn()) {
+      Taro.showToast({ title: '请先登录', icon: 'none' });
+      setShowAuth(true);
+      return;
+    }
     Taro.navigateTo({
       url: '/pages/profile/memorials'
     });
+  };
+
+  // ---- 登录/注册/登出 ----
+  const openLogin = () => {
+    setAuthTab('login');
+    setAuthForm({ username: '', password: '', nickname: '' });
+    setShowAuth(true);
+  };
+
+  const handleAuthSubmit = async () => {
+    if (authSubmitting) return;
+    if (!authForm.username.trim() || !authForm.password) {
+      Taro.showToast({ title: '请输入账号和密码', icon: 'none' });
+      return;
+    }
+    if (authTab === 'register' && authForm.password.length < 6) {
+      Taro.showToast({ title: '密码至少 6 位', icon: 'none' });
+      return;
+    }
+    setAuthSubmitting(true);
+    try {
+      const isLogin = authTab === 'login';
+      const res = await Network.request({
+        url: isLogin ? '/api/auth/login' : '/api/auth/register',
+        method: 'POST',
+        data: isLogin
+          ? { username: authForm.username.trim(), password: authForm.password }
+          : {
+              username: authForm.username.trim(),
+              password: authForm.password,
+              ...(authForm.nickname.trim() ? { nickname: authForm.nickname.trim() } : {})
+            }
+      });
+      const body = res.data as any;
+      if (body?.code === 200 && body?.data?.token && body?.data?.user) {
+        Auth.setAuth(body.data.token, body.data.user);
+        setLoginUser(body.data.user);
+        setShowAuth(false);
+        // 登录后同步本地昵称
+        const u = body.data.user as LoginUser;
+        if (u.nickname) {
+          const p = { name: u.nickname, avatar: null, bio: '已登录用户' };
+          Taro.setStorageSync('userProfile', p);
+          setUserProfile(p);
+        }
+        Taro.showToast({ title: isLogin ? '登录成功' : '注册成功', icon: 'success' });
+      } else {
+        Taro.showToast({ title: body?.msg || (isLogin ? '登录失败' : '注册失败'), icon: 'none' });
+      }
+    } catch (err) {
+      const msg = (err as any)?.data?.msg || '网络异常，请稍后重试';
+      Taro.showToast({ title: msg, icon: 'none' });
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  const handleLogout = () => {
+    Auth.clear();
+    setLoginUser(null);
+    setConfirmLogout(false);
+    Taro.showToast({ title: '已退出登录', icon: 'none' });
   };
 
   return (
@@ -278,6 +355,164 @@ const ProfilePage = () => {
           </View>
         </View>
       </View>
+
+      {/* 登录/账号区域 */}
+      <View className="px-4 mt-4">
+        <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {loginUser ? (
+            <View className="px-6 py-4">
+              <View className="flex items-center gap-3 mb-3">
+                <View className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <ShieldCheck color="#3b82f6" size={20} />
+                </View>
+                <View className="flex-1">
+                  <Text className="block text-base font-bold text-slate-800">
+                    {loginUser.nickname || loginUser.username}
+                  </Text>
+                  <Text className="block text-xs text-slate-400">
+                    {loginUser.role === 'admin' ? '管理员' : '普通用户'}
+                  </Text>
+                </View>
+                <Button
+                  className="bg-slate-100 text-slate-600 rounded-full px-4 py-1 text-sm"
+                  onClick={() => setConfirmLogout(true)}
+                >
+                  退出
+                </Button>
+              </View>
+              {loginUser.role === 'admin' && (
+                <View
+                  className="flex items-center justify-between px-1 py-3 border-t border-blue-50"
+                  onClick={() => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' })}
+                >
+                  <View className="flex items-center gap-2">
+                    <ShieldCheck color="#3b82f6" size={18} />
+                    <Text className="text-sm text-slate-600">礼物配置管理</Text>
+                  </View>
+                  <ChevronRight color="#94a3b8" size={18} />
+                </View>
+              )}
+            </View>
+          ) : (
+            <View className="px-6 py-4 flex items-center justify-between">
+              <View className="flex items-center gap-3">
+                <View className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <LogIn color="#3b82f6" size={20} />
+                </View>
+                <View>
+                  <Text className="block text-base font-bold text-slate-800">未登录</Text>
+                  <Text className="block text-xs text-slate-400">登录后可创建与管理故友空间</Text>
+                </View>
+              </View>
+              <Button
+                className="bg-blue-500 text-white rounded-full px-5 py-1 text-sm"
+                onClick={openLogin}
+              >
+                登录/注册
+              </Button>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* 登录/注册弹窗 */}
+      {showAuth && (
+        <View
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}
+        >
+          <View className="bg-white rounded-2xl p-6 mx-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <Text className="block text-lg font-bold text-blue-900 mb-4 text-center">
+              {authTab === 'login' ? '登录' : '注册'}
+            </Text>
+            <View className="flex gap-2 mb-4">
+              <Button
+                className={authTab === 'login' ? 'flex-1 bg-blue-500 text-white rounded-full py-2' : 'flex-1 bg-slate-100 text-slate-600 rounded-full py-2'}
+                onClick={() => setAuthTab('login')}
+              >
+                登录
+              </Button>
+              <Button
+                className={authTab === 'register' ? 'flex-1 bg-blue-500 text-white rounded-full py-2' : 'flex-1 bg-slate-100 text-slate-600 rounded-full py-2'}
+                onClick={() => setAuthTab('register')}
+              >
+                注册
+              </Button>
+            </View>
+            {authTab === 'register' && (
+              <View className="mb-3">
+                <Text className="block text-sm font-medium text-slate-700 mb-2">昵称</Text>
+                <View className="bg-blue-50 rounded-xl px-4 py-3">
+                  <Input
+                    className="w-full bg-transparent text-slate-700"
+                    value={authForm.nickname}
+                    onInput={(e) => setAuthForm({ ...authForm, nickname: e.detail.value })}
+                    placeholder="请输入昵称（可选）"
+                  />
+                </View>
+              </View>
+            )}
+            <View className="mb-3">
+              <Text className="block text-sm font-medium text-slate-700 mb-2">账号</Text>
+              <View className="bg-blue-50 rounded-xl px-4 py-3">
+                <Input
+                  className="w-full bg-transparent text-slate-700"
+                  value={authForm.username}
+                  onInput={(e) => setAuthForm({ ...authForm, username: e.detail.value })}
+                  placeholder="3-32位字母/数字"
+                />
+              </View>
+            </View>
+            <View className="mb-4">
+              <Text className="block text-sm font-medium text-slate-700 mb-2">密码</Text>
+              <View className="bg-blue-50 rounded-xl px-4 py-3">
+                <Input
+                  className="w-full bg-transparent text-slate-700"
+                  password
+                  value={authForm.password}
+                  onInput={(e) => setAuthForm({ ...authForm, password: e.detail.value })}
+                  placeholder="至少6位"
+                />
+              </View>
+            </View>
+            <Button
+              className="w-full bg-blue-500 text-white rounded-full py-3"
+              onClick={handleAuthSubmit}
+              loading={authSubmitting}
+            >
+              {authTab === 'login' ? '登录' : '注册'}
+            </Button>
+          </View>
+        </View>
+      )}
+
+      {/* 退出确认弹窗 */}
+      {confirmLogout && (
+        <View
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={(e) => { if (e.target === e.currentTarget) setConfirmLogout(false); }}
+        >
+          <View className="bg-white rounded-2xl p-6 mx-4 w-full max-w-xs" onClick={(e) => e.stopPropagation()}>
+            <Text className="block text-lg font-bold text-blue-900 mb-4 text-center">确认退出登录？</Text>
+            <View className="flex gap-3">
+              <Button
+                className="flex-1 bg-slate-200 text-slate-700 rounded-full py-3"
+                onClick={() => setConfirmLogout(false)}
+              >
+                取消
+              </Button>
+              <Button
+                className="flex-1 bg-blue-500 text-white rounded-full py-3"
+                onClick={handleLogout}
+              >
+                退出
+              </Button>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

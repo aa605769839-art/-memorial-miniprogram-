@@ -180,8 +180,12 @@ export default defineConfig<'vite'>(async (merge, _env) => {
         open: false,
         proxy: {
           '/api': {
-            target: 'http://localhost:3000',
+            // 默认指向 ECS 公网接口，保证本地预览与公网数据一致；
+            // 可用环境变量 PUBLIC_API_TARGET 覆盖
+            target: process.env.PUBLIC_API_TARGET || 'http://121.40.49.180',
             changeOrigin: true,
+            // 本地代码请求 /api/*，公网实际是 /memorial/api/*，这里做路径重写
+            rewrite: (p: string) => p.replace(/^\/api/, '/memorial/api'),
           },
         },
       },

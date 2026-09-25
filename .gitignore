@@ -40,3 +40,6 @@ pnpm-debug.log*
 key/
 .cozeproj/reduction
 .codegraph
+
+# Preview files
+.preview

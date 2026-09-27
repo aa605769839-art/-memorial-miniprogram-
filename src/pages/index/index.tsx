@@ -19,17 +19,9 @@ const ELDER_MALE =
 const ELDER_FEMALE =
   'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_875f3290-29ac-4e8d-97d7-fb78c8501238.jpeg?sign=1822036747-72dcb1b772-0-7ac9f978933a6ec6827cd76c9273a25046c89de94d735bf68a75b9ac27999ab9';
 
-// 深青蓝→藏蓝背景上的暖金光点装饰
-const SPARKS = [
-  { top: '6%', left: '8%', s: 3, o: 0.8 },
-  { top: '10%', left: '78%', s: 2, o: 0.6 },
-  { top: '22%', left: '62%', s: 2.5, o: 0.7 },
-  { top: '34%', left: '12%', s: 2, o: 0.5 },
-  { top: '46%', left: '85%', s: 3, o: 0.55 },
-  { top: '58%', left: '30%', s: 2, o: 0.6 },
-  { top: '70%', left: '72%', s: 2.5, o: 0.5 },
-  { top: '5%', left: '42%', s: 2, o: 0.4 }
-];
+// 深邃星空纪念背景（对象存储网络图：深青蓝渐变 + 细碎星光 + 暖金流动光带 + 散景光斑）
+const BG_IMAGE =
+  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_f68fa357-7237-4aec-aed5-5f16dcbe8815.jpeg?sign=1822037344-e8d5ff3e1b-0-75cb727e9d8c81323eb5b0a5716c0e0badf395497dabff50fc102c1c9588311e';
 
 interface Memorial {
   id: string;
@@ -97,27 +89,22 @@ const IndexPage = () => {
   const mainRelation = '奶奶';
 
   return (
-    <View
-      className="min-h-screen relative"
-      style={{ background: 'linear-gradient(178deg,#12313f 0%,#0f2734 45%,#0b1e29 100%)' }}
-    >
-      {/* 星光与暖金光斑装饰 */}
-      {SPARKS.map((s, i) => (
-        <View
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            top: s.top,
-            left: s.left,
-            width: s.s,
-            height: s.s,
-            backgroundColor: '#e8c07a',
-            opacity: s.o,
-            boxShadow: '0 0 8px 2px rgba(232,192,122,0.5)'
-          }}
-        />
-      ))}
-
+    <View className="min-h-screen relative">
+      {/* 全屏网络星空背景图（对象存储加载） */}
+      <Image
+        src={BG_IMAGE}
+        className="absolute top-0 left-0 w-full h-full"
+        style={{ position: 'fixed' }}
+        mode="aspectFill"
+        aria-hidden
+      />
+      {/* 半透明深色遮罩，保证前景文字清晰 */}
+      <View
+        className="absolute top-0 left-0 w-full h-full"
+        style={{ position: 'fixed', background: 'linear-gradient(180deg, rgba(10,25,35,0.25) 0%, rgba(9,22,30,0.45) 100%)' }}
+      />
+      {/* 内容容器：置于背景之上 */}
+      <View className="relative z-10">
       {/* 品牌标题区 */}
       <View className="px-5 pt-14 pb-3 flex flex-row items-start justify-between">
         <View className="flex-1 pr-3">
@@ -293,6 +280,7 @@ const IndexPage = () => {
             </Text>
           </View>
         </View>
+      </View>
       </View>
     </View>
   );

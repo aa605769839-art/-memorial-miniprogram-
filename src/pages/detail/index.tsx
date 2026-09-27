@@ -1,9 +1,22 @@
 import { View, Text, Image, Button, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Network } from '@/network';
 import { Auth } from '@/auth';
-import { User, Calendar, Award, Send, Flower2, Trash2, X, Gift, Pencil, Eye } from 'lucide-react-taro';
+import {
+  User,
+  Calendar,
+  Award,
+  Send,
+  Flower2,
+  Trash2,
+  X,
+  Gift,
+  Pencil,
+  Eye,
+  Heart,
+  ArrowLeft,
+} from 'lucide-react-taro';
 
 // H5环境下从URL hash获取参数
 const getHashParams = () => {
@@ -23,14 +36,21 @@ const getHashParams = () => {
 
 // 统一的 API 响应处理
 const handleApiResponse = (res: any) => {
-  console.log('API Response:', res);
   if (res.data?.code === 200) {
     return res.data.data;
   }
   throw new Error(res.data?.msg || '请求失败');
 };
 
-// 判断是否为图片URL（以http开头）
+// 通用取值：优先 camelCase，其次 snake_case（兼容两种后端格式）
+const pick = (obj: any, camel: string, snake?: string) => {
+  if (obj == null) return undefined;
+  if (obj[camel] !== undefined) return obj[camel];
+  if (snake && obj[snake] !== undefined) return obj[snake];
+  return undefined;
+};
+
+// 判断是否为图片URL
 const isImageUrl = (icon: string | null | undefined): boolean => {
   if (!icon) return false;
   return icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('//');
@@ -40,7 +60,7 @@ const isImageUrl = (icon: string | null | undefined): boolean => {
 const GiftIcon = ({ icon, size = 'normal' }: { icon: string | null | undefined; size?: 'small' | 'normal' | 'large' }) => {
   const sizeClass = size === 'large' ? 'w-16 h-16' : size === 'small' ? 'w-8 h-8' : 'w-12 h-12';
   const textSize = size === 'large' ? 'text-5xl' : size === 'small' ? 'text-xl' : 'text-4xl';
-  
+
   if (isImageUrl(icon)) {
     return (
       <Image
@@ -113,7 +133,6 @@ const DetailPage = () => {
   const router = useRouter();
   const hashParams = getHashParams();
   const id = router.params?.id || hashParams.id;
-  console.log('Detail page id:', id);
 
   const [memorial, setMemorial] = useState<Memorial | null>(null);
   const [message, setMessage] = useState('');
@@ -137,31 +156,26 @@ const DetailPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; authorName: string } | null>(null);
 
-  // 页面显示时重新加载
-  useDidShow(() => {
-    if (id) {
-      fetchMemorial();
-    }
-  });
-
-  // 组件挂载时加载数据
-  useEffect(() => {
-    if (id) {
-      fetchMemorial();
-      fetchMessages();
-      recordVisit();
-      fetchGiftConfigs();
-      // 从本地存储加载用户信息
-      const userProfile = Taro.getStorageSync('userProfile');
-      if (userProfile) {
-        if (userProfile.name) setVisitorName(userProfile.name);
-        if (userProfile.avatar) setVisitorAvatar(userProfile.avatar);
-      }
-    }
-  }, [id]);
+  // 后端统一返回 camelCase，兼容 old snake_case 供渲染层安全取值
+  const mem = useMemo(() => {
+    if (!memorial) return null;
+    return {
+      name: pick(memorial, 'name'),
+      gender: pick(memorial, 'gender'),
+      avatarUrl: pick(memorial, 'avatarUrl', 'avatar_url'),
+      birthDate: pick(memorial, 'birthDate', 'birth_date'),
+      deathDate: pick(memorial, 'deathDate', 'death_date'),
+      description: pick(memorial, 'description'),
+      achievements: pick(memorial, 'achievements'),
+      visitCount: pick(memorial, 'visitCount', 'visit_count') ?? 0,
+      mourningCount: pick(memorial, 'mourningCount', 'mourning_count') ?? 0,
+      photos: pick(memorial, 'photos'),
+      userId: pick(memorial, 'userId', 'user_id'),
+    };
+  }, [memorial]);
 
   // 获取故人详情
-  const fetchMemorial = async () => {
+  const fetchMemorial = useCallback(async () => {
     if (!id) return;
     try {
       setLoading(true);
@@ -170,8 +184,8 @@ const DetailPage = () => {
         method: 'GET'
       });
       const data = handleApiResponse(res);
-      setMemorial(data);
-      
+      setMemorial(data as Memorial);
+
       // 检查是否是创建者
       const currentUser = Auth.getUser();
       const memorialUserId = (data as any)?.userId ?? (data as any)?.user_id;
@@ -182,13 +196,12 @@ const DetailPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   // 获取留言和礼物（合并）
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     if (!id) return;
     try {
-      // 并行获取评论和礼物
       const [commentsRes, giftsRes] = await Promise.all([
         Network.request({ url: `/api/memorials/${id}/comments`, method: 'GET' }),
         Network.request({ url: `/api/gifts/memorial/${id}`, method: 'GET' })
@@ -197,15 +210,17 @@ const DetailPage = () => {
       const comments = handleApiResponse(commentsRes) || [];
       const gifts = handleApiResponse(giftsRes) || [];
 
-      // 合并并按时间排序
-      const combined = [...comments, ...gifts].sort(
-        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      // 兼容 comment 的 createdAt / created_at
+      const combined = [...comments, ...gifts].sort((a: any, b: any) => {
+        const aT = pick(a, 'createdAt', 'created_at');
+        const bT = pick(b, 'createdAt', 'created_at');
+        return new Date(bT || 0).getTime() - new Date(aT || 0).getTime();
+      });
       setMessages(combined);
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     }
-  };
+  }, [id]);
 
   // 获取礼物配置
   const fetchGiftConfigs = async () => {
@@ -258,7 +273,7 @@ const DetailPage = () => {
         }
       });
       handleApiResponse(res);
-      
+
       Taro.showToast({ title: '赠送成功', icon: 'success' });
       setShowGiftModal(false);
       setSelectedGift(null);
@@ -315,7 +330,7 @@ const DetailPage = () => {
         }
       });
       handleApiResponse(res);
-      
+
       Taro.showToast({ title: '留言成功', icon: 'success' });
       setMessage('');
       fetchMessages();
@@ -343,7 +358,7 @@ const DetailPage = () => {
         method: 'DELETE'
       });
       handleApiResponse(res);
-      
+
       Taro.showToast({ title: '删除成功', icon: 'success' });
       fetchMessages();
     } catch (error) {
@@ -370,7 +385,7 @@ const DetailPage = () => {
               header: Auth.headers()
             });
             handleApiResponse(deleteRes);
-            
+
             Taro.showToast({ title: '删除成功', icon: 'success' });
             setTimeout(() => Taro.navigateBack(), 1000);
           } catch (error) {
@@ -389,16 +404,21 @@ const DetailPage = () => {
     }
   };
 
+  // 返回
+  const handleBack = () => {
+    Taro.navigateBack();
+  };
+
   // 预览图片
   const handlePreviewPhoto = (currentUrl: string) => {
-    if (!memorial?.photos) return;
-    const urls = memorial.photos.map(p => p.url);
+    if (!mem?.photos) return;
+    const urls = mem.photos.map(p => p.url);
     Taro.previewImage({ urls, current: currentUrl });
   };
 
   const handlePreviewAvatar = () => {
-    if (memorial?.avatar_url) {
-      Taro.previewImage({ urls: [memorial.avatar_url], current: memorial.avatar_url });
+    if (mem?.avatarUrl) {
+      Taro.previewImage({ urls: [mem.avatarUrl], current: mem.avatarUrl });
     }
   };
 
@@ -410,8 +430,10 @@ const DetailPage = () => {
   };
 
   // 格式化时间（相对时间）
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
+  const formatTime = (item: any) => {
+    const t = pick(item, 'createdAt', 'created_at');
+    if (!t) return '';
+    const date = new Date(t);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
@@ -436,13 +458,36 @@ const DetailPage = () => {
 
   // 判断是否为礼物
   const isGiftItem = (item: MessageItem): item is GiftItem => {
-    return 'gift_id' in item;
+    return 'gift_id' in item || 'giftId' in item;
   };
+
+  // 页面显示时重新加载
+  useDidShow(() => {
+    if (id) {
+      fetchMemorial();
+    }
+  });
+
+  // 组件挂载时加载数据
+  useEffect(() => {
+    if (id) {
+      fetchMemorial();
+      fetchMessages();
+      recordVisit();
+      fetchGiftConfigs();
+      // 从本地存储加载用户信息
+      const userProfile = Taro.getStorageSync('userProfile');
+      if (userProfile) {
+        if (userProfile.name) setVisitorName(userProfile.name);
+        if (userProfile.avatar) setVisitorAvatar(userProfile.avatar);
+      }
+    }
+  }, [id, fetchMemorial, fetchMessages]);
 
   // 加载中
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-[#eef3e4]">
+      <View className="flex flex-col items-center justify-center min-h-screen bg-[#eef3e4]">
         <View className="w-12 h-12 border-4 border-[#cfe0d3] border-t-[#6f9b86] rounded-full animate-spin" />
         <Text className="block text-sm text-slate-400 mt-3">加载中...</Text>
       </View>
@@ -450,9 +495,9 @@ const DetailPage = () => {
   }
 
   // 数据不存在
-  if (!memorial) {
+  if (!mem) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-[#eef3e4]">
+      <View className="flex flex-col items-center justify-center min-h-screen bg-[#eef3e4]">
         <Flower2 color="#94a3b8" size={64} strokeWidth={1.5} />
         <Text className="block text-base text-slate-500 mt-4">纪念空间不存在</Text>
       </View>
@@ -460,73 +505,77 @@ const DetailPage = () => {
   }
 
   return (
-    <View className="min-h-screen bg-[#eef3e4] pb-32">
+    <View className="min-h-screen bg-[#f7f1e2] pb-32">
       {/* 顶部操作栏 */}
-      <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-12 pb-3 flex justify-end">
+      <View className="fixed top-0 left-0 right-0 z-50 px-2 pt-12 pb-2 flex items-center justify-between">
+        <View className="p-2" onClick={handleBack}>
+          <ArrowLeft color="#4a3728" size={22} />
+        </View>
         {isCreator && (
           <View className="flex gap-2">
             <View className="p-2" onClick={handleEdit}>
-              <Pencil color="#64748b" size={22} />
+              <Pencil color="#8a7a6a" size={22} />
             </View>
             <View className="p-2" onClick={handleDeleteMemorial}>
-              <Trash2 color="#94a3b8" size={22} />
+              <Trash2 color="#8a7a6a" size={22} />
             </View>
           </View>
         )}
       </View>
 
       {/* 头像和基本信息 */}
-      <View className="bg-white pt-16">
-        {/* 正方形头像 */}
-        <View className="w-full aspect-square bg-[#dbe8dd] flex items-center justify-center overflow-hidden">
-          {memorial.avatar_url ? (
-            <Image
-              src={memorial.avatar_url}
-              className="w-full h-full"
-              mode="aspectFill"
-              onClick={handlePreviewAvatar}
-            />
-          ) : (
-            <User color="#94a3b8" size={96} />
-          )}
-        </View>
-        
-        {/* 姓名和基本信息 */}
-        <View className="px-6 py-6 text-center">
+      <View className="bg-gradient-to-br from-[#dce8dd] to-[#f3ead9] pt-16">
+        {/* 居中圆形头像 */}
+        <View className="flex flex-col items-center px-6">
+          <View className="w-32 h-32 rounded-full bg-white/70 flex items-center justify-center overflow-hidden mb-4">
+            {mem.avatarUrl ? (
+              <Image
+                src={mem.avatarUrl}
+                className="w-full h-full"
+                mode="aspectFill"
+                onClick={handlePreviewAvatar}
+              />
+            ) : (
+              <User color="#7bac8f" size={56} />
+            )}
+          </View>
+
           {/* 姓名 + 性别 */}
-          <View className="flex items-center justify-center gap-2 mb-3">
-            <Text className="text-3xl font-bold text-[#3f5d50]">{memorial.name}</Text>
-            {memorial.gender === '男' && (
-              <View className="w-5 h-5 rounded-full border border-[#a8cbb8] flex items-center justify-center">
-                <Text className="text-[#7da98f] text-xs font-bold">♂</Text>
+          <View className="flex items-center justify-center gap-2 mb-2">
+            <Text className="text-3xl font-bold text-[#3f5d50]">{mem.name}</Text>
+            {mem.gender === '男' && (
+              <View className="w-6 h-6 rounded-full border border-[#7bac8f] flex items-center justify-center">
+                <Text className="text-[#7bac8f] text-xs font-bold">♂</Text>
               </View>
             )}
-            {memorial.gender === '女' && (
-              <View className="w-5 h-5 rounded-full border border-pink-400 flex items-center justify-center">
-                <Text className="text-pink-400 text-xs font-bold">♀</Text>
+            {mem.gender === '女' && (
+              <View className="w-6 h-6 rounded-full border border-[#c9a86a] flex items-center justify-center">
+                <Text className="text-[#c9a86a] text-xs font-bold">♀</Text>
               </View>
             )}
           </View>
-          
-          {/* 享年 + 拜访数 */}
-          {memorial.birth_date && memorial.death_date && (
-            <View className="flex items-center justify-center gap-4 mb-3">
-              <Text className="text-base text-slate-600 font-medium">
-                享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
-              </Text>
-              <View className="flex items-center gap-1">
-                <Eye size={16} color="#94a3b8" />
-                <Text className="text-sm text-slate-400">{memorial.visit_count || 0}</Text>
-              </View>
+
+          {/* 悼念人数 + 拜访数 */}
+          <View className="flex items-center justify-center gap-6 mb-2 bg-white/50 rounded-full px-6 py-2">
+            <View className="flex items-center gap-1.5">
+              <Heart size={16} color="#c9a86a" />
+              <Text className="text-sm text-[#4a3728] font-medium">{mem.mourningCount} 次悼念</Text>
             </View>
-          )}
-          
-          {/* 生卒日期 */}
-          {memorial.birth_date && memorial.death_date && (
-            <View className="flex items-center justify-center gap-2">
-              <Calendar color="#94a3b8" size={14} />
-              <Text className="block text-sm text-slate-400">
-                {formatDate(memorial.birth_date)} ~ {formatDate(memorial.death_date)}
+            <View className="flex items-center gap-1.5">
+              <Eye size={16} color="#7bac8f" />
+              <Text className="text-sm text-[#4a3728] font-medium">{mem.visitCount} 次拜访</Text>
+            </View>
+          </View>
+
+          {/* 生卒日期 + 享年 */}
+          {mem.birthDate && mem.deathDate && (
+            <View className="flex items-center justify-center gap-2 mb-2">
+              <Calendar color="#8a7a6a" size={15} />
+              <Text className="block text-sm text-[#6b5b4a]">
+                {formatDate(mem.birthDate)} ~ {formatDate(mem.deathDate)}
+              </Text>
+              <Text className="block text-sm font-semibold text-[#6b5b4a]">
+                享年 {calculateAge(mem.birthDate, mem.deathDate)} 岁
               </Text>
             </View>
           )}
@@ -534,29 +583,28 @@ const DetailPage = () => {
       </View>
 
       {/* 简介和成就 */}
-      {(memorial.description || (memorial.achievements && memorial.achievements.length > 0)) && (
-        <View className="bg-white mt-4 px-6 py-4">
-          {memorial.description && (
-            <View className="mb-4">
+      {(mem.description || (mem.achievements && mem.achievements.length > 0)) && (
+        <View className="bg-white mt-5 mx-4 rounded-3xl shadow-sm px-6 py-5">
+          {mem.description && (
+            <View className="mb-5">
               <View className="flex items-center gap-2 mb-3">
-                <User color="#6f9b86" size={20} />
-                <Text className="block text-lg font-semibold text-[#3f5d50]">简介</Text>
+                <Flower2 color="#7bac8f" size={20} />
+                <Text className="block text-lg font-semibold text-[#3f5d50]">生平简介</Text>
               </View>
-              <Text className="block text-sm text-slate-600 leading-relaxed">{memorial.description}</Text>
+              <Text className="block text-sm text-[#6b5b4a] leading-relaxed">{mem.description}</Text>
             </View>
           )}
-          
-          {memorial.achievements && memorial.achievements.length > 0 && (
+
+          {mem.achievements && mem.achievements.length > 0 && (
             <View>
               <View className="flex items-center gap-2 mb-3">
-                <Award color="#6f9b86" size={20} />
-                <Text className="block text-lg font-semibold text-[#3f5d50]">主要成就</Text>
+                <Award color="#7bac8f" size={20} />
+                <Text className="block text-lg font-semibold text-[#3f5d50]">生平成就</Text>
               </View>
-              <View className="flex flex-col gap-2">
-                {memorial.achievements.map((achievement, index) => (
-                  <View key={index} className="flex items-start gap-3">
-                    <View className="w-2 h-2 rounded-full bg-[#6f9b86] mt-2 flex-shrink-0" />
-                    <Text className="block text-sm text-slate-600 leading-relaxed flex-1">{achievement}</Text>
+              <View className="flex flex-wrap gap-2">
+                {mem.achievements.map((achievement, index) => (
+                  <View key={index} className="bg-[#eef3e4] rounded-full px-4 py-1.5">
+                    <Text className="block text-sm text-[#3f5d50] font-medium">{achievement}</Text>
                   </View>
                 ))}
               </View>
@@ -566,22 +614,22 @@ const DetailPage = () => {
       )}
 
       {/* 生活照片 */}
-      {memorial.photos && memorial.photos.length > 0 && (
-        <View className="bg-white mt-4 px-6 py-4">
+      {mem.photos && mem.photos.length > 0 && (
+        <View className="bg-white mt-5 mx-4 rounded-3xl shadow-sm px-6 py-5">
           <View className="flex items-center justify-between mb-3">
-            <Text className="block text-lg font-semibold text-[#3f5d50]">生活照片</Text>
-            {memorial.photos.length > 3 && (
+            <Text className="block text-lg font-semibold text-[#3f5d50]">记忆相册</Text>
+            {mem.photos.length > 3 && (
               <Text
-                className="text-sm text-[#6f9b86]"
+                className="text-sm text-[#7bac8f]"
                 onClick={() => setShowAllPhotos(!showAllPhotos)}
               >
-                {showAllPhotos ? '收起' : `展开全部${memorial.photos.length}张`}
+                {showAllPhotos ? '收起' : `展开全部${mem.photos.length}张`}
               </Text>
             )}
           </View>
           <View className="grid grid-cols-3 gap-2">
-            {(showAllPhotos ? memorial.photos : memorial.photos.slice(0, 3)).map((photo) => (
-              <View key={photo.id} className="aspect-square rounded-lg overflow-hidden">
+            {(showAllPhotos ? mem.photos : mem.photos.slice(0, 3)).map((photo) => (
+              <View key={photo.id} className="aspect-square rounded-xl overflow-hidden bg-[#eef3e4]">
                 <Image
                   src={photo.url}
                   className="w-full h-full"
@@ -595,10 +643,24 @@ const DetailPage = () => {
       )}
 
       {/* 底部操作按钮 */}
-      <View className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#dbe8dd] p-4 z-50">
-        <View className="flex gap-3">
+      <View
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 40,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '12px',
+          padding: '12px',
+          backgroundColor: '#ffffff',
+          borderTop: '1px solid #e5ddd0'
+        }}
+      >
+        <View style={{ flex: 1 }}>
           <Button
-            className="flex-1 bg-[#6f9b86] text-white rounded-full py-3 shadow-md flex items-center justify-center gap-2"
+            className="!bg-[#7bac8f] !text-white !rounded-full !py-3 !border-0 flex items-center justify-center gap-2 shadow-md"
             onClick={() => {
               fetchGiftConfigs();
               setShowGiftModal(true);
@@ -607,90 +669,98 @@ const DetailPage = () => {
             <Gift size={18} color="#ffffff" />
             <Text>悼念</Text>
           </Button>
+        </View>
+        <View style={{ flex: 1 }}>
           <Button
-            className="flex-1 bg-[#dbe8dd] text-[#2f4a3e] rounded-full py-3"
+            className="!bg-[#f3ead9] !text-[#7a6a54] !rounded-full !py-3 !border-0"
             onClick={handleVisit}
           >
-            拜访
+            <Text>拜访</Text>
           </Button>
         </View>
       </View>
 
       {/* 留言区域 */}
-      <View className="bg-white mt-4 px-6 py-4 mb-20">
+      <View className="bg-white mt-5 mx-4 rounded-3xl shadow-sm px-6 py-5">
         <View className="flex items-center justify-between mb-4">
           <Text className="block text-lg font-semibold text-[#3f5d50]">留言板</Text>
-          <Text className="block text-sm text-slate-500">{messages.length} 条</Text>
+          <Text className="block text-sm text-[#8a7a6a]">{messages.length} 条</Text>
         </View>
 
         {messages.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-10">
-            <Text className="block text-sm text-slate-400">还没有留言，留下您的思念</Text>
+            <Flower2 color="#c9d8cd" size={48} strokeWidth={1.5} />
+            <Text className="block text-sm text-[#8a7a6a] mt-3">还没有留言，留下您的思念</Text>
           </View>
         ) : (
           <View className="flex flex-col gap-3">
             {messages.map((msg) => {
               if (isGiftItem(msg)) {
                 // 礼物卡片
+                const senderName = pick((msg as any).sender, 'name');
+                const senderAvatar = pick((msg as any).sender, 'avatar');
                 return (
-                  <View key={msg.id} className="bg-gradient-to-br from-[#eef3e4] to-[#eef3e4] rounded-xl p-4 border border-[#dbe8dd]">
+                  <View key={msg.id} className="bg-[#f3ead9] rounded-2xl p-4">
                     <View className="flex items-center justify-between mb-3">
                       <View className="flex items-center gap-2">
-                        <View className="w-8 h-8 rounded-full bg-pink-200 flex items-center justify-center overflow-hidden">
-                          {msg.sender?.avatar ? (
-                            <Image src={msg.sender.avatar} className="w-full h-full" mode="aspectFill" />
+                        <View className="w-8 h-8 rounded-full bg-[#eed9a8] flex items-center justify-center overflow-hidden">
+                          {senderAvatar ? (
+                            <Image src={senderAvatar} className="w-full h-full" mode="aspectFill" />
                           ) : (
-                            <Text className="text-xs text-pink-600">{msg.sender?.name?.charAt(0) || '访'}</Text>
+                            <Text className="text-xs text-[#a8843f]">{(senderName || '访').charAt(0)}</Text>
                           )}
                         </View>
                         <View>
-                          <Text className="block text-sm font-medium text-pink-700">{msg.sender?.name || '访客'}</Text>
-                          <Text className="block text-xs text-pink-500">赠送了 {msg.gift_name}</Text>
+                          <Text className="block text-sm font-medium text-[#7a6a54]">{senderName || '访客'}</Text>
+                          <Text className="block text-xs text-[#b08d3f]">赠 {pick(msg, 'gift_name', 'giftName')}</Text>
                         </View>
                       </View>
-                      <Text className="block text-xs text-pink-400">{formatTime(msg.created_at)}</Text>
+                      <Text className="block text-xs text-[#a39480]">{formatTime(msg)}</Text>
                     </View>
                     <View className="flex items-end gap-3">
                       <View className="flex-shrink-0 flex items-center justify-center">
-                        <GiftIcon icon={msg.gift_icon} size="large" />
+                        <GiftIcon icon={pick(msg, 'gift_icon', 'giftIcon')} size="large" />
                       </View>
-                      {msg.message && (
-                        <View className="flex-1 bg-white/50 rounded-lg p-2">
-                          <Text className="block text-sm text-slate-700 leading-relaxed">{msg.message}</Text>
+                      {pick(msg, 'message') && (
+                        <View className="flex-1 bg-white/60 rounded-lg p-3">
+                          <Text className="block text-sm text-[#6b5b4a] leading-relaxed">{pick(msg, 'message')}</Text>
                         </View>
                       )}
                     </View>
                   </View>
                 );
               } else {
-                // 普通留言
-                const isMyComment = msg.author_name === visitorName.trim();
+                // 普通留言（兼容 createdAt / created_at）
+                const cmt = msg as any;
+                const authorName = pick(cmt, 'authorName', 'author_name');
+                const authorAvatar = pick(cmt, 'authorAvatar', 'author_avatar');
+                const isMyComment = authorName === visitorName.trim();
                 return (
-                  <View key={msg.id} className="bg-[#eef3e4] rounded-xl p-4">
+                  <View key={cmt.id} className="bg-[#eef3e4] rounded-2xl p-4">
                     <View className="flex items-center justify-between mb-2">
                       <View className="flex items-center gap-2">
                         <View className="w-8 h-8 rounded-full bg-[#cfe0d3] flex items-center justify-center overflow-hidden">
-                          {msg.author_avatar ? (
-                            <Image src={msg.author_avatar} className="w-full h-full" mode="aspectFill" />
+                          {authorAvatar ? (
+                            <Image src={authorAvatar} className="w-full h-full" mode="aspectFill" />
                           ) : (
-                            <Text className="text-xs text-slate-500">{msg.author_name.charAt(0)}</Text>
+                            <Text className="text-xs text-slate-500">{(authorName || '访').charAt(0)}</Text>
                           )}
                         </View>
-                        <Text className="block text-sm font-medium text-slate-700">{msg.author_name}</Text>
+                        <Text className="block text-sm font-medium text-[#3f5d50]">{authorName || '访客'}</Text>
                       </View>
                       <View className="flex items-center gap-2">
-                        <Text className="block text-xs text-slate-500">{formatTime(msg.created_at)}</Text>
+                        <Text className="block text-xs text-[#8a7a6a]">{formatTime(cmt)}</Text>
                         {isMyComment && (
                           <View
-                            className="px-2 py-1 bg-red-100 rounded-full"
-                            onClick={() => handleDeleteComment(msg.id, msg.author_name)}
+                            className="px-2 py-1 bg-[#f3d9c2] rounded-full"
+                            onClick={() => handleDeleteComment(cmt.id, authorName)}
                           >
-                            <Text className="text-xs text-red-500">删除</Text>
+                            <Text className="text-xs text-[#a85c3f]">删除</Text>
                           </View>
                         )}
                       </View>
                     </View>
-                    <Text className="block text-sm text-slate-600 leading-relaxed">{msg.content}</Text>
+                    <Text className="block text-sm text-[#6b5b4a] leading-relaxed">{pick(cmt, 'content')}</Text>
                   </View>
                 );
               }
@@ -699,23 +769,23 @@ const DetailPage = () => {
         )}
 
         {/* 留言输入 */}
-        <View className="mt-4 pt-4 border-t border-[#dbe8dd]">
+        <View className="mt-4 pt-4 border-t border-[#e5ddd0]">
           {/* 用户信息 */}
           <View className="flex items-center gap-3 mb-3 px-1">
             <View className="w-10 h-10 rounded-full bg-[#cfe0d3] flex items-center justify-center overflow-hidden">
               {visitorAvatar ? (
                 <Image src={visitorAvatar} className="w-full h-full" mode="aspectFill" />
               ) : (
-                <Text className="text-sm text-slate-500">{visitorName.charAt(0) || '访'}</Text>
+                <Text className="text-sm text-slate-500">{(visitorName || '访').charAt(0)}</Text>
               )}
             </View>
             <View>
-              <Text className="block text-sm font-medium text-slate-700">{visitorName || '访客'}</Text>
+              <Text className="block text-sm font-medium text-[#3f5d50]">{visitorName || '访客'}</Text>
             </View>
           </View>
-          
+
           {/* 输入框 */}
-          <View className="bg-[#eef3e4] rounded-xl p-4 mb-3">
+          <View className="bg-[#eef3e4] rounded-2xl p-4 mb-3">
             <Textarea
               style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', textAlign: 'left' }}
               placeholder="写下您的思念..."
@@ -727,11 +797,11 @@ const DetailPage = () => {
               <Text className="text-xs text-slate-400">{message.length}/500</Text>
             </View>
           </View>
-          
+
           {/* 发送按钮 */}
           <View className="flex justify-end">
             <Button
-              className="bg-[#6f9b86] text-white rounded-full px-6 py-2 flex items-center gap-2"
+              className="!bg-[#7bac8f] !text-white !rounded-full !px-6 !py-2 !border-0 flex items-center gap-2"
               onClick={handleComment}
             >
               <Send size={16} color="#ffffff" />
@@ -756,10 +826,10 @@ const DetailPage = () => {
         >
           <View className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {/* 弹窗头部 */}
-            <View className="px-6 py-4 border-b border-[#dbe8dd] flex items-center justify-between">
+            <View className="px-6 py-4 border-b border-[#e5ddd0] flex items-center justify-between">
               <Text className="text-lg font-bold text-[#3f5d50]">选择礼物</Text>
               <View className="p-2" onClick={() => { setShowGiftModal(false); setSelectedGift(null); setGiftMessage(''); }}>
-                <X size={24} color="#94a3b8" />
+                <X size={24} color="#8a7a6a" />
               </View>
             </View>
 
@@ -770,15 +840,15 @@ const DetailPage = () => {
                   <View
                     key={gift.id}
                     className={`flex flex-col items-center justify-end p-4 rounded-2xl border-2 min-h-[140px] ${
-                      selectedGift?.id === gift.id ? 'border-[#6f9b86] bg-[#eef3e4]' : 'border-transparent bg-gray-50'
+                      selectedGift?.id === gift.id ? 'border-[#7bac8f] bg-[#eef3e4]' : 'border-transparent bg-[#f7f1e2]'
                     }`}
                     onClick={() => setSelectedGift(gift)}
                   >
                     <View className="flex-1 flex items-center justify-center w-full mb-2">
                       <GiftIcon icon={gift.icon} size="normal" />
                     </View>
-                    <Text className={`text-sm font-semibold ${gift.color}`}>{gift.name}</Text>
-                    <Text className="text-xs text-gray-500 mt-1">{gift.price || 0}积分</Text>
+                    <Text className={`block text-sm font-semibold ${gift.color || 'text-[#7a6a54]'}`}>{gift.name}</Text>
+                    <Text className="block text-xs text-[#8a7a6a] mt-1">{gift.price || 0}积分</Text>
                   </View>
                 ))}
               </View>
@@ -786,9 +856,9 @@ const DetailPage = () => {
 
             {/* 留言输入 */}
             {selectedGift && (
-              <View className="px-6 py-4 border-t border-[#dbe8dd]">
-                <Text className="block text-sm font-medium text-slate-700 mb-2">给故人留句话（可选）</Text>
-                <View className="bg-[#eef3e4] rounded-xl p-4">
+              <View className="px-6 py-4 border-t border-[#e5ddd0]">
+                <Text className="block text-sm font-medium text-[#3f5d50] mb-2">给故人留句话（可选）</Text>
+                <View className="bg-[#eef3e4] rounded-2xl p-4">
                   <Textarea
                     style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
                     placeholder="写下您的思念..."
@@ -802,9 +872,9 @@ const DetailPage = () => {
             )}
 
             {/* 确认按钮 */}
-            <View className="px-6 py-4 border-t border-[#dbe8dd]">
+            <View className="px-6 py-4 border-t border-[#e5ddd0]">
               <Button
-                className={`w-full rounded-full py-3 ${selectedGift ? 'bg-[#6f9b86] text-white' : 'bg-gray-200 text-gray-400'}`}
+                className={`!rounded-full !py-3 ${selectedGift ? '!bg-[#7bac8f] !text-white' : '!bg-[#eee7db] !text-[#a89a85]'}`}
                 onClick={handleSendGift}
                 disabled={!selectedGift || isSendingGift}
               >
@@ -823,20 +893,20 @@ const DetailPage = () => {
           onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}
         >
           <View className="bg-white rounded-2xl mx-6 w-full max-w-sm overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <View className="bg-[#6f9b86] px-6 py-4">
-              <Text className="text-lg font-bold text-white text-center">确认删除</Text>
+            <View className="bg-[#7bac8f] px-6 py-4">
+              <Text className="block text-lg font-bold text-white text-center">确认删除</Text>
             </View>
             <View className="px-6 py-6">
-              <Text className="text-base text-slate-600 text-center leading-relaxed">确定要删除这条留言吗？</Text>
-              <Text className="text-sm text-slate-400 text-center mt-2">删除后无法恢复</Text>
+              <Text className="block text-base text-slate-600 text-center leading-relaxed">确定要删除这条留言吗？</Text>
+              <Text className="block text-sm text-slate-400 text-center mt-2">删除后无法恢复</Text>
             </View>
-            <View className="flex border-t border-[#dbe8dd]">
-              <View className="flex-1 py-4 bg-[#eef3e4] flex items-center justify-center" onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}>
-                <Text className="text-base text-slate-600 text-center font-medium">取消</Text>
+            <View className="flex border-t border-[#e5ddd0]">
+              <View className="flex-1 py-4 bg-[#f3ead9] flex items-center justify-center" onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}>
+                <Text className="block text-base text-slate-600 text-center font-medium">取消</Text>
               </View>
-              <View className="w-px bg-[#dbe8dd]" />
-              <View className="flex-1 py-4 bg-[#6f9b86] flex items-center justify-center" onClick={confirmDeleteComment}>
-                <Text className="text-base text-white text-center font-medium">确定</Text>
+              <View className="w-px bg-[#e5ddd0]" />
+              <View className="flex-1 py-4 bg-[#7bac8f] flex items-center justify-center" onClick={confirmDeleteComment}>
+                <Text className="block text-base text-white text-center font-medium">确定</Text>
               </View>
             </View>
           </View>

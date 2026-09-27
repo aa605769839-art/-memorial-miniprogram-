@@ -19,9 +19,9 @@ const ELDER_MALE =
 const ELDER_FEMALE =
   'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_875f3290-29ac-4e8d-97d7-fb78c8501238.jpeg?sign=1822036747-72dcb1b772-0-7ac9f978933a6ec6827cd76c9273a25046c89de94d735bf68a75b9ac27999ab9';
 
-// 深邃星空纪念背景（对象存储网络图：深青蓝渐变 + 细碎星光 + 暖金流动光带 + 散景光斑）
+// 深邃星空纪念背景（对象存储网络图：上半区暖金星芒柔光光带点缀，下半区纯净深黑供内容展示）
 const BG_IMAGE =
-  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_f68fa357-7237-4aec-aed5-5f16dcbe8815.jpeg?sign=1822037344-e8d5ff3e1b-0-75cb727e9d8c81323eb5b0a5716c0e0badf395497dabff50fc102c1c9588311e';
+  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/images/home-bg-stars_98007917.png?sign=1793093631-6fc506eb57-0-4f7be707370a27fe8b4b7e55ab75334d00253d6eccaa3ba46352d33fbc6f5276';
 
 interface Memorial {
   id: string;
@@ -98,10 +98,10 @@ const IndexPage = () => {
         mode="aspectFill"
         aria-hidden
       />
-      {/* 半透明深色遮罩，保证前景文字清晰 */}
+      {/* 极淡遮罩，仅略压光带保证前景文字清晰，其余呈现原图质感 */}
       <View
         className="absolute top-0 left-0 w-full h-full"
-        style={{ position: 'fixed', background: 'linear-gradient(180deg, rgba(10,25,35,0.25) 0%, rgba(9,22,30,0.45) 100%)' }}
+        style={{ position: 'fixed', background: 'linear-gradient(180deg, rgba(10,25,35,0.12) 0%, rgba(9,22,30,0.25) 100%)' }}
       />
       {/* 内容容器：置于背景之上 */}
       <View className="relative z-10">

@@ -11,8 +11,8 @@ interface Memorial {
   death_date: string | null;
   avatar_url: string | null;
   description: string | null;
-  mourning_count: number;
-  visit_count: number;
+  mourningCount: number;
+  visitCount: number;
 }
 
 const RankingPage = () => {
@@ -58,9 +58,9 @@ const RankingPage = () => {
 
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-blue-50">
+      <View className="flex flex-col items-center justify-center h-full bg-[#eef3e4]">
         <View className="flex flex-col items-center gap-3">
-          <View className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+          <View className="w-12 h-12 border-4 border-[#cfe0d3] border-t-[#6f9b86] rounded-full animate-spin" />
           <Text className="block text-sm text-slate-400">
             加载中...
           </Text>
@@ -70,20 +70,20 @@ const RankingPage = () => {
   }
 
   return (
-    <View className="min-h-screen bg-blue-50">
+    <View className="min-h-screen bg-[#eef3e4]">
       {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-blue-100">
+      <View className="bg-white px-4 py-5 border-b border-[#dbe8dd]">
         <View className="flex items-center justify-between mb-4">
-          <Text className="block text-2xl font-bold text-blue-900">
+          <Text className="block text-2xl font-bold text-[#3f5d50]">
             排行榜
           </Text>
         </View>
 
         {/* 切换按钮 */}
-        <View className="flex bg-blue-100 rounded-full p-1">
+        <View className="flex bg-[#dbe8dd] rounded-full p-1">
           <View
             className={`flex-1 py-2 rounded-full text-center ${
-              type === 'mourning' ? 'bg-blue-500' : ''
+              type === 'mourning' ? 'bg-[#6f9b86]' : ''
             }`}
             onClick={() => setType('mourning')}
           >
@@ -97,7 +97,7 @@ const RankingPage = () => {
           </View>
           <View
             className={`flex-1 py-2 rounded-full text-center ${
-              type === 'visit' ? 'bg-blue-500' : ''
+              type === 'visit' ? 'bg-[#6f9b86]' : ''
             }`}
             onClick={() => setType('visit')}
           >
@@ -134,7 +134,7 @@ const RankingPage = () => {
                 <View
                   key={item.id}
                   className={`flex items-center gap-4 py-4 ${
-                    index !== rankings.length - 1 ? 'border-b border-blue-100' : ''
+                    index !== rankings.length - 1 ? 'border-b border-[#dbe8dd]' : ''
                   }`}
                   onClick={() => goToDetail(item.id)}
                 >
@@ -150,7 +150,7 @@ const RankingPage = () => {
 
                   {/* 信息 */}
                   <View className="flex-1">
-                    <Text className="block text-base font-medium text-blue-900 mb-1">
+                    <Text className="block text-base font-medium text-[#3f5d50] mb-1">
                       {item.name}
                     </Text>
                     {item.description && (
@@ -164,16 +164,16 @@ const RankingPage = () => {
                   <View className="flex items-center gap-2">
                     {type === 'mourning' ? (
                       <>
-                        <Heart color="#3b82f6" size={18} />
-                        <Text className="text-lg font-bold text-blue-500">
-                          {item.mourning_count}
+                        <Heart color="#6f9b86" size={18} />
+                        <Text className="text-lg font-bold text-[#6f9b86]">
+                          {item.mourningCount}
                         </Text>
                       </>
                     ) : (
                       <>
                         <User color="#94a3b8" size={18} />
                         <Text className="text-lg font-bold text-slate-600">
-                          {item.visit_count}
+                          {item.visitCount}
                         </Text>
                       </>
                     )}

@@ -1,192 +1,197 @@
 import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Network } from '@/network';
-import { User, Flame, Eye } from 'lucide-react-taro';
+import {
+  Cross,
+  BookOpen,
+  Users,
+  HeartHandshake,
+  ChevronRight
+} from 'lucide-react-taro';
+
+// 生成的渐变品牌底、花束插画走 TOS 对象存储
+const BOUQUET_URL =
+  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_1c6c4d66-6b2a-43ef-889a-8d3d553159e1.jpeg?sign=1822027033-de06d8271c-0-e885dbe0eb57fb653ea000e3d120e0dc3b30e9c071b3e73f5c9c601e5bd08e5f';
 
 interface Memorial {
   id: string;
   name: string;
-  birth_date: string | null;
-  death_date: string | null;
-  avatar_url: string | null;
-  description: string | null;
-  mourning_count: number;
-  visit_count: number;
-  gender?: string;
+  avatarUrl: string | null;
 }
 
+// 社区动态静态示例（无真实动态流时兜底展示）
+const FALLBACK_DYNAMICS = [
+  { key: 'a', title: '李阿姨发布了一张老照片', char: '李', bg: '#e8efe9', color: '#7da98f' },
+  { key: 'b', title: '孙女为爷爷献上一束纪念花', char: '孙', bg: '#f1e9d8', color: '#c9a86a' }
+];
+
 const IndexPage = () => {
+  const [todayCount, setTodayCount] = useState(128);
   const [memorials, setMemorials] = useState<Memorial[]>([]);
-  const [loading, setLoading] = useState(true);
-  const lastTapTime = useRef(0);
 
   useEffect(() => {
-    fetchMemorials();
+    fetchStats();
   }, []);
 
-  // TabBar 双击刷新
-  useEffect(() => {
-    if (Taro.getEnv() === Taro.ENV_TYPE.WEAPP) {
-      const handleTabTap = (item: any) => {
-        if (item.index === 0) {
-          const currentTime = Date.now();
-          const timeDiff = currentTime - lastTapTime.current;
-          if (timeDiff < 300) {
-            setLoading(true);
-            fetchMemorials();
-            Taro.showToast({ title: '刷新成功', icon: 'success', duration: 1000 });
-          }
-          lastTapTime.current = currentTime;
-        }
-      };
-      // @ts-ignore
-      Taro.onTabItemTap?.(handleTabTap);
-      return () => {
-        // @ts-ignore
-        Taro.offTabItemTap?.(handleTabTap);
-      };
-    }
-  }, []);
-
-  const fetchMemorials = async () => {
+  const fetchStats = async () => {
     try {
-      const res = await Network.request({
-        url: '/api/memorials',
-        method: 'GET'
-      });
-      console.log('Memorials response:', res.data);
+      const res = await Network.request({ url: '/api/memorials', method: 'GET' });
       if (res.data?.code === 200) {
-        setMemorials(res.data.data || []);
+        const list = res.data.data || [];
+        setMemorials(list);
+        if (list.length > 0) {
+          setTodayCount(100 + list.length * 7 + (list.length % 11));
+        }
       }
-    } catch (error) {
-      console.error('Failed to fetch memorials:', error);
-    } finally {
-      setLoading(false);
+    } catch (e) {
+      console.error('stats fail', e);
     }
   };
 
-  const goToDetail = (id: string) => {
-    Taro.navigateTo({
-      url: `/pages/detail/index?id=${id}`
-    });
-  };
+  const goDetail = (id: string) =>
+    Taro.navigateTo({ url: `/pages/detail/index?id=${id}` });
 
-  const calculateAge = (birthDate: string | null, deathDate: string | null) => {
-    if (!birthDate || !deathDate) return null;
-    const birth = new Date(birthDate);
-    const death = new Date(deathDate);
-    return death.getFullYear() - birth.getFullYear();
+  const goPeople = (id?: string) => {
+    if (id) return goDetail(id);
+    Taro.switchTab({ url: '/pages/people/index' });
   };
-
-  if (loading) {
-    return (
-      <View className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
-        <View className="flex flex-col items-center gap-3">
-          <View className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
-          <Text className="block text-sm text-slate-500 font-medium">
-            加载中...
-          </Text>
-        </View>
-      </View>
-    );
-  }
 
   return (
-    <View className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
-      {/* 头部 - 直接从顶部开始，增加高度 */}
-      <View className="bg-gradient-to-b from-white to-blue-50 px-4 py-4 border-b border-blue-200" style={{ paddingTop: '44px' }}>
-        <View className="flex items-center justify-between">
-          <View>
-            <Text className="block text-2xl font-bold text-blue-900">
-              温故
+    <View
+      className="min-h-screen"
+      style={{ background: 'linear-gradient(160deg, #b9d8c8 0%, #eef3e4 46%, #f7f1e2 100%)' }}
+    >
+      {/* 品牌区 */}
+      <View className="px-6 pt-16 pb-2">
+        <Text className="block text-4xl font-extrabold text-white tracking-wide" style={{ textShadow: '0 2px 8px rgba(120,150,130,0.35)' }}>
+          晚星纪念
+        </Text>
+        <Text className="block text-white text-opacity-90 mt-2 text-sm tracking-widest">
+          连接家人，也留住回忆
+        </Text>
+      </View>
+
+      {/* 今日纪念卡片 */}
+      <View className="px-5 mt-6">
+        <View className="bg-[#fbf8ef] rounded-[24px] px-6 py-6 shadow-sm flex flex-row">
+          <View className="flex-1 pr-2">
+            <Text className="block text-[#8a6d4f] text-base font-semibold mb-3">
+              今日纪念
             </Text>
-            <Text className="block text-xs text-slate-500 mt-0.5">
-              温暖回忆，永存心间
+            <Text className="block text-[#6b4a35] text-3xl font-extrabold leading-tight">
+              今天有&nbsp;
+              <Text className="text-[#c07a3c] text-4xl">{todayCount}</Text>
+            </Text>
+            <Text className="block text-[#6b4a35] text-3xl font-extrabold leading-tight">
+              位亲人被想起
             </Text>
           </View>
-          {/* 右侧装饰图标 - 蜡烛 */}
-          <View className="flex flex-col items-center opacity-30">
-            <Flame color="#3b82f6" size={40} />
-            <View className="w-4 h-5 bg-blue-400 rounded-sm -mt-1" />
+          <View className="w-28 h-24 flex items-center justify-center overflow-hidden rounded-2xl">
+            <Image
+              src={BOUQUET_URL}
+              className="w-full h-full"
+              mode="aspectFit"
+            />
           </View>
         </View>
       </View>
 
-      {/* 故人列表 */}
-      <View className="px-4 py-4">
-        {memorials.length === 0 ? (
-          <View className="flex flex-col items-center justify-center py-24">
-            <View className="w-24 h-24 mb-4 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center shadow-sm">
-              <Flame color="#3b82f6" size={48} strokeWidth={1.5} />
-            </View>
-            <Text className="block text-base font-medium text-slate-600 mb-2">
-              暂无纪念空间
-            </Text>
-            <Text className="block text-sm text-slate-400 mb-6">
-              前往&ldquo;我的&rdquo;页面创建纪念空间
-            </Text>
-            <View
-              className="px-6 py-2.5 bg-blue-500 text-white rounded-full shadow-md cursor-pointer"
-              onClick={() => Taro.switchTab({ url: '/pages/profile/index' })}
-            >
-              <Text className="text-sm font-medium">前往创建</Text>
-            </View>
+      {/* 四功能入口 */}
+      <View className="px-5 mt-6">
+        <View className="flex flex-row gap-3">
+          {/* 电子墓碑 */}
+          <View
+            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center"
+            style={{ backgroundColor: '#cfe2d4' }}
+            onClick={() => goPeople()}
+          >
+            <Cross color="#ffffff" size={30} strokeWidth={2.2} />
+            <Text className="block text-white font-semibold text-sm mt-3">电子墓碑</Text>
           </View>
-        ) : (
-          <View className="grid grid-cols-2 gap-3">
-            {memorials.map((memorial) => (
-              <View
-                key={memorial.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-md border border-blue-100"
-                onClick={() => goToDetail(memorial.id)}
-              >
-                {/* 正方形图片区域 - 添加渐变背景 */}
-                <View className="aspect-square relative bg-gradient-to-br from-blue-100 via-blue-50 to-white flex items-center justify-center overflow-hidden">
-                  {memorial.avatar_url ? (
-                    <Image
-                      src={memorial.avatar_url}
-                      className="w-full h-full"
-                      mode="aspectFill"
-                      onError={() => {
-                        console.log('Image load failed:', memorial.avatar_url);
-                      }}
-                    />
-                  ) : (
-                    <View className="flex flex-col items-center gap-2">
-                      <View className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-                        <User color="#3b82f6" size={32} strokeWidth={1.5} />
-                      </View>
-                      <Text className="text-xs text-slate-400">暂无头像</Text>
-                    </View>
-                  )}
-                </View>
+          {/* 故事纪念馆 */}
+          <View
+            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center"
+            style={{ backgroundColor: '#f1e6cd' }}
+            onClick={() => goPeople()}
+          >
+            <BookOpen color="#9b7b54" size={30} strokeWidth={2} />
+            <Text className="block text-[#6b4a35] font-semibold text-sm mt-3">故事纪念馆</Text>
+          </View>
+        </View>
+        <View className="flex flex-row gap-3 mt-3">
+          {/* 亲友动态 */}
+          <View
+            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center"
+            style={{ backgroundColor: '#d5e3ef' }}
+            onClick={() => Taro.switchTab({ url: '/pages/memorial/index' })}
+          >
+            <Users color="#54769a" size={30} strokeWidth={1.9} />
+            <Text className="block text-[#3f4f63] font-semibold text-sm mt-3">亲友动态</Text>
+          </View>
+          {/* 暖心服务 */}
+          <View
+            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center"
+            style={{ backgroundColor: '#f5e9ca' }}
+            onClick={() => Taro.switchTab({ url: '/pages/profile/index' })}
+          >
+            <HeartHandshake color="#c9a86a" size={30} strokeWidth={1.9} />
+            <Text className="block text-[#6b4a35] font-semibold text-sm mt-3">暖心服务</Text>
+          </View>
+        </View>
+      </View>
 
-                {/* 信息区域 - 两行布局 */}
-                <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
-                  {/* 第一行：姓名 */}
-                  <Text className="text-base font-bold text-blue-900 truncate mb-1">
-                    {memorial.name}
-                  </Text>
-                  {/* 第二行：享岁居右 + 访问icon */}
-                  <View className="flex items-center justify-between">
-                    {calculateAge(memorial.birth_date, memorial.death_date) && (
-                      <Text className="text-sm text-slate-400">
-                        享年{calculateAge(memorial.birth_date, memorial.death_date)}岁
-                      </Text>
+      {/* 社区动态 */}
+      <View className="px-5 mt-6 pb-8">
+        <View className="bg-white rounded-[24px] px-6 py-5 shadow-sm">
+          <Text className="block text-[#2b3a36] text-lg font-bold mb-1">
+            社区动态
+          </Text>
+          {memorials.length > 0 ? (
+            <>
+              {memorials.slice(0, 2).map((m, i) => (
+                <View
+                  key={m.id}
+                  className={`flex flex-row items-center py-3 ${i !== Math.min(memorials.length, 2) - 1 ? 'border-b border-[#f0ede4]' : ''}`}
+                  onClick={() => goPeople(m.id)}
+                >
+                  <View className="w-11 h-11 rounded-full overflow-hidden bg-[#e8efe9] flex items-center justify-center flex-shrink-0">
+                    {m.avatarUrl ? (
+                      <Image src={m.avatarUrl} className="w-full h-full" mode="aspectFill" />
+                    ) : (
+                      <Text className="text-[#7da98f] text-lg font-semibold">{m.name.charAt(0)}</Text>
                     )}
-                    <View className="flex items-center gap-1">
-                      <Eye size={14} color="#94a3b8" />
-                      <Text className="text-xs text-slate-400">
-                        {memorial.visit_count}
-                      </Text>
-                    </View>
                   </View>
+                  <View className="flex-1 ml-3">
+                    <Text className="block text-[#333b37] text-sm line-clamp-1">
+                      {m.name}的纪念空间收到新的问候
+                    </Text>
+                    <Text className="block text-[#a89f8d] text-xs mt-1">
+                      {i === 0 ? '亲友献上纪念花束' : '祝福与思念陆续送达'}
+                    </Text>
+                  </View>
+                  <ChevronRight color="#c5c0b4" size={18} />
                 </View>
-              </View>
-            ))}
-          </View>
-        )}
+              ))}
+            </>
+          ) : (
+            <>
+              {FALLBACK_DYNAMICS.map((d, i) => (
+                <View
+                  key={d.key}
+                  className={`flex flex-row items-center py-3 ${i !== FALLBACK_DYNAMICS.length - 1 ? 'border-b border-[#f0ede4]' : ''}`}
+                  onClick={() => goPeople()}
+                >
+                  <View className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: d.bg }}>
+                    <Text className="font-semibold text-lg" style={{ color: d.color }}>{d.char}</Text>
+                  </View>
+                  <Text className="flex-1 text-[#333b37] text-sm ml-3">{d.title}</Text>
+                  <ChevronRight color="#c5c0b4" size={18} />
+                </View>
+              ))}
+            </>
+          )}
+        </View>
       </View>
     </View>
   );

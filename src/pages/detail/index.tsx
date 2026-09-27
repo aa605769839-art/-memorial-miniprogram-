@@ -442,8 +442,8 @@ const DetailPage = () => {
   // 加载中
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-blue-50">
-        <View className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+      <View className="flex flex-col items-center justify-center h-full bg-[#eef3e4]">
+        <View className="w-12 h-12 border-4 border-[#cfe0d3] border-t-[#6f9b86] rounded-full animate-spin" />
         <Text className="block text-sm text-slate-400 mt-3">加载中...</Text>
       </View>
     );
@@ -452,7 +452,7 @@ const DetailPage = () => {
   // 数据不存在
   if (!memorial) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-blue-50">
+      <View className="flex flex-col items-center justify-center h-full bg-[#eef3e4]">
         <Flower2 color="#94a3b8" size={64} strokeWidth={1.5} />
         <Text className="block text-base text-slate-500 mt-4">纪念空间不存在</Text>
       </View>
@@ -460,7 +460,7 @@ const DetailPage = () => {
   }
 
   return (
-    <View className="min-h-screen bg-blue-50 pb-32">
+    <View className="min-h-screen bg-[#eef3e4] pb-32">
       {/* 顶部操作栏 */}
       <View className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm px-4 pt-12 pb-3 flex justify-end">
         {isCreator && (
@@ -478,7 +478,7 @@ const DetailPage = () => {
       {/* 头像和基本信息 */}
       <View className="bg-white pt-16">
         {/* 正方形头像 */}
-        <View className="w-full aspect-square bg-blue-100 flex items-center justify-center overflow-hidden">
+        <View className="w-full aspect-square bg-[#dbe8dd] flex items-center justify-center overflow-hidden">
           {memorial.avatar_url ? (
             <Image
               src={memorial.avatar_url}
@@ -495,10 +495,10 @@ const DetailPage = () => {
         <View className="px-6 py-6 text-center">
           {/* 姓名 + 性别 */}
           <View className="flex items-center justify-center gap-2 mb-3">
-            <Text className="text-3xl font-bold text-blue-900">{memorial.name}</Text>
+            <Text className="text-3xl font-bold text-[#3f5d50]">{memorial.name}</Text>
             {memorial.gender === '男' && (
-              <View className="w-5 h-5 rounded-full border border-blue-400 flex items-center justify-center">
-                <Text className="text-blue-400 text-xs font-bold">♂</Text>
+              <View className="w-5 h-5 rounded-full border border-[#a8cbb8] flex items-center justify-center">
+                <Text className="text-[#7da98f] text-xs font-bold">♂</Text>
               </View>
             )}
             {memorial.gender === '女' && (
@@ -539,8 +539,8 @@ const DetailPage = () => {
           {memorial.description && (
             <View className="mb-4">
               <View className="flex items-center gap-2 mb-3">
-                <User color="#3b82f6" size={20} />
-                <Text className="block text-lg font-semibold text-blue-900">简介</Text>
+                <User color="#6f9b86" size={20} />
+                <Text className="block text-lg font-semibold text-[#3f5d50]">简介</Text>
               </View>
               <Text className="block text-sm text-slate-600 leading-relaxed">{memorial.description}</Text>
             </View>
@@ -549,13 +549,13 @@ const DetailPage = () => {
           {memorial.achievements && memorial.achievements.length > 0 && (
             <View>
               <View className="flex items-center gap-2 mb-3">
-                <Award color="#3b82f6" size={20} />
-                <Text className="block text-lg font-semibold text-blue-900">主要成就</Text>
+                <Award color="#6f9b86" size={20} />
+                <Text className="block text-lg font-semibold text-[#3f5d50]">主要成就</Text>
               </View>
               <View className="flex flex-col gap-2">
                 {memorial.achievements.map((achievement, index) => (
                   <View key={index} className="flex items-start gap-3">
-                    <View className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                    <View className="w-2 h-2 rounded-full bg-[#6f9b86] mt-2 flex-shrink-0" />
                     <Text className="block text-sm text-slate-600 leading-relaxed flex-1">{achievement}</Text>
                   </View>
                 ))}
@@ -569,10 +569,10 @@ const DetailPage = () => {
       {memorial.photos && memorial.photos.length > 0 && (
         <View className="bg-white mt-4 px-6 py-4">
           <View className="flex items-center justify-between mb-3">
-            <Text className="block text-lg font-semibold text-blue-900">生活照片</Text>
+            <Text className="block text-lg font-semibold text-[#3f5d50]">生活照片</Text>
             {memorial.photos.length > 3 && (
               <Text
-                className="text-sm text-blue-500"
+                className="text-sm text-[#6f9b86]"
                 onClick={() => setShowAllPhotos(!showAllPhotos)}
               >
                 {showAllPhotos ? '收起' : `展开全部${memorial.photos.length}张`}
@@ -595,10 +595,10 @@ const DetailPage = () => {
       )}
 
       {/* 底部操作按钮 */}
-      <View className="fixed bottom-0 left-0 right-0 bg-white border-t border-blue-100 p-4 z-50">
+      <View className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#dbe8dd] p-4 z-50">
         <View className="flex gap-3">
           <Button
-            className="flex-1 bg-blue-500 text-white rounded-full py-3 shadow-md flex items-center justify-center gap-2"
+            className="flex-1 bg-[#6f9b86] text-white rounded-full py-3 shadow-md flex items-center justify-center gap-2"
             onClick={() => {
               fetchGiftConfigs();
               setShowGiftModal(true);
@@ -608,7 +608,7 @@ const DetailPage = () => {
             <Text>悼念</Text>
           </Button>
           <Button
-            className="flex-1 bg-blue-100 text-blue-700 rounded-full py-3"
+            className="flex-1 bg-[#dbe8dd] text-[#2f4a3e] rounded-full py-3"
             onClick={handleVisit}
           >
             拜访
@@ -619,7 +619,7 @@ const DetailPage = () => {
       {/* 留言区域 */}
       <View className="bg-white mt-4 px-6 py-4 mb-20">
         <View className="flex items-center justify-between mb-4">
-          <Text className="block text-lg font-semibold text-blue-900">留言板</Text>
+          <Text className="block text-lg font-semibold text-[#3f5d50]">留言板</Text>
           <Text className="block text-sm text-slate-500">{messages.length} 条</Text>
         </View>
 
@@ -633,7 +633,7 @@ const DetailPage = () => {
               if (isGiftItem(msg)) {
                 // 礼物卡片
                 return (
-                  <View key={msg.id} className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-200">
+                  <View key={msg.id} className="bg-gradient-to-br from-[#eef3e4] to-[#eef3e4] rounded-xl p-4 border border-[#dbe8dd]">
                     <View className="flex items-center justify-between mb-3">
                       <View className="flex items-center gap-2">
                         <View className="w-8 h-8 rounded-full bg-pink-200 flex items-center justify-center overflow-hidden">
@@ -666,10 +666,10 @@ const DetailPage = () => {
                 // 普通留言
                 const isMyComment = msg.author_name === visitorName.trim();
                 return (
-                  <View key={msg.id} className="bg-blue-50 rounded-xl p-4">
+                  <View key={msg.id} className="bg-[#eef3e4] rounded-xl p-4">
                     <View className="flex items-center justify-between mb-2">
                       <View className="flex items-center gap-2">
-                        <View className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center overflow-hidden">
+                        <View className="w-8 h-8 rounded-full bg-[#cfe0d3] flex items-center justify-center overflow-hidden">
                           {msg.author_avatar ? (
                             <Image src={msg.author_avatar} className="w-full h-full" mode="aspectFill" />
                           ) : (
@@ -699,10 +699,10 @@ const DetailPage = () => {
         )}
 
         {/* 留言输入 */}
-        <View className="mt-4 pt-4 border-t border-blue-100">
+        <View className="mt-4 pt-4 border-t border-[#dbe8dd]">
           {/* 用户信息 */}
           <View className="flex items-center gap-3 mb-3 px-1">
-            <View className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center overflow-hidden">
+            <View className="w-10 h-10 rounded-full bg-[#cfe0d3] flex items-center justify-center overflow-hidden">
               {visitorAvatar ? (
                 <Image src={visitorAvatar} className="w-full h-full" mode="aspectFill" />
               ) : (
@@ -715,7 +715,7 @@ const DetailPage = () => {
           </View>
           
           {/* 输入框 */}
-          <View className="bg-blue-50 rounded-xl p-4 mb-3">
+          <View className="bg-[#eef3e4] rounded-xl p-4 mb-3">
             <Textarea
               style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', textAlign: 'left' }}
               placeholder="写下您的思念..."
@@ -731,7 +731,7 @@ const DetailPage = () => {
           {/* 发送按钮 */}
           <View className="flex justify-end">
             <Button
-              className="bg-blue-500 text-white rounded-full px-6 py-2 flex items-center gap-2"
+              className="bg-[#6f9b86] text-white rounded-full px-6 py-2 flex items-center gap-2"
               onClick={handleComment}
             >
               <Send size={16} color="#ffffff" />
@@ -756,8 +756,8 @@ const DetailPage = () => {
         >
           <View className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {/* 弹窗头部 */}
-            <View className="px-6 py-4 border-b border-blue-100 flex items-center justify-between">
-              <Text className="text-lg font-bold text-blue-900">选择礼物</Text>
+            <View className="px-6 py-4 border-b border-[#dbe8dd] flex items-center justify-between">
+              <Text className="text-lg font-bold text-[#3f5d50]">选择礼物</Text>
               <View className="p-2" onClick={() => { setShowGiftModal(false); setSelectedGift(null); setGiftMessage(''); }}>
                 <X size={24} color="#94a3b8" />
               </View>
@@ -770,7 +770,7 @@ const DetailPage = () => {
                   <View
                     key={gift.id}
                     className={`flex flex-col items-center justify-end p-4 rounded-2xl border-2 min-h-[140px] ${
-                      selectedGift?.id === gift.id ? 'border-blue-500 bg-blue-50' : 'border-transparent bg-gray-50'
+                      selectedGift?.id === gift.id ? 'border-[#6f9b86] bg-[#eef3e4]' : 'border-transparent bg-gray-50'
                     }`}
                     onClick={() => setSelectedGift(gift)}
                   >
@@ -786,9 +786,9 @@ const DetailPage = () => {
 
             {/* 留言输入 */}
             {selectedGift && (
-              <View className="px-6 py-4 border-t border-blue-100">
+              <View className="px-6 py-4 border-t border-[#dbe8dd]">
                 <Text className="block text-sm font-medium text-slate-700 mb-2">给故人留句话（可选）</Text>
-                <View className="bg-blue-50 rounded-xl p-4">
+                <View className="bg-[#eef3e4] rounded-xl p-4">
                   <Textarea
                     style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
                     placeholder="写下您的思念..."
@@ -802,9 +802,9 @@ const DetailPage = () => {
             )}
 
             {/* 确认按钮 */}
-            <View className="px-6 py-4 border-t border-blue-100">
+            <View className="px-6 py-4 border-t border-[#dbe8dd]">
               <Button
-                className={`w-full rounded-full py-3 ${selectedGift ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400'}`}
+                className={`w-full rounded-full py-3 ${selectedGift ? 'bg-[#6f9b86] text-white' : 'bg-gray-200 text-gray-400'}`}
                 onClick={handleSendGift}
                 disabled={!selectedGift || isSendingGift}
               >
@@ -823,19 +823,19 @@ const DetailPage = () => {
           onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}
         >
           <View className="bg-white rounded-2xl mx-6 w-full max-w-sm overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <View className="bg-blue-500 px-6 py-4">
+            <View className="bg-[#6f9b86] px-6 py-4">
               <Text className="text-lg font-bold text-white text-center">确认删除</Text>
             </View>
             <View className="px-6 py-6">
               <Text className="text-base text-slate-600 text-center leading-relaxed">确定要删除这条留言吗？</Text>
               <Text className="text-sm text-slate-400 text-center mt-2">删除后无法恢复</Text>
             </View>
-            <View className="flex border-t border-blue-100">
-              <View className="flex-1 py-4 bg-blue-50 flex items-center justify-center" onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}>
+            <View className="flex border-t border-[#dbe8dd]">
+              <View className="flex-1 py-4 bg-[#eef3e4] flex items-center justify-center" onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}>
                 <Text className="text-base text-slate-600 text-center font-medium">取消</Text>
               </View>
-              <View className="w-px bg-blue-100" />
-              <View className="flex-1 py-4 bg-blue-500 flex items-center justify-center" onClick={confirmDeleteComment}>
+              <View className="w-px bg-[#dbe8dd]" />
+              <View className="flex-1 py-4 bg-[#6f9b86] flex items-center justify-center" onClick={confirmDeleteComment}>
                 <Text className="text-base text-white text-center font-medium">确定</Text>
               </View>
             </View>

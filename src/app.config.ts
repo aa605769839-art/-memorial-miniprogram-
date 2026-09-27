@@ -1,30 +1,44 @@
 export default defineAppConfig({
   pages: [
     'pages/index/index',
+    'pages/people/index',
+    'pages/memorial/index',
+    'pages/profile/index',
     'pages/detail/index',
     'pages/ranking/index',
-    'pages/profile/index',
     'pages/profile/form',
     'pages/profile/memorials',
     'pages/admin/gift-configs/index'
   ],
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: 'WeChat',
+    navigationBarBackgroundColor: '#ffffff',
+    navigationBarTitleText: '晚星纪念',
     navigationBarTextStyle: 'black'
   },
   tabBar: {
-    color: '#94a3b8',
-    selectedColor: '#3b82f6',
+    color: '#b0a48f',
+    selectedColor: '#6f9b86',
     backgroundColor: '#ffffff',
-    borderStyle: 'black',
+    borderStyle: 'white',
     list: [
       {
         pagePath: 'pages/index/index',
         text: '首页',
         iconPath: './assets/tabbar/home.png',
         selectedIconPath: './assets/tabbar/home-active.png'
+      },
+      {
+        pagePath: 'pages/people/index',
+        text: '故人',
+        iconPath: './assets/tabbar/people.png',
+        selectedIconPath: './assets/tabbar/people-active.png'
+      },
+      {
+        pagePath: 'pages/memorial/index',
+        text: '纪念',
+        iconPath: './assets/tabbar/memorial.png',
+        selectedIconPath: './assets/tabbar/memorial-active.png'
       },
       {
         pagePath: 'pages/profile/index',

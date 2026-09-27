@@ -223,7 +223,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <View className="min-h-screen bg-blue-50 pb-6">
+    <View className="min-h-screen bg-[#eef3e4] pb-6">
       {/* 名片区域 */}
       <View className="px-4 py-6">
         <View className="bg-white rounded-2xl p-6 shadow-sm">
@@ -231,7 +231,7 @@ const ProfilePage = () => {
             className="flex items-center gap-4 cursor-pointer"
             onClick={handleEdit}
           >
-            <View className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <View className="w-20 h-20 rounded-full bg-[#dbe8dd] flex items-center justify-center overflow-hidden flex-shrink-0">
               {userProfile.avatar ? (
                 <Image
                   src={userProfile.avatar}
@@ -243,7 +243,7 @@ const ProfilePage = () => {
               )}
             </View>
             <View className="flex-1">
-              <Text className="block text-xl font-bold text-blue-900 mb-1">
+              <Text className="block text-xl font-bold text-[#3f5d50] mb-1">
                 {userProfile.name}
               </Text>
               <Text className="block text-sm text-slate-500 line-clamp-2">
@@ -266,7 +266,7 @@ const ProfilePage = () => {
             className="bg-white rounded-2xl p-6 mx-4 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <Text className="block text-lg font-bold text-blue-900 mb-4 text-center">
+            <Text className="block text-lg font-bold text-[#3f5d50] mb-4 text-center">
               编辑个人信息
             </Text>
             <View className="flex flex-col gap-4">
@@ -276,7 +276,7 @@ const ProfilePage = () => {
                   头像
                 </Text>
                 <View
-                  className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden mx-auto cursor-pointer"
+                  className="w-20 h-20 rounded-full bg-[#dbe8dd] flex items-center justify-center overflow-hidden mx-auto cursor-pointer"
                   onClick={handleAvatarUpload}
                 >
                   {tempAvatar ? (
@@ -297,7 +297,7 @@ const ProfilePage = () => {
                 <Text className="block text-sm font-medium text-slate-700 mb-2">
                   姓名 *
                 </Text>
-                <View className="bg-blue-50 rounded-xl px-4 py-3">
+                <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
                   <Input
                     className="w-full bg-transparent text-slate-700"
                     value={editForm.name}
@@ -310,7 +310,7 @@ const ProfilePage = () => {
                 <Text className="block text-sm font-medium text-slate-700 mb-2">
                   简介
                 </Text>
-                <View className="bg-blue-50 rounded-xl px-4 py-3">
+                <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
                   <Input
                     className="w-full bg-transparent text-slate-700"
                     value={editForm.bio}
@@ -327,7 +327,7 @@ const ProfilePage = () => {
                   取消
                 </Button>
                 <Button
-                  className="flex-1 bg-blue-500 text-white rounded-full py-3"
+                  className="flex-1 bg-[#eef3e4]0 text-white rounded-full py-3"
                   onClick={handleSave}
                 >
                   保存
@@ -346,8 +346,8 @@ const ProfilePage = () => {
             onClick={handleAddMemorial}
           >
             <View className="flex items-center gap-3">
-              <View className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <Heart color="#3b82f6" size={20} />
+              <View className="w-10 h-10 rounded-full bg-[#dbe8dd] flex items-center justify-center">
+                <Heart color="#6f9b86" size={20} />
               </View>
               <Text className="text-base text-slate-700">我的故友</Text>
             </View>
@@ -362,8 +362,8 @@ const ProfilePage = () => {
           {loginUser ? (
             <View className="px-6 py-4">
               <View className="flex items-center gap-3 mb-3">
-                <View className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <ShieldCheck color="#3b82f6" size={20} />
+                <View className="w-10 h-10 rounded-full bg-[#dbe8dd] flex items-center justify-center">
+                  <ShieldCheck color="#6f9b86" size={20} />
                 </View>
                 <View className="flex-1">
                   <Text className="block text-base font-bold text-slate-800">
@@ -382,11 +382,11 @@ const ProfilePage = () => {
               </View>
               {loginUser.role === 'admin' && (
                 <View
-                  className="flex items-center justify-between px-1 py-3 border-t border-blue-50"
+                  className="flex items-center justify-between px-1 py-3 border-t border-[#eef3e4]"
                   onClick={() => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' })}
                 >
                   <View className="flex items-center gap-2">
-                    <ShieldCheck color="#3b82f6" size={18} />
+                    <ShieldCheck color="#6f9b86" size={18} />
                     <Text className="text-sm text-slate-600">礼物配置管理</Text>
                   </View>
                   <ChevronRight color="#94a3b8" size={18} />
@@ -396,8 +396,8 @@ const ProfilePage = () => {
           ) : (
             <View className="px-6 py-4 flex items-center justify-between">
               <View className="flex items-center gap-3">
-                <View className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <LogIn color="#3b82f6" size={20} />
+                <View className="w-10 h-10 rounded-full bg-[#dbe8dd] flex items-center justify-center">
+                  <LogIn color="#6f9b86" size={20} />
                 </View>
                 <View>
                   <Text className="block text-base font-bold text-slate-800">未登录</Text>
@@ -405,7 +405,7 @@ const ProfilePage = () => {
                 </View>
               </View>
               <Button
-                className="bg-blue-500 text-white rounded-full px-5 py-1 text-sm"
+                className="bg-[#eef3e4]0 text-white rounded-full px-5 py-1 text-sm"
                 onClick={openLogin}
               >
                 登录/注册
@@ -423,18 +423,18 @@ const ProfilePage = () => {
           onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}
         >
           <View className="bg-white rounded-2xl p-6 mx-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <Text className="block text-lg font-bold text-blue-900 mb-4 text-center">
+            <Text className="block text-lg font-bold text-[#3f5d50] mb-4 text-center">
               {authTab === 'login' ? '登录' : '注册'}
             </Text>
             <View className="flex gap-2 mb-4">
               <Button
-                className={authTab === 'login' ? 'flex-1 bg-blue-500 text-white rounded-full py-2' : 'flex-1 bg-slate-100 text-slate-600 rounded-full py-2'}
+                className={authTab === 'login' ? 'flex-1 bg-[#eef3e4]0 text-white rounded-full py-2' : 'flex-1 bg-slate-100 text-slate-600 rounded-full py-2'}
                 onClick={() => setAuthTab('login')}
               >
                 登录
               </Button>
               <Button
-                className={authTab === 'register' ? 'flex-1 bg-blue-500 text-white rounded-full py-2' : 'flex-1 bg-slate-100 text-slate-600 rounded-full py-2'}
+                className={authTab === 'register' ? 'flex-1 bg-[#eef3e4]0 text-white rounded-full py-2' : 'flex-1 bg-slate-100 text-slate-600 rounded-full py-2'}
                 onClick={() => setAuthTab('register')}
               >
                 注册
@@ -443,7 +443,7 @@ const ProfilePage = () => {
             {authTab === 'register' && (
               <View className="mb-3">
                 <Text className="block text-sm font-medium text-slate-700 mb-2">昵称</Text>
-                <View className="bg-blue-50 rounded-xl px-4 py-3">
+                <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
                   <Input
                     className="w-full bg-transparent text-slate-700"
                     value={authForm.nickname}
@@ -455,7 +455,7 @@ const ProfilePage = () => {
             )}
             <View className="mb-3">
               <Text className="block text-sm font-medium text-slate-700 mb-2">账号</Text>
-              <View className="bg-blue-50 rounded-xl px-4 py-3">
+              <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
                 <Input
                   className="w-full bg-transparent text-slate-700"
                   value={authForm.username}
@@ -466,7 +466,7 @@ const ProfilePage = () => {
             </View>
             <View className="mb-4">
               <Text className="block text-sm font-medium text-slate-700 mb-2">密码</Text>
-              <View className="bg-blue-50 rounded-xl px-4 py-3">
+              <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
                 <Input
                   className="w-full bg-transparent text-slate-700"
                   password
@@ -477,7 +477,7 @@ const ProfilePage = () => {
               </View>
             </View>
             <Button
-              className="w-full bg-blue-500 text-white rounded-full py-3"
+              className="w-full bg-[#eef3e4]0 text-white rounded-full py-3"
               onClick={handleAuthSubmit}
               loading={authSubmitting}
             >
@@ -495,7 +495,7 @@ const ProfilePage = () => {
           onClick={(e) => { if (e.target === e.currentTarget) setConfirmLogout(false); }}
         >
           <View className="bg-white rounded-2xl p-6 mx-4 w-full max-w-xs" onClick={(e) => e.stopPropagation()}>
-            <Text className="block text-lg font-bold text-blue-900 mb-4 text-center">确认退出登录？</Text>
+            <Text className="block text-lg font-bold text-[#3f5d50] mb-4 text-center">确认退出登录？</Text>
             <View className="flex gap-3">
               <Button
                 className="flex-1 bg-slate-200 text-slate-700 rounded-full py-3"
@@ -504,7 +504,7 @@ const ProfilePage = () => {
                 取消
               </Button>
               <Button
-                className="flex-1 bg-blue-500 text-white rounded-full py-3"
+                className="flex-1 bg-[#eef3e4]0 text-white rounded-full py-3"
                 onClick={handleLogout}
               >
                 退出

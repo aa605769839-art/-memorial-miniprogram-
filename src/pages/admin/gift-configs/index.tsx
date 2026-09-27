@@ -95,7 +95,7 @@ const COLORS = [
   { value: 'text-orange-400', label: '橙色', bg: 'bg-orange-400' },
   { value: 'text-yellow-500', label: '黄色', bg: 'bg-yellow-500' },
   { value: 'text-green-500', label: '绿色', bg: 'bg-green-500' },
-  { value: 'text-blue-500', label: '蓝色', bg: 'bg-blue-500' },
+  { value: 'text-[#6f9b86]', label: '蓝色', bg: 'bg-[#6f9b86]' },
   { value: 'text-purple-500', label: '紫色', bg: 'bg-purple-500' },
 ];
 
@@ -341,7 +341,7 @@ const GiftConfigPage = () => {
   };
 
   return (
-    <View className="min-h-screen bg-gray-50">
+    <View className="min-h-screen bg-[#f7f1e2]">
       {/* API 配置弹窗 */}
       {showApiConfig && (
         <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -359,7 +359,7 @@ const GiftConfigPage = () => {
                 取消
               </Button>
               <Button
-                className="flex-1 bg-blue-500 text-white py-3 rounded-lg"
+                className="flex-1 bg-[#6f9b86] text-white py-3 rounded-lg"
                 onClick={() => {
                   Taro.setStorageSync('admin_api_base', apiBase);
                   setShowApiConfig(false);
@@ -384,7 +384,7 @@ const GiftConfigPage = () => {
           </View>
           <View className="flex gap-2">
             {activeTab === 'config' && (
-              <Button className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm" onClick={handleAdd}>
+              <Button className="bg-[#6f9b86] text-white px-4 py-2 rounded-lg text-sm" onClick={handleAdd}>
                 <View className="flex items-center gap-1">
                   <Plus size={16} />
                   <Text>新增</Text>
@@ -397,13 +397,13 @@ const GiftConfigPage = () => {
         {/* 标签页 */}
         <View className="flex border-b border-gray-200">
           <View
-            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'config' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
+            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'config' ? 'border-b-2 border-[#6f9b86] text-[#5f8b76] font-medium' : 'text-gray-500'}`}
             onClick={() => handleTabChange('config')}
           >
             <Text>礼物配置</Text>
           </View>
           <View
-            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'logs' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
+            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'logs' ? 'border-b-2 border-[#6f9b86] text-[#5f8b76] font-medium' : 'text-gray-500'}`}
             onClick={() => handleTabChange('logs')}
           >
             <Text>赠送日志</Text>
@@ -416,7 +416,7 @@ const GiftConfigPage = () => {
         <View className="p-4">
           {loading ? (
             <View className="flex flex-col items-center justify-center py-12">
-              <View className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <View className="w-8 h-8 border-2 border-[#6f9b86] border-t-transparent rounded-full animate-spin mb-4" />
               <Text className="text-gray-500">加载中...</Text>
             </View>
           ) : error ? (
@@ -426,7 +426,7 @@ const GiftConfigPage = () => {
                 <Button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm" onClick={() => setShowApiConfig(true)}>
                   配置地址
                 </Button>
-                <Button className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm" onClick={loadGiftConfigs}>
+                <Button className="bg-[#6f9b86] text-white px-4 py-2 rounded-lg text-sm" onClick={loadGiftConfigs}>
                   重新加载
                 </Button>
               </View>
@@ -451,7 +451,7 @@ const GiftConfigPage = () => {
                           <View className={`w-3 h-3 rounded-full ${config.color.replace('text-', 'bg-')}`} />
                           <Text className="text-xs text-gray-500">{config.isEnabled ? '已启用' : '已禁用'}</Text>
                           <Text className="text-xs text-orange-500 font-medium">{config.price || 0}积分</Text>
-                          {isImageUrl(config.icon) && <Text className="text-xs text-blue-500">图片</Text>}
+                          {isImageUrl(config.icon) && <Text className="text-xs text-[#6f9b86]">图片</Text>}
                         </View>
                       </View>
                     </View>
@@ -463,7 +463,7 @@ const GiftConfigPage = () => {
                         <ArrowDown size={18} color="#6b7280" />
                       </View>
                       <View className="p-2" onClick={() => handleEdit(config)}>
-                        <Pencil size={18} color="#3b82f6" />
+                        <Pencil size={18} color="#6f9b86" />
                       </View>
                       <View className="p-2" onClick={() => handleDelete(config.id)}>
                         <Trash2 size={18} color="#ef4444" />
@@ -479,13 +479,13 @@ const GiftConfigPage = () => {
         <View className="p-4">
           {logsLoading ? (
             <View className="flex flex-col items-center justify-center py-12">
-              <View className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <View className="w-8 h-8 border-2 border-[#6f9b86] border-t-transparent rounded-full animate-spin mb-4" />
               <Text className="text-gray-500">加载中...</Text>
             </View>
           ) : logsError ? (
             <View className="flex flex-col items-center justify-center py-12">
               <Text className="text-red-500 mb-2">{logsError}</Text>
-              <Button className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm" onClick={() => loadGiftLogs(logsPage)}>
+              <Button className="bg-[#6f9b86] text-white px-4 py-2 rounded-lg text-sm" onClick={() => loadGiftLogs(logsPage)}>
                 重新加载
               </Button>
             </View>
@@ -506,11 +506,11 @@ const GiftConfigPage = () => {
                         <Text className="font-semibold text-gray-900">{log.gift_name}</Text>
                         <Text className="text-xs text-gray-400">{new Date(log.created_at).toLocaleString()}</Text>
                       </View>
-                      <View className="bg-blue-50 rounded-lg p-3 mb-2">
+                      <View className="bg-[#eef3e4] rounded-lg p-3 mb-2">
                         <Text className="text-sm text-gray-600">
-                          <Text className="font-medium text-blue-600">{log.sender_name}</Text>
+                          <Text className="font-medium text-[#5f8b76]">{log.sender_name}</Text>
                           <Text className="text-gray-400"> 赠送给 </Text>
-                          <Text className="font-medium text-blue-600">{log.memorial_name}</Text>
+                          <Text className="font-medium text-[#5f8b76]">{log.memorial_name}</Text>
                         </Text>
                         {log.message && (
                           <Text className="text-sm text-gray-500 mt-1 italic">&quot;{log.message}&quot;</Text>
@@ -524,7 +524,7 @@ const GiftConfigPage = () => {
               {logsTotal > 20 && (
                 <View className="flex items-center justify-center gap-4 mt-6">
                   <Button
-                    className={`px-4 py-2 rounded-lg text-sm ${logsPage === 1 ? 'bg-gray-200 text-gray-400' : 'bg-blue-500 text-white'}`}
+                    className={`px-4 py-2 rounded-lg text-sm ${logsPage === 1 ? 'bg-gray-200 text-gray-400' : 'bg-[#6f9b86] text-white'}`}
                     onClick={() => { if (logsPage > 1) { const p = logsPage - 1; setLogsPage(p); loadGiftLogs(p); }}}
                     disabled={logsPage === 1}
                   >
@@ -532,7 +532,7 @@ const GiftConfigPage = () => {
                   </Button>
                   <Text className="text-gray-600">第 {logsPage} 页</Text>
                   <Button
-                    className={`px-4 py-2 rounded-lg text-sm ${logsPage >= Math.ceil(logsTotal / 20) ? 'bg-gray-200 text-gray-400' : 'bg-blue-500 text-white'}`}
+                    className={`px-4 py-2 rounded-lg text-sm ${logsPage >= Math.ceil(logsTotal / 20) ? 'bg-gray-200 text-gray-400' : 'bg-[#6f9b86] text-white'}`}
                     onClick={() => { const total = Math.ceil(logsTotal / 20); if (logsPage < total) { const p = logsPage + 1; setLogsPage(p); loadGiftLogs(p); }}}
                     disabled={logsPage >= Math.ceil(logsTotal / 20)}
                   >
@@ -568,13 +568,13 @@ const GiftConfigPage = () => {
                 <Text className="text-sm text-gray-600 mb-2">图标类型</Text>
                 <View className="flex gap-2">
                   <View
-                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'emoji' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'emoji' ? 'bg-[#6f9b86] text-white' : 'bg-gray-100 text-gray-700'}`}
                     onClick={() => { setIconType('emoji'); setFormData({ ...formData, icon: '' }); }}
                   >
                     <Text>Emoji 表情</Text>
                   </View>
                   <View
-                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'image' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'image' ? 'bg-[#6f9b86] text-white' : 'bg-gray-100 text-gray-700'}`}
                     onClick={() => { setIconType('image'); setFormData({ ...formData, icon: '' }); }}
                   >
                     <Text>上传图片</Text>
@@ -590,7 +590,7 @@ const GiftConfigPage = () => {
                     {PRESET_EMOJIS.map((emoji) => (
                       <View
                         key={emoji}
-                        className={`w-10 h-10 flex items-center justify-center text-2xl rounded-lg cursor-pointer ${formData.icon === emoji ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-50'}`}
+                        className={`w-10 h-10 flex items-center justify-center text-2xl rounded-lg cursor-pointer ${formData.icon === emoji ? 'bg-[#dbe8dd] border-2 border-[#6f9b86]' : 'bg-gray-50'}`}
                         onClick={() => setFormData({ ...formData, icon: emoji })}
                       >
                         <Text>{emoji}</Text>
@@ -626,7 +626,7 @@ const GiftConfigPage = () => {
                       onClick={handleUploadImage}
                     >
                       {uploading ? (
-                        <View className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                        <View className="w-6 h-6 border-2 border-[#6f9b86] border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <>
                           <Text className="text-3xl text-gray-400 mb-1">🖼️</Text>
@@ -677,7 +677,7 @@ const GiftConfigPage = () => {
               <Button className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg" onClick={() => setShowModal(false)}>
                 取消
               </Button>
-              <Button className="flex-1 bg-blue-500 text-white py-3 rounded-lg" onClick={handleSubmit}>
+              <Button className="flex-1 bg-[#6f9b86] text-white py-3 rounded-lg" onClick={handleSubmit}>
                 保存
               </Button>
             </View>

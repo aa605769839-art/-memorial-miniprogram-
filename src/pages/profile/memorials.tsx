@@ -73,10 +73,10 @@ const MyMemorialsPage = () => {
   };
 
   return (
-    <View className="min-h-screen bg-blue-50 pb-6">
+    <View className="min-h-screen bg-[#eef3e4] pb-6">
       {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-blue-100 relative">
-        <Text className="block text-2xl font-bold text-blue-900">
+      <View className="bg-white px-4 py-5 border-b border-[#dbe8dd] relative">
+        <Text className="block text-2xl font-bold text-[#3f5d50]">
           我的故友
         </Text>
         {/* 新建按钮 - 右上角 */}
@@ -108,10 +108,10 @@ const MyMemorialsPage = () => {
             {memorials.map((memorial) => (
               <View
                 key={memorial.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer border border-blue-100"
+                className="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer border border-[#dbe8dd]"
                 onClick={() => handleMemorialClick(memorial.id)}
               >
-                <View className="w-full aspect-square bg-blue-100 overflow-hidden">
+                <View className="w-full aspect-square bg-[#dbe8dd] overflow-hidden">
                   {memorial.avatar_url ? (
                     <Image
                       src={memorial.avatar_url}
@@ -127,9 +127,9 @@ const MyMemorialsPage = () => {
                   )}
                 </View>
                 {/* 信息区域 - 两行布局 */}
-                <View className="p-3 bg-gradient-to-b from-blue-50 to-white">
+                <View className="p-3 bg-gradient-to-b from-[#eef3e4] to-white">
                   {/* 第一行：姓名 */}
-                  <Text className="text-base font-bold text-blue-900 truncate mb-1">
+                  <Text className="text-base font-bold text-[#3f5d50] truncate mb-1">
                     {memorial.name}
                   </Text>
                   {/* 第二行：享岁居右 + 访问icon */}

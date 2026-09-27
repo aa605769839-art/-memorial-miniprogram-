@@ -1,7 +1,22 @@
 import { View, Text, Button, Input, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
-import { Heart, User, ChevronRight, LogIn, ShieldCheck } from 'lucide-react-taro';
+import {
+  Heart,
+  User,
+  ChevronRight,
+  LogIn,
+  ShieldCheck,
+  BookOpen,
+  Users,
+  HeartHandshake,
+  Settings,
+  Bell,
+  Medal,
+  Gift,
+  Cross,
+  Flower2
+} from 'lucide-react-taro';
 import { Network } from '@/network';
 import { Auth, type LoginUser } from '@/auth';
 
@@ -10,6 +25,14 @@ interface UserProfile {
   avatar: string | null;
   bio: string;
 }
+
+// 高级青蓝色系 token（参考设计）
+const C = {
+  grad: 'linear-gradient(135deg,#60B8B8 0%,#40A0B0 100%)',
+  primary: '#48A8A8',
+  gold: '#C9A86A',
+  bg: '#F5F7F8'
+};
 
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -222,36 +245,209 @@ const ProfilePage = () => {
     Taro.showToast({ title: '已退出登录', icon: 'none' });
   };
 
+  const goTo = (url: string) => {
+    if (url.startsWith('/pages/profile/memorials') || url.startsWith('/pages/admin/')) {
+      if (!Auth.isLoggedIn()) {
+        Taro.showToast({ title: '请先登录', icon: 'none' });
+        setShowAuth(true);
+        return;
+      }
+    }
+    Taro.navigateTo({ url });
+  };
+
+  const displayName = loginUser?.nickname || loginUser?.username || userProfile.name || '访客';
+  const isAdmin = loginUser?.role === 'admin';
+
+  // 功能列表（参考图语义映射到真实入口）
+  const menuItems = [
+    { icon: Cross, color: '#48A8A8', label: '我的电子墓碑', onClick: () => goTo('/pages/profile/memorials') },
+    { icon: BookOpen, color: '#48A8A8', label: '我的故事', onClick: () => goTo('/pages/profile/memorials') },
+    { icon: Flower2, color: '#C9A86A', label: '我的献花记录', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
+    { icon: Users, color: '#48A8A8', label: '家属管理', onClick: () => goTo('/pages/profile/memorials') },
+    { icon: HeartHandshake, color: '#48A8A8', label: '暖心服务', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
+    { icon: Settings, color: '#48A8A8', label: '设置与帮助', onClick: () => Taro.showToast({ title: '晚星纪念 v1.0', icon: 'none' }) }
+  ];
+
   return (
-    <View className="min-h-screen bg-[#eef3e4] pb-6">
-      {/* 名片区域 */}
-      <View className="px-4 py-6">
-        <View className="bg-white rounded-2xl p-6 shadow-sm">
-          <View
-            className="flex items-center gap-4 cursor-pointer"
-            onClick={handleEdit}
-          >
-            <View className="w-20 h-20 rounded-full bg-[#dbe8dd] flex items-center justify-center overflow-hidden flex-shrink-0">
-              {userProfile.avatar ? (
-                <Image
-                  src={userProfile.avatar}
-                  className="w-full h-full"
-                  mode="aspectFill"
-                />
-              ) : (
-                <User color="#94a3b8" size={40} />
+    <View className="min-h-screen pb-8" style={{ backgroundColor: C.bg }}>
+      {/* 顶部青蓝渐变头部 */}
+      <View className="px-5 pt-14 pb-16" style={{ background: C.grad }}>
+        <Text className="block text-white text-2xl font-bold text-center">
+          个人中心
+        </Text>
+      </View>
+
+      {/* 用户信息主卡片（上移覆盖头部） */}
+      <View className="px-4 -mt-14">
+        <View className="bg-white rounded-3xl shadow-sm overflow-hidden p-5">
+          {/* 卡片内渐变区 */}
+          <View style={{ background: 'linear-gradient(135deg,#d7ece7 0%,#cfe7ec 60%,#f6f0e0 100%)' }} className="rounded-2xl p-5">
+            <View className="flex items-center gap-4">
+              <View className="w-20 h-20 rounded-full border-2 border-[#f6f0e0] overflow-hidden flex-shrink-0 bg-[#cfe7ec] flex items-center justify-center">
+                {userProfile.avatar ? (
+                  <Image src={userProfile.avatar} className="w-full h-full" mode="aspectFill" />
+                ) : (
+                  <View
+                    className="w-full h-full flex items-center justify-center"
+                    style={{ background: 'linear-gradient(180deg,#8fd4da,#5fb3c0)' }}
+                  >
+                    <User color="#ffffff" size={44} />
+                  </View>
+                )}
+              </View>
+              <View className="flex-1">
+                <Text className="block text-3xl font-extrabold text-white mb-2" style={{ textShadow: '0 1px 4px rgba(50,120,130,0.4)' }}>
+                  {displayName}
+                </Text>
+                <View className="flex flex-wrap gap-2">
+                  <View className="rounded-full px-3 py-1 flex items-center gap-1 bg-[#f6f0e0]">
+                    <ShieldCheck color="#C9A86A" size={13} strokeWidth={3} />
+                    <Text className="text-white text-xs font-medium">社区成员</Text>
+                  </View>
+                  {isAdmin && (
+                    <View className="rounded-full px-3 py-1 flex items-center gap-1 bg-[#f0e2c0]">
+                      <Medal color="#C9A86A" size={13} strokeWidth={2.4} />
+                      <Text className="text-[#9a7b3f] text-xs font-medium">管理员</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+              <Button
+                className="rounded-full px-3 py-1 text-xs text-[#6b4a35] mr-0"
+                style={{ background: 'linear-gradient(135deg,#faf3e4,#f0ddb4)', border: '1px solid rgba(201,168,106,0.5)', height: 'auto', lineHeight: '1.4', padding: '0 0' }}
+                onClick={handleEdit}
+              >
+                编辑资料
+              </Button>
+            </View>
+          </View>
+
+          {/* 数据统计栏 */}
+          <View className="flex flex-row mt-2">
+            <View className="flex-1 flex flex-col items-center py-3">
+              <Gift color="#C9A86A" size={22} strokeWidth={1.8} />
+              <Text className="block text-xs text-[#8A8F94] mt-2">创建纪念册</Text>
+              <Text className="block text-2xl font-extrabold text-slate-800 mt-1">{isAdmin ? '2' : '—'}</Text>
+            </View>
+            <View className="w-px bg-[#eceff1] my-3" />
+            <View className="flex-1 flex flex-col items-center py-3">
+              <BookOpen color="#48A8A8" size={22} strokeWidth={1.8} />
+              <Text className="block text-xs text-[#8A8F94] mt-2">参与纪念</Text>
+              <Text className="block text-2xl font-extrabold text-slate-800 mt-1">—</Text>
+            </View>
+            <View className="w-px bg-[#eceff1] my-3" />
+            <View className="flex-1 flex flex-col items-center py-3">
+              <Cross color="#48A8A8" size={22} strokeWidth={1.8} />
+              <Text className="block text-xs text-[#8A8F94] mt-2">亲友成员</Text>
+              <Text className="block text-2xl font-extrabold text-slate-800 mt-1">—</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* 功能列表 */}
+      <View className="px-4 mt-6">
+        <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {menuItems.map((item, i) => (
+            <View
+              key={item.label}
+              className={`flex items-center justify-between px-5 py-4 bg-white ${i !== menuItems.length - 1 ? 'border-b border-[#f0f2f3]' : ''}`}
+              onClick={item.onClick}
+              style={{ backgroundColor: '#ffffff' }}
+            >
+              <View className="flex items-center gap-4">
+                <item.icon color={item.color} size={22} strokeWidth={1.8} />
+                <Text className="text-slate-700 text-base">{item.label}</Text>
+              </View>
+              <ChevronRight color="#c5c9cc" size={20} />
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* 活动提示条 */}
+      <View className="px-4 mt-5">
+        <View className="rounded-2xl px-5 py-3.5 flex items-center gap-3" style={{ backgroundColor: '#f6f0e0' }}>
+          <Bell color="#C9A86A" size={20} strokeWidth={1.8} />
+          <Text className="text-[#6b4a35] text-sm">每周日晚 8 点，社区会发起集体追思活动</Text>
+        </View>
+      </View>
+
+      {/* 登录/账号区域 */}
+      <View className="px-4 mt-5">
+        <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {loginUser ? (
+            <View className="px-5 py-4">
+              <View className="flex items-center gap-3">
+                <View className="w-10 h-10 rounded-full bg-[#d7ece7] flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck color="#48A8A8" size={20} />
+                </View>
+                <View className="flex-1">
+                  <Text className="block text-slate-800 font-semibold">
+                    {loginUser.nickname || loginUser.username}
+                  </Text>
+                  <Text className="block text-xs text-[#8A8F94]">
+                    {isAdmin ? '管理员账号' : '普通用户'}
+                  </Text>
+                </View>
+                <Button
+                  className="rounded-full px-4 py-1 text-sm"
+                  style={{ backgroundColor: '#eef1f2', color: '#5a6165', height: 'auto', lineHeight: '1.5' }}
+                  onClick={() => setConfirmLogout(true)}
+                >
+                  退出
+                </Button>
+              </View>
+              {isAdmin && (
+                <View
+                  className="flex items-center justify-between mt-3 pt-3 border-t border-[#f0f2f3]"
+                  onClick={() => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' })}
+                >
+                  <View className="flex items-center gap-2">
+                    <Gift color="#48A8A8" size={18} />
+                    <Text className="text-sm text-slate-600">礼物配置管理</Text>
+                  </View>
+                  <ChevronRight color="#c5c9cc" size={18} />
+                </View>
               )}
             </View>
-            <View className="flex-1">
-              <Text className="block text-xl font-bold text-[#3f5d50] mb-1">
-                {userProfile.name}
-              </Text>
-              <Text className="block text-sm text-slate-500 line-clamp-2">
-                {userProfile.bio}
-              </Text>
+          ) : (
+            <View className="px-5 py-4 flex items-center justify-between">
+              <View className="flex items-center gap-3">
+                <View className="w-10 h-10 rounded-full bg-[#d7ece7] flex items-center justify-center flex-shrink-0">
+                  <LogIn color="#48A8A8" size={20} />
+                </View>
+                <View>
+                  <Text className="block text-slate-800 font-semibold">未登录</Text>
+                  <Text className="block text-xs text-[#8A8F94]">登录后可创建与管理故友空间</Text>
+                </View>
+              </View>
+              <Button
+                className="rounded-full px-5 py-1 text-sm text-white"
+                style={{ background: C.grad, height: 'auto', lineHeight: '1.5' }}
+                onClick={openLogin}
+              >
+                登录/注册
+              </Button>
             </View>
-            <ChevronRight color="#94a3b8" size={20} />
+          )}
+        </View>
+      </View>
+
+      {/* 我的故友入口 */}
+      <View className="px-4 mt-4">
+        <View
+          className="bg-white rounded-2xl shadow-sm flex items-center justify-between px-5 py-4"
+          onClick={handleAddMemorial}
+        >
+          <View className="flex items-center gap-4">
+            <View className="w-11 h-11 rounded-full bg-[#d7ece7] flex items-center justify-center flex-shrink-0">
+              <Heart color="#48A8A8" size={22} strokeWidth={1.8} />
+            </View>
+            <Text className="text-slate-700 text-base">我的故友</Text>
           </View>
+          <ChevronRight color="#c5c9cc" size={20} />
         </View>
       </View>
 
@@ -266,38 +462,26 @@ const ProfilePage = () => {
             className="bg-white rounded-2xl p-6 mx-4 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <Text className="block text-lg font-bold text-[#3f5d50] mb-4 text-center">
-              编辑个人信息
-            </Text>
+            <Text className="block text-lg font-bold text-[#2e3438] mb-1 text-center">编辑个人信息</Text>
+            <Text className="block text-xs text-[#8A8F94] mb-4 text-center">完善资料，让家人更好地记住你</Text>
             <View className="flex flex-col gap-4">
-              {/* 头像上传 */}
               <View>
-                <Text className="block text-sm font-medium text-slate-700 mb-2">
-                  头像
-                </Text>
+                <Text className="block text-sm font-medium text-slate-700 mb-2">头像</Text>
                 <View
-                  className="w-20 h-20 rounded-full bg-[#dbe8dd] flex items-center justify-center overflow-hidden mx-auto cursor-pointer"
+                  className="w-20 h-20 rounded-full bg-[#d7ece7] flex items-center justify-center overflow-hidden mx-auto cursor-pointer"
                   onClick={handleAvatarUpload}
                 >
                   {tempAvatar ? (
-                    <Image
-                      src={tempAvatar}
-                      className="w-full h-full"
-                      mode="aspectFill"
-                    />
+                    <Image src={tempAvatar} className="w-full h-full" mode="aspectFill" />
                   ) : (
-                    <User color="#94a3b8" size={40} />
+                    <User color="#8A8F94" size={40} />
                   )}
                 </View>
-                <Text className="block text-xs text-center text-slate-500 mt-2">
-                  点击上传头像
-                </Text>
+                <Text className="block text-xs text-center text-[#8A8F94] mt-2">点击上传头像</Text>
               </View>
               <View>
-                <Text className="block text-sm font-medium text-slate-700 mb-2">
-                  姓名 *
-                </Text>
-                <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
+                <Text className="block text-sm font-medium text-slate-700 mb-2">姓名 *</Text>
+                <View className="bg-[#F5F7F8] rounded-xl px-4 py-3">
                   <Input
                     className="w-full bg-transparent text-slate-700"
                     value={editForm.name}
@@ -307,10 +491,8 @@ const ProfilePage = () => {
                 </View>
               </View>
               <View>
-                <Text className="block text-sm font-medium text-slate-700 mb-2">
-                  简介
-                </Text>
-                <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
+                <Text className="block text-sm font-medium text-slate-700 mb-2">简介</Text>
+                <View className="bg-[#F5F7F8] rounded-xl px-4 py-3">
                   <Input
                     className="w-full bg-transparent text-slate-700"
                     value={editForm.bio}
@@ -321,13 +503,15 @@ const ProfilePage = () => {
               </View>
               <View className="flex gap-3 mt-2">
                 <Button
-                  className="flex-1 bg-slate-200 text-slate-700 rounded-full py-3"
+                  className="flex-1 rounded-full py-3 text-slate-600"
+                  style={{ backgroundColor: '#eef1f2', height: 'auto', lineHeight: '1.6' }}
                   onClick={handleCancel}
                 >
                   取消
                 </Button>
                 <Button
-                  className="flex-1 bg-[#eef3e4]0 text-white rounded-full py-3"
+                  className="flex-1 rounded-full py-3 text-white"
+                  style={{ background: C.grad, height: 'auto', lineHeight: '1.6' }}
                   onClick={handleSave}
                 >
                   保存
@@ -338,83 +522,6 @@ const ProfilePage = () => {
         </View>
       )}
 
-      {/* 功能入口 */}
-      <View className="px-4">
-        <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <View
-            className="flex items-center justify-between px-6 py-4"
-            onClick={handleAddMemorial}
-          >
-            <View className="flex items-center gap-3">
-              <View className="w-10 h-10 rounded-full bg-[#dbe8dd] flex items-center justify-center">
-                <Heart color="#6f9b86" size={20} />
-              </View>
-              <Text className="text-base text-slate-700">我的故友</Text>
-            </View>
-            <ChevronRight color="#94a3b8" size={20} />
-          </View>
-        </View>
-      </View>
-
-      {/* 登录/账号区域 */}
-      <View className="px-4 mt-4">
-        <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          {loginUser ? (
-            <View className="px-6 py-4">
-              <View className="flex items-center gap-3 mb-3">
-                <View className="w-10 h-10 rounded-full bg-[#dbe8dd] flex items-center justify-center">
-                  <ShieldCheck color="#6f9b86" size={20} />
-                </View>
-                <View className="flex-1">
-                  <Text className="block text-base font-bold text-slate-800">
-                    {loginUser.nickname || loginUser.username}
-                  </Text>
-                  <Text className="block text-xs text-slate-400">
-                    {loginUser.role === 'admin' ? '管理员' : '普通用户'}
-                  </Text>
-                </View>
-                <Button
-                  className="bg-slate-100 text-slate-600 rounded-full px-4 py-1 text-sm"
-                  onClick={() => setConfirmLogout(true)}
-                >
-                  退出
-                </Button>
-              </View>
-              {loginUser.role === 'admin' && (
-                <View
-                  className="flex items-center justify-between px-1 py-3 border-t border-[#eef3e4]"
-                  onClick={() => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' })}
-                >
-                  <View className="flex items-center gap-2">
-                    <ShieldCheck color="#6f9b86" size={18} />
-                    <Text className="text-sm text-slate-600">礼物配置管理</Text>
-                  </View>
-                  <ChevronRight color="#94a3b8" size={18} />
-                </View>
-              )}
-            </View>
-          ) : (
-            <View className="px-6 py-4 flex items-center justify-between">
-              <View className="flex items-center gap-3">
-                <View className="w-10 h-10 rounded-full bg-[#dbe8dd] flex items-center justify-center">
-                  <LogIn color="#6f9b86" size={20} />
-                </View>
-                <View>
-                  <Text className="block text-base font-bold text-slate-800">未登录</Text>
-                  <Text className="block text-xs text-slate-400">登录后可创建与管理故友空间</Text>
-                </View>
-              </View>
-              <Button
-                className="bg-[#eef3e4]0 text-white rounded-full px-5 py-1 text-sm"
-                onClick={openLogin}
-              >
-                登录/注册
-              </Button>
-            </View>
-          )}
-        </View>
-      </View>
-
       {/* 登录/注册弹窗 */}
       {showAuth && (
         <View
@@ -423,18 +530,20 @@ const ProfilePage = () => {
           onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}
         >
           <View className="bg-white rounded-2xl p-6 mx-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <Text className="block text-lg font-bold text-[#3f5d50] mb-4 text-center">
-              {authTab === 'login' ? '登录' : '注册'}
+            <Text className="block text-lg font-bold text-[#2e3438] mb-4 text-center">
+              {authTab === 'login' ? '欢迎回来' : '加入晚星纪念'}
             </Text>
-            <View className="flex gap-2 mb-4">
+            <View className="flex gap-2 mb-4 rounded-full p-1" style={{ backgroundColor: '#F5F7F8' }}>
               <Button
-                className={authTab === 'login' ? 'flex-1 bg-[#eef3e4]0 text-white rounded-full py-2' : 'flex-1 bg-slate-100 text-slate-600 rounded-full py-2'}
+                className="flex-1 rounded-full py-2 text-sm"
+                style={authTab === 'login' ? { background: C.grad, color: '#fff', height: 'auto', lineHeight: '1.6' } : { backgroundColor: 'transparent', color: '#8A8F94', height: 'auto', lineHeight: '1.6' }}
                 onClick={() => setAuthTab('login')}
               >
                 登录
               </Button>
               <Button
-                className={authTab === 'register' ? 'flex-1 bg-[#eef3e4]0 text-white rounded-full py-2' : 'flex-1 bg-slate-100 text-slate-600 rounded-full py-2'}
+                className="flex-1 rounded-full py-2 text-sm"
+                style={authTab === 'register' ? { background: C.grad, color: '#fff', height: 'auto', lineHeight: '1.6' } : { backgroundColor: 'transparent', color: '#8A8F94', height: 'auto', lineHeight: '1.6' }}
                 onClick={() => setAuthTab('register')}
               >
                 注册
@@ -443,7 +552,7 @@ const ProfilePage = () => {
             {authTab === 'register' && (
               <View className="mb-3">
                 <Text className="block text-sm font-medium text-slate-700 mb-2">昵称</Text>
-                <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
+                <View className="bg-[#F5F7F8] rounded-xl px-4 py-3">
                   <Input
                     className="w-full bg-transparent text-slate-700"
                     value={authForm.nickname}
@@ -455,7 +564,7 @@ const ProfilePage = () => {
             )}
             <View className="mb-3">
               <Text className="block text-sm font-medium text-slate-700 mb-2">账号</Text>
-              <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
+              <View className="bg-[#F5F7F8] rounded-xl px-4 py-3">
                 <Input
                   className="w-full bg-transparent text-slate-700"
                   value={authForm.username}
@@ -466,7 +575,7 @@ const ProfilePage = () => {
             </View>
             <View className="mb-4">
               <Text className="block text-sm font-medium text-slate-700 mb-2">密码</Text>
-              <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
+              <View className="bg-[#F5F7F8] rounded-xl px-4 py-3">
                 <Input
                   className="w-full bg-transparent text-slate-700"
                   password
@@ -477,7 +586,8 @@ const ProfilePage = () => {
               </View>
             </View>
             <Button
-              className="w-full bg-[#eef3e4]0 text-white rounded-full py-3"
+              className="w-full rounded-full py-3 text-white"
+              style={{ background: C.grad, height: 'auto', lineHeight: '1.6' }}
               onClick={handleAuthSubmit}
               loading={authSubmitting}
             >
@@ -495,16 +605,18 @@ const ProfilePage = () => {
           onClick={(e) => { if (e.target === e.currentTarget) setConfirmLogout(false); }}
         >
           <View className="bg-white rounded-2xl p-6 mx-4 w-full max-w-xs" onClick={(e) => e.stopPropagation()}>
-            <Text className="block text-lg font-bold text-[#3f5d50] mb-4 text-center">确认退出登录？</Text>
+            <Text className="block text-lg font-bold text-[#2e3438] mb-4 text-center">确认退出登录？</Text>
             <View className="flex gap-3">
               <Button
-                className="flex-1 bg-slate-200 text-slate-700 rounded-full py-3"
+                className="flex-1 rounded-full py-3 text-slate-600"
+                style={{ backgroundColor: '#eef1f2', height: 'auto', lineHeight: '1.6' }}
                 onClick={() => setConfirmLogout(false)}
               >
                 取消
               </Button>
               <Button
-                className="flex-1 bg-[#eef3e4]0 text-white rounded-full py-3"
+                className="flex-1 rounded-full py-3 text-white"
+                style={{ background: C.grad, height: 'auto', lineHeight: '1.6' }}
                 onClick={handleLogout}
               >
                 退出

@@ -60,28 +60,39 @@ const IndexPage = () => {
   return (
     <View
       className="min-h-screen"
-      style={{ background: 'linear-gradient(160deg, #b9d8c8 0%, #eef3e4 46%, #f7f1e2 100%)' }}
+      style={{ background: 'linear-gradient(165deg,#5aabaa 0%,#9ccfcc 28%,#e7f0e8 55%,#f7f1e2 100%)' }}
     >
       {/* 品牌区 */}
       <View className="px-6 pt-16 pb-2">
-        <Text className="block text-4xl font-extrabold text-white tracking-wide" style={{ textShadow: '0 2px 8px rgba(120,150,130,0.35)' }}>
+        <Text
+          className="block text-4xl font-extrabold tracking-wide"
+          style={{ color: '#ffffff', textShadow: '0 3px 12px rgba(40,110,120,0.5)' }}
+        >
           晚星纪念
         </Text>
-        <Text className="block text-white text-opacity-90 mt-2 text-sm tracking-widest">
+        <Text className="block mt-2 text-sm tracking-[0.3em]" style={{ color: 'rgba(255,255,255,0.95)' }}>
           连接家人，也留住回忆
         </Text>
       </View>
 
       {/* 今日纪念卡片 */}
       <View className="px-5 mt-6">
-        <View className="bg-[#fbf8ef] rounded-[24px] px-6 py-6 shadow-sm flex flex-row">
+        <View
+          className="rounded-[24px] px-6 py-6 shadow-sm flex flex-row"
+          style={{
+            backgroundColor: 'rgba(251,248,239,0.96)',
+            border: '1px solid rgba(201,168,106,0.28)',
+            boxShadow: '0 8px 24px rgba(58,110,130,0.10)'
+          }}
+        >
           <View className="flex-1 pr-2">
-            <Text className="block text-[#8a6d4f] text-base font-semibold mb-3">
-              今日纪念
-            </Text>
+            <View className="flex items-center gap-1.5 mb-3">
+              <View className="w-1.5 h-4 rounded-full" style={{ background: 'linear-gradient(180deg,#48A8A8,#C9A86A)' }} />
+              <Text className="text-[#8a6d4f] text-base font-semibold">今日纪念</Text>
+            </View>
             <Text className="block text-[#6b4a35] text-3xl font-extrabold leading-tight">
               今天有&nbsp;
-              <Text className="text-[#c07a3c] text-4xl">{todayCount}</Text>
+              <Text className="text-4xl" style={{ color: '#3f8f8f' }}>{todayCount}</Text>
             </Text>
             <Text className="block text-[#6b4a35] text-3xl font-extrabold leading-tight">
               位亲人被想起
@@ -102,7 +113,7 @@ const IndexPage = () => {
         <View className="flex flex-row gap-3">
           {/* 电子墓碑 */}
           <View
-            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center"
+            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center shadow-sm"
             style={{ backgroundColor: '#cfe2d4' }}
             onClick={() => goPeople()}
           >
@@ -111,8 +122,8 @@ const IndexPage = () => {
           </View>
           {/* 故事纪念馆 */}
           <View
-            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center"
-            style={{ backgroundColor: '#f1e6cd' }}
+            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center shadow-sm"
+            style={{ backgroundColor: '#f1e6cd', border: '1px solid rgba(201,168,106,0.2)' }}
             onClick={() => goPeople()}
           >
             <BookOpen color="#9b7b54" size={30} strokeWidth={2} />
@@ -122,7 +133,7 @@ const IndexPage = () => {
         <View className="flex flex-row gap-3 mt-3">
           {/* 亲友动态 */}
           <View
-            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center"
+            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center shadow-sm"
             style={{ backgroundColor: '#d5e3ef' }}
             onClick={() => Taro.switchTab({ url: '/pages/memorial/index' })}
           >
@@ -131,8 +142,8 @@ const IndexPage = () => {
           </View>
           {/* 暖心服务 */}
           <View
-            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center"
-            style={{ backgroundColor: '#f5e9ca' }}
+            className="flex-1 rounded-[18px] py-5 px-3 flex flex-col items-center shadow-sm"
+            style={{ backgroundColor: '#f5e9ca', border: '1px solid rgba(201,168,106,0.2)' }}
             onClick={() => Taro.switchTab({ url: '/pages/profile/index' })}
           >
             <HeartHandshake color="#c9a86a" size={30} strokeWidth={1.9} />
@@ -143,7 +154,10 @@ const IndexPage = () => {
 
       {/* 社区动态 */}
       <View className="px-5 mt-6 pb-8">
-        <View className="bg-white rounded-[24px] px-6 py-5 shadow-sm">
+        <View
+          className="rounded-[24px] px-6 py-5"
+          style={{ backgroundColor: 'rgba(255,255,255,0.96)', border: '1px solid rgba(72,168,168,0.12)', boxShadow: '0 8px 24px rgba(58,110,130,0.08)' }}
+        >
           <Text className="block text-[#2b3a36] text-lg font-bold mb-1">
             社区动态
           </Text>

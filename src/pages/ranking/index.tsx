@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
 import { Award, Heart, User } from 'lucide-react-taro';
+import { StarsBackground } from '@/components/StarsBackground';
 
 interface Memorial {
   id: string;
@@ -58,52 +59,52 @@ const RankingPage = () => {
 
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center h-full bg-[#eef3e4]">
-        <View className="flex flex-col items-center gap-3">
-          <View className="w-12 h-12 border-4 border-[#cfe0d3] border-t-[#6f9b86] rounded-full animate-spin" />
-          <Text className="block text-sm text-slate-400">
-            加载中...
-          </Text>
+      <StarsBackground dim="normal">
+        <View className="flex flex-col items-center justify-center" style={{ minHeight: '100vh' }}>
+          <View className="flex flex-col items-center gap-3">
+            <View className="w-12 h-12 border-4 border-[#e8c07a]/30 border-t-[#e8c07a] rounded-full animate-spin" />
+            <Text className="block text-sm text-white/60">
+              加载中...
+            </Text>
+          </View>
         </View>
-      </View>
+      </StarsBackground>
     );
   }
 
   return (
-    <View className="min-h-screen bg-[#eef3e4]">
+    <StarsBackground dim="light">
       {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-[#dbe8dd]">
+      <View className="px-4 pt-14 pb-5" style={{ borderBottom: '1px solid rgba(232,192,122,0.25)' }}>
         <View className="flex items-center justify-between mb-4">
-          <Text className="block text-2xl font-bold text-[#3f5d50]">
+          <Text className="block text-2xl font-bold text-white">
             排行榜
           </Text>
         </View>
 
         {/* 切换按钮 */}
-        <View className="flex bg-[#dbe8dd] rounded-full p-1">
+        <View className="flex rounded-full p-1" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
           <View
-            className={`flex-1 py-2 rounded-full text-center ${
-              type === 'mourning' ? 'bg-[#6f9b86]' : ''
-            }`}
+            className="flex-1 py-2 rounded-full text-center"
+            style={{ backgroundColor: type === 'mourning' ? '#e8c07a' : 'transparent' }}
             onClick={() => setType('mourning')}
           >
             <Text
               className={`text-sm font-medium ${
-                type === 'mourning' ? 'text-white' : 'text-slate-600'
+                type === 'mourning' ? 'text-[#2e1f0f]' : 'text-white/70'
               }`}
             >
               悼念排行
             </Text>
           </View>
           <View
-            className={`flex-1 py-2 rounded-full text-center ${
-              type === 'visit' ? 'bg-[#6f9b86]' : ''
-            }`}
+            className="flex-1 py-2 rounded-full text-center"
+            style={{ backgroundColor: type === 'visit' ? '#e8c07a' : 'transparent' }}
             onClick={() => setType('visit')}
           >
             <Text
               className={`text-sm font-medium ${
-                type === 'visit' ? 'text-white' : 'text-slate-600'
+                type === 'visit' ? 'text-[#2e1f0f]' : 'text-white/70'
               }`}
             >
               拜访排行
@@ -117,44 +118,48 @@ const RankingPage = () => {
         {rankings.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-20">
             <View className="w-24 h-24 mb-6 opacity-30">
-              <Award color="#94a3b8" size={96} strokeWidth={1.5} />
+              <Award color="#e8c07a" size={96} strokeWidth={1.5} />
             </View>
-            <Text className="block text-base text-slate-500 mb-2">
+            <Text className="block text-base text-white/60 mb-2">
               暂无排行数据
             </Text>
-            <Text className="block text-sm text-slate-400">
+            <Text className="block text-sm text-white/40">
               还没有人进行悼念或拜访
             </Text>
           </View>
         ) : (
-          <View className="bg-white rounded-2xl p-4 shadow-sm">
+          <View className="rounded-2xl p-4" style={{ backgroundColor: 'rgba(18,42,53,0.75)', border: '1px solid rgba(232,192,122,0.25)' }}>
             {rankings.map((item, index) => {
               const badge = getRankBadge(index);
               return (
                 <View
                   key={item.id}
                   className={`flex items-center gap-4 py-4 ${
-                    index !== rankings.length - 1 ? 'border-b border-[#dbe8dd]' : ''
+                    index !== rankings.length - 1 ? 'border-b' : ''
                   }`}
+                  style={{ borderColor: 'rgba(232,192,122,0.15)' }}
                   onClick={() => goToDetail(item.id)}
                 >
                   {/* 排名 */}
                   <View
                     className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: badge.color }}
+                    style={{
+                      backgroundColor: index === 0 ? 'rgba(251,191,36,0.25)' : index === 1 ? 'rgba(156,163,175,0.25)' : 'rgba(255,255,255,0.12)',
+                      border: index === 0 ? '1px solid #fbbf24' : index === 1 ? '1px solid #9ca3af' : '1px solid rgba(255,255,255,0.25)'
+                    }}
                   >
-                    <Text className="text-white font-bold text-lg">
+                    <Text className="font-bold text-lg" style={{ color: badge.color }}>
                       {badge.text}
                     </Text>
                   </View>
 
                   {/* 信息 */}
                   <View className="flex-1">
-                    <Text className="block text-base font-medium text-[#3f5d50] mb-1">
+                    <Text className="block text-base font-medium text-white mb-1">
                       {item.name}
                     </Text>
                     {item.description && (
-                      <Text className="block text-xs text-slate-500 line-clamp-1">
+                      <Text className="block text-xs text-white/50 line-clamp-1">
                         {item.description}
                       </Text>
                     )}
@@ -164,15 +169,15 @@ const RankingPage = () => {
                   <View className="flex items-center gap-2">
                     {type === 'mourning' ? (
                       <>
-                        <Heart color="#6f9b86" size={18} />
-                        <Text className="text-lg font-bold text-[#6f9b86]">
+                        <Heart color="#e8c07a" size={18} />
+                        <Text className="text-lg font-bold text-[#e8c07a]">
                           {item.mourningCount}
                         </Text>
                       </>
                     ) : (
                       <>
-                        <User color="#94a3b8" size={18} />
-                        <Text className="text-lg font-bold text-slate-600">
+                        <User color="#7fc3ce" size={18} />
+                        <Text className="text-lg font-bold text-white">
                           {item.visitCount}
                         </Text>
                       </>
@@ -184,7 +189,7 @@ const RankingPage = () => {
           </View>
         )}
       </View>
-    </View>
+    </StarsBackground>
   );
 };
 

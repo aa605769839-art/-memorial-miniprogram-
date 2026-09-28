@@ -2,6 +2,7 @@ import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect, useRef } from 'react';
 import { Network } from '@/network';
+import { StarsBackground } from '@/components/StarsBackground';
 import { User, Eye } from 'lucide-react-taro';
 
 interface Memorial {
@@ -68,31 +69,33 @@ const PeoplePage = () => {
 
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center min-h-screen" style={{ background: 'linear-gradient(160deg,#eef3e4,#f7f1e2)' }}>
-        <View className="w-11 h-11 border-4 border-[#9dc3af] border-t-[#6f9b86] rounded-full animate-spin" />
-        <Text className="block text-sm text-[#7c8f83] mt-3">加载中...</Text>
-      </View>
+      <StarsBackground dim="normal" className="flex items-center justify-center">
+        <View className="flex flex-col items-center">
+          <View className="w-11 h-11 border-4 border-[#e8c07a]/30 border-t-[#e8c07a] rounded-full animate-spin" />
+          <Text className="block text-sm text-[#e8c07a] mt-3">加载中...</Text>
+        </View>
+      </StarsBackground>
     );
   }
 
   return (
-    <View className="min-h-screen" style={{ background: 'linear-gradient(170deg,#eef3e4 0%,#f7f1e2 100%)' }}>
+    <StarsBackground>
       <View className="px-5 pt-14 pb-2">
-        <Text className="block text-2xl font-bold text-[#3f5d50]">故人</Text>
-        <Text className="block text-[#9aa68f] text-xs mt-1">每一段思念，都值得被郑重收藏</Text>
+        <Text className="block text-2xl font-bold text-white">故人</Text>
+        <Text className="block text-[#e8c07a] text-xs mt-1">每一段思念，都值得被郑重收藏</Text>
       </View>
 
       <View className="px-5 py-4">
         {memorials.length === 0 ? (
           <View className="flex flex-col items-center py-24">
-            <View className="w-24 h-24 mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3eee5' }}>
-              <User color="#7da98f" size={44} strokeWidth={1.5} />
+            <View className="w-24 h-24 mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(232,192,122,0.15)' }}>
+              <User color="#e8c07a" size={44} strokeWidth={1.5} />
             </View>
-            <Text className="block text-base font-medium text-[#6b6f63] mb-2">暂无纪念空间</Text>
-            <Text className="block text-sm text-[#a89f8d] mb-6">前往"我的"页面创建纪念空间</Text>
+            <Text className="block text-base font-medium text-white mb-2">暂无纪念空间</Text>
+            <Text className="block text-sm text-[#e8c07a]/70 mb-6">前往"我的"页面创建纪念空间</Text>
             <View
               className="px-6 py-2.5 rounded-full text-white"
-              style={{ backgroundColor: '#6f9b86' }}
+              style={{ background: 'linear-gradient(90deg,#f0c87d,#d9a853)' }}
               onClick={() => Taro.switchTab({ url: '/pages/profile/index' })}
             >
               <Text className="text-sm font-medium">前往创建</Text>
@@ -134,7 +137,7 @@ const PeoplePage = () => {
           </View>
         )}
       </View>
-    </View>
+    </StarsBackground>
   );
 };
 

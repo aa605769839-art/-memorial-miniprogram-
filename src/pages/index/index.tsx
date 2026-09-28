@@ -2,6 +2,7 @@ import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
+import { StarsBackground } from '@/components/StarsBackground';
 import {
   Cross,
   CalendarDays,
@@ -18,10 +19,6 @@ const ELDER_MALE =
   'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_99407d53-7ceb-4084-a666-0804bb070cec.jpeg?sign=1822036751-3ff48bae20-0-8f3de7f683b12bb244c51ec8963dca0c88e5d329c01c58328650428341448061';
 const ELDER_FEMALE =
   'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_875f3290-29ac-4e8d-97d7-fb78c8501238.jpeg?sign=1822036747-72dcb1b772-0-7ac9f978933a6ec6827cd76c9273a25046c89de94d735bf68a75b9ac27999ab9';
-
-// 藏青蓝星空纪念背景（对象存储网络图：上半区纪念标识+金色光带点缀，下半区纯深蓝供内容展示）
-const BG_IMAGE =
-  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/images/home-bg-v3_8951ca4d.png?sign=1793161490-def9b034af-0-03e34474f578ca213fd4b5ee8aadb8947753115ea1a9ccc32902e40c8aaa3f43';
 
 interface Memorial {
   id: string;
@@ -89,22 +86,7 @@ const IndexPage = () => {
   const mainRelation = '奶奶';
 
   return (
-    <View className="min-h-screen relative">
-      {/* 全屏网络星空背景图（对象存储加载） */}
-      <Image
-        src={BG_IMAGE}
-        className="absolute top-0 left-0 w-full h-full"
-        style={{ position: 'fixed' }}
-        mode="aspectFill"
-        aria-hidden
-      />
-      {/* 极淡遮罩，仅略压光带保证前景文字清晰，其余呈现原图质感 */}
-      <View
-        className="absolute top-0 left-0 w-full h-full"
-        style={{ position: 'fixed', background: 'linear-gradient(180deg, rgba(10,25,35,0.12) 0%, rgba(9,22,30,0.25) 100%)' }}
-      />
-      {/* 内容容器：置于背景之上 */}
-      <View className="relative z-10">
+    <StarsBackground>
       {/* 品牌标题区 */}
       <View className="px-5 pt-14 pb-3 flex flex-row items-start justify-between">
         <View className="flex-1 pr-3">
@@ -281,8 +263,7 @@ const IndexPage = () => {
           </View>
         </View>
       </View>
-      </View>
-    </View>
+    </StarsBackground>
   );
 };
 

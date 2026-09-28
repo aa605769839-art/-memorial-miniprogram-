@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Trash2, Pencil, ArrowUp, ArrowDown, X } from 'lucide-react-taro';
 import { Network } from '@/network';
 import { Auth } from '@/auth';
+import { StarsBackground } from '@/components/StarsBackground';
 
 // 从本地存储获取 API 基础地址
 const getApiBase = (): string => {
@@ -341,25 +342,28 @@ const GiftConfigPage = () => {
   };
 
   return (
-    <View className="min-h-screen bg-[#f7f1e2]">
+    <StarsBackground dim="light">
       {/* API 配置弹窗 */}
       {showApiConfig && (
-        <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0 }}>
-          <View className="bg-white rounded-2xl mx-6 w-full max-w-sm p-6">
-            <Text className="text-lg font-bold text-gray-900 mb-4">配置后端地址</Text>
-            <Text className="text-sm text-gray-500 mb-4">请输入后端 API 地址</Text>
-            <Input
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-gray-900 mb-4"
-              placeholder="https://your-api.com"
-              value={apiBase}
-              onInput={(e) => setApiBase(e.detail.value)}
-            />
+        <View className="bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+          <View className="rounded-2xl mx-6 w-full max-w-sm p-6" style={{ backgroundColor: 'rgba(18,42,53,0.96)', border: '1px solid rgba(232,192,122,0.35)' }}>
+            <Text className="text-lg font-bold mb-4 block text-white">配置后端地址</Text>
+            <Text className="text-sm mb-4 block text-white/60">请输入后端 API 地址</Text>
+            <View className="bg-white/10 rounded-lg mb-4 px-4">
+              <Input
+                className="w-full bg-transparent py-3 text-white"
+                placeholder="https://your-api.com"
+                value={apiBase}
+                onInput={(e) => setApiBase(e.detail.value)}
+              />
+            </View>
             <View className="flex gap-3">
-              <Button className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg" onClick={() => setShowApiConfig(false)}>
+              <Button className="flex-1 py-3 rounded-lg text-white" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} onClick={() => setShowApiConfig(false)}>
                 取消
               </Button>
               <Button
-                className="flex-1 bg-[#6f9b86] text-white py-3 rounded-lg"
+                className="flex-1 py-3 rounded-lg text-[#2e1f0f]"
+                style={{ backgroundColor: '#e8c07a' }}
                 onClick={() => {
                   Taro.setStorageSync('admin_api_base', apiBase);
                   setShowApiConfig(false);
@@ -374,17 +378,17 @@ const GiftConfigPage = () => {
       )}
 
       {/* 头部 */}
-      <View className="bg-white px-4 py-4 border-b border-gray-200">
+      <View className="px-4 pt-14 pb-4" style={{ backgroundColor: 'rgba(10,26,34,0.55)', borderBottom: '1px solid rgba(232,192,122,0.25)' }}>
         <View className="flex items-center justify-between mb-4">
           <View>
-            <Text className="text-xl font-bold text-gray-900">礼物管理中台</Text>
-            <Text className="text-sm text-gray-500 mt-1">
+            <Text className="text-xl font-bold block text-white">礼物管理中台</Text>
+            <Text className="text-sm mt-1 block text-white/55">
               {activeTab === 'config' ? `共 ${giftConfigs.length} 个礼物` : `共 ${logsTotal} 条记录`}
             </Text>
           </View>
           <View className="flex gap-2">
             {activeTab === 'config' && (
-              <Button className="bg-[#6f9b86] text-white px-4 py-2 rounded-lg text-sm" onClick={handleAdd}>
+              <Button className="px-4 py-2 rounded-lg text-sm text-[#2e1f0f]" style={{ backgroundColor: '#e8c07a' }} onClick={handleAdd}>
                 <View className="flex items-center gap-1">
                   <Plus size={16} />
                   <Text>新增</Text>
@@ -395,15 +399,17 @@ const GiftConfigPage = () => {
         </View>
         
         {/* 标签页 */}
-        <View className="flex border-b border-gray-200">
+        <View className="flex" style={{ borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
           <View
-            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'config' ? 'border-b-2 border-[#6f9b86] text-[#5f8b76] font-medium' : 'text-gray-500'}`}
+            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'config' ? 'font-medium' : ''}`}
+            style={{ borderBottom: activeTab === 'config' ? '2px solid #e8c07a' : '2px solid transparent', color: activeTab === 'config' ? '#e8c07a' : 'rgba(255,255,255,0.55)' }}
             onClick={() => handleTabChange('config')}
           >
             <Text>礼物配置</Text>
           </View>
           <View
-            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'logs' ? 'border-b-2 border-[#6f9b86] text-[#5f8b76] font-medium' : 'text-gray-500'}`}
+            className={`flex-1 py-3 text-center cursor-pointer ${activeTab === 'logs' ? 'font-medium' : ''}`}
+            style={{ borderBottom: activeTab === 'logs' ? '2px solid #e8c07a' : '2px solid transparent', color: activeTab === 'logs' ? '#e8c07a' : 'rgba(255,255,255,0.55)' }}
             onClick={() => handleTabChange('logs')}
           >
             <Text>赠送日志</Text>
@@ -416,57 +422,57 @@ const GiftConfigPage = () => {
         <View className="p-4">
           {loading ? (
             <View className="flex flex-col items-center justify-center py-12">
-              <View className="w-8 h-8 border-2 border-[#6f9b86] border-t-transparent rounded-full animate-spin mb-4" />
-              <Text className="text-gray-500">加载中...</Text>
+              <View className="w-8 h-8 rounded-full animate-spin mb-4" style={{ border: '2px solid rgba(232,192,122,0.3)', borderTopColor: '#e8c07a' }} />
+              <Text className="block text-white/55">加载中...</Text>
             </View>
           ) : error ? (
             <View className="flex flex-col items-center justify-center py-12 px-6">
-              <Text className="text-red-500 mb-2 text-center">{error}</Text>
+              <Text className="mb-2 text-center block text-[#fca5a5]">{error}</Text>
               <View className="flex gap-3">
-                <Button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm" onClick={() => setShowApiConfig(true)}>
+                <Button className="px-4 py-2 rounded-lg text-sm text-white" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} onClick={() => setShowApiConfig(true)}>
                   配置地址
                 </Button>
-                <Button className="bg-[#6f9b86] text-white px-4 py-2 rounded-lg text-sm" onClick={loadGiftConfigs}>
+                <Button className="px-4 py-2 rounded-lg text-sm text-[#2e1f0f]" style={{ backgroundColor: '#e8c07a' }} onClick={loadGiftConfigs}>
                   重新加载
                 </Button>
               </View>
             </View>
           ) : giftConfigs.length === 0 ? (
             <View className="flex flex-col items-center justify-center py-12">
-              <Text className="text-gray-400">暂无礼物配置</Text>
-              <Text className="text-gray-400 text-sm mt-2">点击右上角按钮添加</Text>
+              <Text className="block text-white/45">暂无礼物配置</Text>
+              <Text className="mt-2 text-sm block text-white/40">点击右上角按钮添加</Text>
             </View>
           ) : (
             <View className="space-y-3">
               {giftConfigs.map((config, index) => (
-                <View key={config.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <View key={config.id} className="rounded-xl p-4 border" style={{ backgroundColor: 'rgba(18,42,53,0.7)', borderColor: 'rgba(232,192,122,0.22)' }}>
                   <View className="flex items-center justify-between">
                     <View className="flex items-center gap-3">
-                      <View className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-lg">
+                      <View className="w-12 h-12 flex items-center justify-center rounded-lg bg-white/8">
                         <GiftIconDisplay icon={config.icon} size="normal" />
                       </View>
                       <View>
-                        <Text className="text-base font-semibold text-gray-900">{config.name}</Text>
+                        <Text className="text-base font-semibold text-white block">{config.name}</Text>
                         <View className="flex items-center gap-2 mt-1">
                           <View className={`w-3 h-3 rounded-full ${config.color.replace('text-', 'bg-')}`} />
-                          <Text className="text-xs text-gray-500">{config.isEnabled ? '已启用' : '已禁用'}</Text>
-                          <Text className="text-xs text-orange-500 font-medium">{config.price || 0}积分</Text>
-                          {isImageUrl(config.icon) && <Text className="text-xs text-[#6f9b86]">图片</Text>}
+                          <Text className="text-xs text-white/55 block">{config.isEnabled ? '已启用' : '已禁用'}</Text>
+                          <Text className="text-xs text-[#fbbf24] font-medium block">{config.price || 0}积分</Text>
+                          {isImageUrl(config.icon) && <Text className="text-xs text-[#7fc3ce] block">图片</Text>}
                         </View>
                       </View>
                     </View>
                     <View className="flex items-center gap-1">
                       <View className="p-2" onClick={() => handleMove(index, 'up')} style={{ opacity: index === 0 ? 0.3 : 1 }}>
-                        <ArrowUp size={18} color="#6b7280" />
+                        <ArrowUp size={18} color="#cbd5e1" />
                       </View>
                       <View className="p-2" onClick={() => handleMove(index, 'down')} style={{ opacity: index === giftConfigs.length - 1 ? 0.3 : 1 }}>
-                        <ArrowDown size={18} color="#6b7280" />
+                        <ArrowDown size={18} color="#cbd5e1" />
                       </View>
                       <View className="p-2" onClick={() => handleEdit(config)}>
-                        <Pencil size={18} color="#6f9b86" />
+                        <Pencil size={18} color="#7fc3ce" />
                       </View>
                       <View className="p-2" onClick={() => handleDelete(config.id)}>
-                        <Trash2 size={18} color="#ef4444" />
+                        <Trash2 size={18} color="#fca5a5" />
                       </View>
                     </View>
                   </View>
@@ -479,41 +485,41 @@ const GiftConfigPage = () => {
         <View className="p-4">
           {logsLoading ? (
             <View className="flex flex-col items-center justify-center py-12">
-              <View className="w-8 h-8 border-2 border-[#6f9b86] border-t-transparent rounded-full animate-spin mb-4" />
-              <Text className="text-gray-500">加载中...</Text>
+              <View className="w-8 h-8 rounded-full animate-spin mb-4" style={{ border: '2px solid rgba(232,192,122,0.3)', borderTopColor: '#e8c07a' }} />
+              <Text className="block text-white/55">加载中...</Text>
             </View>
           ) : logsError ? (
             <View className="flex flex-col items-center justify-center py-12">
-              <Text className="text-red-500 mb-2">{logsError}</Text>
-              <Button className="bg-[#6f9b86] text-white px-4 py-2 rounded-lg text-sm" onClick={() => loadGiftLogs(logsPage)}>
+              <Text className="mb-2 block text-[#fca5a5]">{logsError}</Text>
+              <Button className="px-4 py-2 rounded-lg text-sm text-[#2e1f0f]" style={{ backgroundColor: '#e8c07a' }} onClick={() => loadGiftLogs(logsPage)}>
                 重新加载
               </Button>
             </View>
           ) : giftLogs.length === 0 ? (
             <View className="flex flex-col items-center justify-center py-12">
-              <Text className="text-gray-400">暂无赠送记录</Text>
+              <Text className="block text-white/45">暂无赠送记录</Text>
             </View>
           ) : (
             <View className="space-y-3">
               {giftLogs.map((log) => (
-                <View key={log.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <View key={log.id} className="rounded-xl p-4 border" style={{ backgroundColor: 'rgba(18,42,53,0.7)', borderColor: 'rgba(232,192,122,0.22)' }}>
                   <View className="flex items-start gap-3">
-                    <View className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-lg flex-shrink-0">
+                    <View className="w-12 h-12 flex items-center justify-center rounded-lg flex-shrink-0 bg-white/8">
                       <GiftIconDisplay icon={log.gift_icon} size="normal" />
                     </View>
                     <View className="flex-1">
                       <View className="flex items-center justify-between mb-2">
-                        <Text className="font-semibold text-gray-900">{log.gift_name}</Text>
-                        <Text className="text-xs text-gray-400">{new Date(log.created_at).toLocaleString()}</Text>
+                        <Text className="font-semibold text-white block">{log.gift_name}</Text>
+                        <Text className="text-xs text-white/40 block">{new Date(log.created_at).toLocaleString()}</Text>
                       </View>
-                      <View className="bg-[#eef3e4] rounded-lg p-3 mb-2">
-                        <Text className="text-sm text-gray-600">
-                          <Text className="font-medium text-[#5f8b76]">{log.sender_name}</Text>
-                          <Text className="text-gray-400"> 赠送给 </Text>
-                          <Text className="font-medium text-[#5f8b76]">{log.memorial_name}</Text>
+                      <View className="rounded-lg p-3 mb-2" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                        <Text className="text-sm text-white/70 block">
+                          <Text className="font-medium text-[#f0d9a8]">{log.sender_name}</Text>
+                          <Text className="text-white/45"> 赠送给 </Text>
+                          <Text className="font-medium text-[#f0d9a8]">{log.memorial_name}</Text>
                         </Text>
                         {log.message && (
-                          <Text className="text-sm text-gray-500 mt-1 italic">&quot;{log.message}&quot;</Text>
+                          <Text className="text-sm text-white/55 mt-1 italic block">&quot;{log.message}&quot;</Text>
                         )}
                       </View>
                     </View>
@@ -524,15 +530,15 @@ const GiftConfigPage = () => {
               {logsTotal > 20 && (
                 <View className="flex items-center justify-center gap-4 mt-6">
                   <Button
-                    className={`px-4 py-2 rounded-lg text-sm ${logsPage === 1 ? 'bg-gray-200 text-gray-400' : 'bg-[#6f9b86] text-white'}`}
+                    className={`px-4 py-2 rounded-lg text-sm ${logsPage === 1 ? 'text-white/35 bg-white/10' : 'text-[#2e1f0f] bg-[#e8c07a]'}`}
                     onClick={() => { if (logsPage > 1) { const p = logsPage - 1; setLogsPage(p); loadGiftLogs(p); }}}
                     disabled={logsPage === 1}
                   >
                     上一页
                   </Button>
-                  <Text className="text-gray-600">第 {logsPage} 页</Text>
+                  <Text className="text-white/60 block">第 {logsPage} 页</Text>
                   <Button
-                    className={`px-4 py-2 rounded-lg text-sm ${logsPage >= Math.ceil(logsTotal / 20) ? 'bg-gray-200 text-gray-400' : 'bg-[#6f9b86] text-white'}`}
+                    className={`px-4 py-2 rounded-lg text-sm ${logsPage >= Math.ceil(logsTotal / 20) ? 'text-white/35 bg-white/10' : 'text-[#2e1f0f] bg-[#e8c07a]'}`}
                     onClick={() => { const total = Math.ceil(logsTotal / 20); if (logsPage < total) { const p = logsPage + 1; setLogsPage(p); loadGiftLogs(p); }}}
                     disabled={logsPage >= Math.ceil(logsTotal / 20)}
                   >
@@ -547,34 +553,38 @@ const GiftConfigPage = () => {
 
       {/* 新增/编辑弹窗 */}
       {showModal && (
-        <View className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0 }} onClick={() => setShowModal(false)}>
-          <View className="bg-white rounded-2xl w-11/12 max-w-md p-6 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <Text className="text-lg font-bold text-gray-900 mb-4">{editingId ? '编辑礼物' : '新增礼物'}</Text>
+        <View className="flex items-center justify-center z-50" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex' }} onClick={() => setShowModal(false)}>
+          <View className="rounded-2xl w-11/12 max-w-md p-6 max-h-[80vh] overflow-y-auto" style={{ backgroundColor: 'rgba(18,42,53,0.97)', border: '1px solid rgba(232,192,122,0.35)' }} onClick={(e) => e.stopPropagation()}>
+            <Text className="text-lg font-bold text-white mb-4 block">{editingId ? '编辑礼物' : '新增礼物'}</Text>
 
             <View className="space-y-4">
               {/* 礼物名称 */}
               <View>
-                <Text className="text-sm text-gray-600 mb-2">礼物名称</Text>
-                <Input
-                  className="w-full bg-gray-50 rounded-lg px-4 py-3 text-gray-900"
-                  placeholder="如：鲜花、蜡烛"
-                  value={formData.name}
-                  onInput={(e) => setFormData({ ...formData, name: e.detail.value })}
-                />
+                <Text className="text-sm text-white/70 mb-2 block">礼物名称</Text>
+                <View className="w-full bg-white/10 rounded-lg px-4">
+                  <Input
+                    className="w-full bg-transparent py-3 text-white"
+                    placeholder="如：鲜花、蜡烛"
+                    value={formData.name}
+                    onInput={(e) => setFormData({ ...formData, name: e.detail.value })}
+                  />
+                </View>
               </View>
 
               {/* 图标类型切换 */}
               <View>
-                <Text className="text-sm text-gray-600 mb-2">图标类型</Text>
+                <Text className="text-sm text-white/70 mb-2 block">图标类型</Text>
                 <View className="flex gap-2">
                   <View
-                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'emoji' ? 'bg-[#6f9b86] text-white' : 'bg-gray-100 text-gray-700'}`}
+                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'emoji' ? 'text-[#2e1f0f]' : 'text-white/70'}`}
+                    style={{ backgroundColor: iconType === 'emoji' ? '#e8c07a' : 'rgba(255,255,255,0.1)' }}
                     onClick={() => { setIconType('emoji'); setFormData({ ...formData, icon: '' }); }}
                   >
                     <Text>Emoji 表情</Text>
                   </View>
                   <View
-                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'image' ? 'bg-[#6f9b86] text-white' : 'bg-gray-100 text-gray-700'}`}
+                    className={`flex-1 py-2 px-4 rounded-lg text-center cursor-pointer ${iconType === 'image' ? 'text-[#2e1f0f]' : 'text-white/70'}`}
+                    style={{ backgroundColor: iconType === 'image' ? '#e8c07a' : 'rgba(255,255,255,0.1)' }}
                     onClick={() => { setIconType('image'); setFormData({ ...formData, icon: '' }); }}
                   >
                     <Text>上传图片</Text>
@@ -585,34 +595,37 @@ const GiftConfigPage = () => {
               {/* Emoji 选择 */}
               {iconType === 'emoji' && (
                 <View>
-                  <Text className="text-sm text-gray-600 mb-2">选择图标</Text>
+                  <Text className="text-sm text-white/70 mb-2 block">选择图标</Text>
                   <View className="flex flex-wrap gap-2 mb-3">
                     {PRESET_EMOJIS.map((emoji) => (
                       <View
                         key={emoji}
-                        className={`w-10 h-10 flex items-center justify-center text-2xl rounded-lg cursor-pointer ${formData.icon === emoji ? 'bg-[#dbe8dd] border-2 border-[#6f9b86]' : 'bg-gray-50'}`}
+                        className={`w-10 h-10 flex items-center justify-center text-2xl rounded-lg cursor-pointer ${formData.icon === emoji ? 'border-2' : ''}`}
+                        style={{ backgroundColor: formData.icon === emoji ? 'rgba(232,192,122,0.25)' : 'rgba(255,255,255,0.08)', borderColor: '#e8c07a' }}
                         onClick={() => setFormData({ ...formData, icon: emoji })}
                       >
                         <Text>{emoji}</Text>
                       </View>
                     ))}
                   </View>
-                  <Input
-                    className="w-full bg-gray-50 rounded-lg px-4 py-3 text-gray-900"
-                    placeholder="或输入自定义 Emoji"
-                    value={formData.icon}
-                    onInput={(e) => setFormData({ ...formData, icon: e.detail.value })}
-                  />
+                  <View className="w-full bg-white/10 rounded-lg px-4">
+                    <Input
+                      className="w-full bg-transparent py-3 text-white"
+                      placeholder="或输入自定义 Emoji"
+                      value={formData.icon}
+                      onInput={(e) => setFormData({ ...formData, icon: e.detail.value })}
+                    />
+                  </View>
                 </View>
               )}
 
               {/* 图片上传 */}
               {iconType === 'image' && (
                 <View>
-                  <Text className="text-sm text-gray-600 mb-2">上传图片</Text>
+                  <Text className="text-sm text-white/70 mb-2 block">上传图片</Text>
                   {formData.icon ? (
                     <View className="relative w-32 h-32 mb-2">
-                      <Image src={formData.icon} className="w-full h-full rounded-lg object-contain bg-gray-50" mode="aspectFit" />
+                      <Image src={formData.icon} className="w-full h-full rounded-lg object-contain bg-white/10" mode="aspectFit" />
                       <View
                         className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
                         onClick={() => setFormData({ ...formData, icon: '' })}
@@ -622,31 +635,32 @@ const GiftConfigPage = () => {
                     </View>
                   ) : (
                     <View
-                      className="w-32 h-32 bg-gray-50 rounded-lg flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-gray-300"
+                      className="w-32 h-32 bg-white/8 rounded-lg flex flex-col items-center justify-center cursor-pointer border-2 border-dashed"
+                      style={{ borderColor: 'rgba(232,192,122,0.4)' }}
                       onClick={handleUploadImage}
                     >
                       {uploading ? (
-                        <View className="w-6 h-6 border-2 border-[#6f9b86] border-t-transparent rounded-full animate-spin" />
+                        <View className="w-6 h-6 rounded-full animate-spin" style={{ border: '2px solid rgba(232,192,122,0.3)', borderTopColor: '#e8c07a' }} />
                       ) : (
                         <>
-                          <Text className="text-3xl text-gray-400 mb-1">🖼️</Text>
-                          <Text className="text-xs text-gray-400">点击上传</Text>
+                          <Text className="text-3xl mb-1 block">🖼️</Text>
+                          <Text className="text-xs text-white/50 block">点击上传</Text>
                         </>
                       )}
                     </View>
                   )}
-                  <Text className="text-xs text-gray-400 mt-1">建议尺寸 200x200，支持 JPG、PNG</Text>
+                  <Text className="text-xs text-white/40 mt-1 block">建议尺寸 200x200，支持 JPG、PNG</Text>
                 </View>
               )}
 
               {/* 颜色 */}
               <View>
-                <Text className="text-sm text-gray-600 mb-2">颜色</Text>
+                <Text className="text-sm text-white/70 mb-2 block">颜色</Text>
                 <View className="flex flex-wrap gap-2">
                   {COLORS.map((color) => (
                     <View
                       key={color.value}
-                      className={`w-8 h-8 rounded-full cursor-pointer border-2 ${formData.color === color.value ? 'border-gray-900' : 'border-transparent'}`}
+                      className={`w-8 h-8 rounded-full cursor-pointer border-2 ${formData.color === color.value ? 'border-white' : 'border-transparent'}`}
                       style={{ backgroundColor: color.bg.replace('bg-', '') }}
                       onClick={() => setFormData({ ...formData, color: color.value })}
                     />
@@ -656,35 +670,37 @@ const GiftConfigPage = () => {
 
               {/* 价格 */}
               <View>
-                <Text className="text-sm text-gray-600 mb-2">价格（虚拟货币）</Text>
-                <Input
-                  className="w-full bg-gray-50 rounded-lg px-4 py-3 text-gray-900"
-                  placeholder="如：10、50、100"
-                  type="number"
-                  value={String(formData.price)}
-                  onInput={(e) => setFormData({ ...formData, price: parseInt(e.detail.value) || 0 })}
-                />
+                <Text className="text-sm text-white/70 mb-2 block">价格（虚拟货币）</Text>
+                <View className="w-full bg-white/10 rounded-lg px-4">
+                  <Input
+                    className="w-full bg-transparent py-3 text-white"
+                    placeholder="如：10、50、100"
+                    type="number"
+                    value={String(formData.price)}
+                    onInput={(e) => setFormData({ ...formData, price: parseInt(e.detail.value) || 0 })}
+                  />
+                </View>
               </View>
 
               {/* 启用状态 */}
               <View className="flex items-center justify-between">
-                <Text className="text-sm text-gray-600">启用状态</Text>
+                <Text className="text-sm text-white/70 block">启用状态</Text>
                 <Switch checked={formData.isEnabled} onChange={(e) => setFormData({ ...formData, isEnabled: e.detail.value })} />
               </View>
             </View>
 
             <View className="flex gap-3 mt-6">
-              <Button className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg" onClick={() => setShowModal(false)}>
+              <Button className="flex-1 py-3 rounded-lg text-white" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} onClick={() => setShowModal(false)}>
                 取消
               </Button>
-              <Button className="flex-1 bg-[#6f9b86] text-white py-3 rounded-lg" onClick={handleSubmit}>
+              <Button className="flex-1 py-3 rounded-lg text-[#2e1f0f]" style={{ backgroundColor: '#e8c07a' }} onClick={handleSubmit}>
                 保存
               </Button>
             </View>
           </View>
         </View>
       )}
-    </View>
+    </StarsBackground>
   );
 };
 

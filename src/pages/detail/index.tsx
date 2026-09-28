@@ -3,6 +3,7 @@ import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Network } from '@/network';
 import { Auth } from '@/auth';
+import { StarsBackground } from '@/components/StarsBackground';
 import {
   User,
   Calendar,
@@ -487,47 +488,53 @@ const DetailPage = () => {
   // 加载中
   if (loading) {
     return (
-      <View className="flex flex-col items-center justify-center min-h-screen bg-[#eef3e4]">
-        <View className="w-12 h-12 border-4 border-[#cfe0d3] border-t-[#6f9b86] rounded-full animate-spin" />
-        <Text className="block text-sm text-slate-400 mt-3">加载中...</Text>
-      </View>
+      <StarsBackground dim="normal">
+        <View className="flex flex-col items-center justify-center" style={{ minHeight: '100vh' }}>
+          <View className="w-12 h-12 border-4 border-[#e8c07a]/30 border-t-[#e8c07a] rounded-full animate-spin" />
+          <Text className="block text-sm text-[#e8c07a] mt-3">加载中...</Text>
+        </View>
+      </StarsBackground>
     );
   }
 
   // 数据不存在
   if (!mem) {
     return (
-      <View className="flex flex-col items-center justify-center min-h-screen bg-[#eef3e4]">
-        <Flower2 color="#94a3b8" size={64} strokeWidth={1.5} />
-        <Text className="block text-base text-slate-500 mt-4">纪念空间不存在</Text>
-      </View>
+      <StarsBackground dim="normal">
+        <View className="flex flex-col items-center justify-center" style={{ minHeight: '100vh' }}>
+          <Flower2 color="#e8c07a" size={64} strokeWidth={1.5} />
+          <Text className="block text-base text-white mt-4">纪念空间不存在</Text>
+        </View>
+      </StarsBackground>
     );
   }
 
   return (
-    <View className="min-h-screen bg-[#f7f1e2] pb-32">
+    <StarsBackground dim="light">
       {/* 顶部操作栏 */}
       <View className="fixed top-0 left-0 right-0 z-50 px-2 pt-12 pb-2 flex items-center justify-between">
-        <View className="p-2" onClick={handleBack}>
-          <ArrowLeft color="#4a3728" size={22} />
+        <View className="p-2 bg-white/10 rounded-full" onClick={handleBack}>
+          <ArrowLeft color="#ffffff" size={22} />
         </View>
         {isCreator && (
           <View className="flex gap-2">
-            <View className="p-2" onClick={handleEdit}>
-              <Pencil color="#8a7a6a" size={22} />
+            <View className="p-2 bg-white/10 rounded-full" onClick={handleEdit}>
+              <Pencil color="#ffffff" size={22} />
             </View>
-            <View className="p-2" onClick={handleDeleteMemorial}>
-              <Trash2 color="#8a7a6a" size={22} />
+            <View className="p-2 bg-white/10 rounded-full" onClick={handleDeleteMemorial}>
+              <Trash2 color="#ffffff" size={22} />
             </View>
           </View>
         )}
       </View>
 
       {/* 头像和基本信息 */}
-      <View className="bg-gradient-to-br from-[#dce8dd] to-[#f3ead9] pt-16">
+      <View className="pt-16">
         {/* 居中圆形头像 */}
         <View className="flex flex-col items-center px-6">
-          <View className="w-32 h-32 rounded-full bg-white/70 flex items-center justify-center overflow-hidden mb-4">
+          <View className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden mb-4"
+            style={{ backgroundColor: 'rgba(255,255,255,0.12)', border: '1px solid rgba(232,192,122,0.5)' }}
+          >
             {mem.avatarUrl ? (
               <Image
                 src={mem.avatarUrl}
@@ -536,45 +543,47 @@ const DetailPage = () => {
                 onClick={handlePreviewAvatar}
               />
             ) : (
-              <User color="#7bac8f" size={56} />
+              <User color="#e8c07a" size={56} />
             )}
           </View>
 
           {/* 姓名 + 性别 */}
           <View className="flex items-center justify-center gap-2 mb-2">
-            <Text className="text-3xl font-bold text-[#3f5d50]">{mem.name}</Text>
+            <Text className="text-3xl font-bold text-white">{mem.name}</Text>
             {mem.gender === '男' && (
-              <View className="w-6 h-6 rounded-full border border-[#7bac8f] flex items-center justify-center">
-                <Text className="text-[#7bac8f] text-xs font-bold">♂</Text>
+              <View className="w-6 h-6 rounded-full border border-[#7fc3ce] flex items-center justify-center">
+                <Text className="text-[#7fc3ce] text-xs font-bold">♂</Text>
               </View>
             )}
             {mem.gender === '女' && (
-              <View className="w-6 h-6 rounded-full border border-[#c9a86a] flex items-center justify-center">
-                <Text className="text-[#c9a86a] text-xs font-bold">♀</Text>
+              <View className="w-6 h-6 rounded-full border border-[#e8c07a] flex items-center justify-center">
+                <Text className="text-[#e8c07a] text-xs font-bold">♀</Text>
               </View>
             )}
           </View>
 
           {/* 悼念人数 + 拜访数 */}
-          <View className="flex items-center justify-center gap-6 mb-2 bg-white/50 rounded-full px-6 py-2">
+          <View className="flex items-center justify-center gap-6 mb-2 rounded-full px-6 py-2"
+            style={{ backgroundColor: 'rgba(255,255,255,0.12)', border: '1px solid rgba(232,192,122,0.3)' }}
+          >
             <View className="flex items-center gap-1.5">
-              <Heart size={16} color="#c9a86a" />
-              <Text className="text-sm text-[#4a3728] font-medium">{mem.mourningCount} 次悼念</Text>
+              <Heart size={16} color="#e8c07a" />
+              <Text className="text-sm text-white font-medium">{mem.mourningCount} 次悼念</Text>
             </View>
             <View className="flex items-center gap-1.5">
-              <Eye size={16} color="#7bac8f" />
-              <Text className="text-sm text-[#4a3728] font-medium">{mem.visitCount} 次拜访</Text>
+              <Eye size={16} color="#7fc3ce" />
+              <Text className="text-sm text-white font-medium">{mem.visitCount} 次拜访</Text>
             </View>
           </View>
 
           {/* 生卒日期 + 享年 */}
           {mem.birthDate && mem.deathDate && (
             <View className="flex items-center justify-center gap-2 mb-2">
-              <Calendar color="#8a7a6a" size={15} />
-              <Text className="block text-sm text-[#6b5b4a]">
+              <Calendar color="#e8c07a" size={15} />
+              <Text className="block text-sm text-[#e8c07a]/80">
                 {formatDate(mem.birthDate)} ~ {formatDate(mem.deathDate)}
               </Text>
-              <Text className="block text-sm font-semibold text-[#6b5b4a]">
+              <Text className="block text-sm font-semibold text-[#e8c07a]/80">
                 享年 {calculateAge(mem.birthDate, mem.deathDate)} 岁
               </Text>
             </View>
@@ -584,27 +593,31 @@ const DetailPage = () => {
 
       {/* 简介和成就 */}
       {(mem.description || (mem.achievements && mem.achievements.length > 0)) && (
-        <View className="bg-white mt-5 mx-4 rounded-3xl shadow-sm px-6 py-5">
+        <View className="mt-5 mx-4 rounded-3xl px-6 py-5"
+          style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(232,192,122,0.25)' }}
+        >
           {mem.description && (
             <View className="mb-5">
               <View className="flex items-center gap-2 mb-3">
-                <Flower2 color="#7bac8f" size={20} />
-                <Text className="block text-lg font-semibold text-[#3f5d50]">生平简介</Text>
+                <Flower2 color="#e8c07a" size={20} />
+                <Text className="block text-lg font-semibold text-white">生平简介</Text>
               </View>
-              <Text className="block text-sm text-[#6b5b4a] leading-relaxed">{mem.description}</Text>
+              <Text className="block text-sm text-white/75 leading-relaxed">{mem.description}</Text>
             </View>
           )}
 
           {mem.achievements && mem.achievements.length > 0 && (
             <View>
               <View className="flex items-center gap-2 mb-3">
-                <Award color="#7bac8f" size={20} />
-                <Text className="block text-lg font-semibold text-[#3f5d50]">生平成就</Text>
+                <Award color="#e8c07a" size={20} />
+                <Text className="block text-lg font-semibold text-white">生平成就</Text>
               </View>
               <View className="flex flex-wrap gap-2">
                 {mem.achievements.map((achievement, index) => (
-                  <View key={index} className="bg-[#eef3e4] rounded-full px-4 py-1.5">
-                    <Text className="block text-sm text-[#3f5d50] font-medium">{achievement}</Text>
+                  <View key={index} className="rounded-full px-4 py-1.5"
+                    style={{ backgroundColor: 'rgba(232,192,122,0.15)', border: '1px solid rgba(232,192,122,0.3)' }}
+                  >
+                    <Text className="block text-sm text-[#e8c07a] font-medium">{achievement}</Text>
                   </View>
                 ))}
               </View>
@@ -615,12 +628,14 @@ const DetailPage = () => {
 
       {/* 生活照片 */}
       {mem.photos && mem.photos.length > 0 && (
-        <View className="bg-white mt-5 mx-4 rounded-3xl shadow-sm px-6 py-5">
+        <View className="mt-5 mx-4 rounded-3xl px-6 py-5"
+          style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(232,192,122,0.25)' }}
+        >
           <View className="flex items-center justify-between mb-3">
-            <Text className="block text-lg font-semibold text-[#3f5d50]">记忆相册</Text>
+            <Text className="block text-lg font-semibold text-white">记忆相册</Text>
             {mem.photos.length > 3 && (
               <Text
-                className="text-sm text-[#7bac8f]"
+                className="text-sm text-[#e8c07a]"
                 onClick={() => setShowAllPhotos(!showAllPhotos)}
               >
                 {showAllPhotos ? '收起' : `展开全部${mem.photos.length}张`}
@@ -629,7 +644,9 @@ const DetailPage = () => {
           </View>
           <View className="grid grid-cols-3 gap-2">
             {(showAllPhotos ? mem.photos : mem.photos.slice(0, 3)).map((photo) => (
-              <View key={photo.id} className="aspect-square rounded-xl overflow-hidden bg-[#eef3e4]">
+              <View key={photo.id} className="aspect-square rounded-xl overflow-hidden"
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+              >
                 <Image
                   src={photo.url}
                   className="w-full h-full"
@@ -654,25 +671,28 @@ const DetailPage = () => {
           flexDirection: 'row',
           gap: '12px',
           padding: '12px',
-          backgroundColor: '#ffffff',
-          borderTop: '1px solid #e5ddd0'
+          backgroundColor: 'rgba(11,28,38,0.92)',
+          borderTop: '1px solid rgba(232,192,122,0.35)',
+          backdropFilter: 'blur(12px)'
         }}
       >
         <View style={{ flex: 1 }}>
           <Button
-            className="!bg-[#7bac8f] !text-white !rounded-full !py-3 !border-0 flex items-center justify-center gap-2 shadow-md"
+            className="!rounded-full !py-3 !border-0 flex items-center justify-center gap-2 shadow-md"
+            style={{ backgroundColor: 'linear-gradient(90deg,#e8c07a,#d9a84c)', color: '#2e1f0f' }}
             onClick={() => {
               fetchGiftConfigs();
               setShowGiftModal(true);
             }}
           >
-            <Gift size={18} color="#ffffff" />
+            <Gift size={18} color="#2e1f0f" />
             <Text>悼念</Text>
           </Button>
         </View>
         <View style={{ flex: 1 }}>
           <Button
-            className="!bg-[#f3ead9] !text-[#7a6a54] !rounded-full !py-3 !border-0"
+            className="!rounded-full !py-3 !border-0"
+            style={{ backgroundColor: 'rgba(232,192,122,0.15)', color: '#e8c07a' }}
             onClick={handleVisit}
           >
             <Text>拜访</Text>
@@ -681,16 +701,18 @@ const DetailPage = () => {
       </View>
 
       {/* 留言区域 */}
-      <View className="bg-white mt-5 mx-4 rounded-3xl shadow-sm px-6 py-5">
+      <View className="mt-5 mx-4 rounded-3xl px-6 py-5 mb-4"
+        style={{ backgroundColor: 'rgba(20,42,55,0.5)', border: '1px solid rgba(232,192,122,0.35)', backdropFilter: 'blur(14px)' }}
+      >
         <View className="flex items-center justify-between mb-4">
-          <Text className="block text-lg font-semibold text-[#3f5d50]">留言板</Text>
-          <Text className="block text-sm text-[#8a7a6a]">{messages.length} 条</Text>
+          <Text className="block text-lg font-semibold text-white">留言板</Text>
+          <Text className="block text-sm text-[#e8c07a]/70">{messages.length} 条</Text>
         </View>
 
         {messages.length === 0 ? (
           <View className="flex flex-col items-center justify-center py-10">
-            <Flower2 color="#c9d8cd" size={48} strokeWidth={1.5} />
-            <Text className="block text-sm text-[#8a7a6a] mt-3">还没有留言，留下您的思念</Text>
+            <Flower2 color="#e8c07a" size={48} strokeWidth={1.5} />
+            <Text className="block text-sm text-white/70 mt-3">还没有留言，留下您的思念</Text>
           </View>
         ) : (
           <View className="flex flex-col gap-3">
@@ -700,30 +722,36 @@ const DetailPage = () => {
                 const senderName = pick((msg as any).sender, 'name');
                 const senderAvatar = pick((msg as any).sender, 'avatar');
                 return (
-                  <View key={msg.id} className="bg-[#f3ead9] rounded-2xl p-4">
+                  <View key={msg.id} className="rounded-2xl p-4"
+                    style={{ backgroundColor: 'rgba(232,192,122,0.12)', border: '1px solid rgba(232,192,122,0.4)' }}
+                  >
                     <View className="flex items-center justify-between mb-3">
                       <View className="flex items-center gap-2">
-                        <View className="w-8 h-8 rounded-full bg-[#eed9a8] flex items-center justify-center overflow-hidden">
+                        <View className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center"
+                          style={{ backgroundColor: 'rgba(232,192,122,0.25)' }}
+                        >
                           {senderAvatar ? (
                             <Image src={senderAvatar} className="w-full h-full" mode="aspectFill" />
                           ) : (
-                            <Text className="text-xs text-[#a8843f]">{(senderName || '访').charAt(0)}</Text>
+                            <Text className="text-xs text-[#e8c07a]">{(senderName || '访').charAt(0)}</Text>
                           )}
                         </View>
                         <View>
-                          <Text className="block text-sm font-medium text-[#7a6a54]">{senderName || '访客'}</Text>
-                          <Text className="block text-xs text-[#b08d3f]">赠 {pick(msg, 'gift_name', 'giftName')}</Text>
+                          <Text className="block text-sm font-medium text-[#f0d9a8]">{senderName || '访客'}</Text>
+                          <Text className="block text-xs text-[#e8c07a]">赠 {pick(msg, 'gift_name', 'giftName')}</Text>
                         </View>
                       </View>
-                      <Text className="block text-xs text-[#a39480]">{formatTime(msg)}</Text>
+                      <Text className="block text-xs text-white/50">{formatTime(msg)}</Text>
                     </View>
                     <View className="flex items-end gap-3">
                       <View className="flex-shrink-0 flex items-center justify-center">
                         <GiftIcon icon={pick(msg, 'gift_icon', 'giftIcon')} size="large" />
                       </View>
                       {pick(msg, 'message') && (
-                        <View className="flex-1 bg-white/60 rounded-lg p-3">
-                          <Text className="block text-sm text-[#6b5b4a] leading-relaxed">{pick(msg, 'message')}</Text>
+                        <View className="flex-1 rounded-lg p-3"
+                          style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                        >
+                          <Text className="block text-sm text-white/85 leading-relaxed">{pick(msg, 'message')}</Text>
                         </View>
                       )}
                     </View>
@@ -736,31 +764,36 @@ const DetailPage = () => {
                 const authorAvatar = pick(cmt, 'authorAvatar', 'author_avatar');
                 const isMyComment = authorName === visitorName.trim();
                 return (
-                  <View key={cmt.id} className="bg-[#eef3e4] rounded-2xl p-4">
+                  <View key={cmt.id} className="rounded-2xl p-4"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.09)', border: '1px solid rgba(232,192,122,0.3)' }}
+                  >
                     <View className="flex items-center justify-between mb-2">
                       <View className="flex items-center gap-2">
-                        <View className="w-8 h-8 rounded-full bg-[#cfe0d3] flex items-center justify-center overflow-hidden">
+                        <View className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center"
+                          style={{ backgroundColor: 'rgba(127,195,206,0.25)' }}
+                        >
                           {authorAvatar ? (
                             <Image src={authorAvatar} className="w-full h-full" mode="aspectFill" />
                           ) : (
-                            <Text className="text-xs text-slate-500">{(authorName || '访').charAt(0)}</Text>
+                            <Text className="text-xs text-[#7fc3ce]">{(authorName || '访').charAt(0)}</Text>
                           )}
                         </View>
-                        <Text className="block text-sm font-medium text-[#3f5d50]">{authorName || '访客'}</Text>
+                        <Text className="block text-sm font-medium text-white">{authorName || '访客'}</Text>
                       </View>
                       <View className="flex items-center gap-2">
-                        <Text className="block text-xs text-[#8a7a6a]">{formatTime(cmt)}</Text>
+                        <Text className="block text-xs text-white/50">{formatTime(cmt)}</Text>
                         {isMyComment && (
                           <View
-                            className="px-2 py-1 bg-[#f3d9c2] rounded-full"
+                            className="px-2 py-1 rounded-full"
+                            style={{ backgroundColor: 'rgba(232,192,122,0.15)' }}
                             onClick={() => handleDeleteComment(cmt.id, authorName)}
                           >
-                            <Text className="text-xs text-[#a85c3f]">删除</Text>
+                            <Text className="text-xs text-[#e8c07a]">删除</Text>
                           </View>
                         )}
                       </View>
                     </View>
-                    <Text className="block text-sm text-[#6b5b4a] leading-relaxed">{pick(cmt, 'content')}</Text>
+                    <Text className="block text-sm text-white/85 leading-relaxed">{pick(cmt, 'content')}</Text>
                   </View>
                 );
               }
@@ -769,42 +802,48 @@ const DetailPage = () => {
         )}
 
         {/* 留言输入 */}
-        <View className="mt-4 pt-4 border-t border-[#e5ddd0]">
+        <View className="mt-4 pt-4 border-t" style={{ borderColor: 'rgba(232,192,122,0.3)' }}>
           {/* 用户信息 */}
           <View className="flex items-center gap-3 mb-3 px-1">
-            <View className="w-10 h-10 rounded-full bg-[#cfe0d3] flex items-center justify-center overflow-hidden">
+            <View className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(127,195,206,0.25)' }}
+            >
               {visitorAvatar ? (
                 <Image src={visitorAvatar} className="w-full h-full" mode="aspectFill" />
               ) : (
-                <Text className="text-sm text-slate-500">{(visitorName || '访').charAt(0)}</Text>
+                <Text className="text-sm text-[#7fc3ce]">{(visitorName || '访').charAt(0)}</Text>
               )}
             </View>
             <View>
-              <Text className="block text-sm font-medium text-[#3f5d50]">{visitorName || '访客'}</Text>
+              <Text className="block text-sm font-medium text-white">{visitorName || '访客'}</Text>
             </View>
           </View>
 
           {/* 输入框 */}
-          <View className="bg-[#eef3e4] rounded-2xl p-4 mb-3">
+          <View className="rounded-2xl p-4 mb-3"
+            style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}
+          >
             <Textarea
-              style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', textAlign: 'left' }}
+              style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', textAlign: 'left', color: '#fff' }}
               placeholder="写下您的思念..."
+              placeholderStyle="color:#8ea9b4"
               value={message}
               onInput={(e) => setMessage(e.detail.value)}
               maxlength={500}
             />
             <View className="flex justify-end mt-2">
-              <Text className="text-xs text-slate-400">{message.length}/500</Text>
+              <Text className="text-xs text-[#e8c07a]/60">{message.length}/500</Text>
             </View>
           </View>
 
           {/* 发送按钮 */}
           <View className="flex justify-end">
             <Button
-              className="!bg-[#7bac8f] !text-white !rounded-full !px-6 !py-2 !border-0 flex items-center gap-2"
+              className="!rounded-full !px-6 !py-2 !border-0 flex items-center gap-2"
+              style={{ backgroundColor: '#e8c07a', color: '#2e1f0f' }}
               onClick={handleComment}
             >
-              <Send size={16} color="#ffffff" />
+              <Send size={16} color="#2e1f0f" />
               <Text>发送</Text>
             </Button>
           </View>
@@ -824,12 +863,15 @@ const DetailPage = () => {
             }
           }}
         >
-          <View className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <View className="rounded-t-3xl w-full max-h-[80vh] overflow-y-auto"
+            style={{ backgroundColor: '#112933', border: '1px solid rgba(232,192,122,0.3)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* 弹窗头部 */}
-            <View className="px-6 py-4 border-b border-[#e5ddd0] flex items-center justify-between">
-              <Text className="text-lg font-bold text-[#3f5d50]">选择礼物</Text>
+            <View className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: 'rgba(232,192,122,0.3)' }}>
+              <Text className="text-lg font-bold text-white">选择礼物</Text>
               <View className="p-2" onClick={() => { setShowGiftModal(false); setSelectedGift(null); setGiftMessage(''); }}>
-                <X size={24} color="#8a7a6a" />
+                <X size={24} color="#e8c07a" />
               </View>
             </View>
 
@@ -840,15 +882,16 @@ const DetailPage = () => {
                   <View
                     key={gift.id}
                     className={`flex flex-col items-center justify-end p-4 rounded-2xl border-2 min-h-[140px] ${
-                      selectedGift?.id === gift.id ? 'border-[#7bac8f] bg-[#eef3e4]' : 'border-transparent bg-[#f7f1e2]'
+                      selectedGift?.id === gift.id ? 'border-[#e8c07a]' : 'border-transparent'
                     }`}
+                    style={{ backgroundColor: selectedGift?.id === gift.id ? 'rgba(232,192,122,0.18)' : 'rgba(255,255,255,0.08)' }}
                     onClick={() => setSelectedGift(gift)}
                   >
                     <View className="flex-1 flex items-center justify-center w-full mb-2">
                       <GiftIcon icon={gift.icon} size="normal" />
                     </View>
-                    <Text className={`block text-sm font-semibold ${gift.color || 'text-[#7a6a54]'}`}>{gift.name}</Text>
-                    <Text className="block text-xs text-[#8a7a6a] mt-1">{gift.price || 0}积分</Text>
+                    <Text className="block text-sm font-semibold text-white">{gift.name}</Text>
+                    <Text className="block text-xs text-[#e8c07a]/70 mt-1">{gift.price || 0}积分</Text>
                   </View>
                 ))}
               </View>
@@ -856,25 +899,27 @@ const DetailPage = () => {
 
             {/* 留言输入 */}
             {selectedGift && (
-              <View className="px-6 py-4 border-t border-[#e5ddd0]">
-                <Text className="block text-sm font-medium text-[#3f5d50] mb-2">给故人留句话（可选）</Text>
-                <View className="bg-[#eef3e4] rounded-2xl p-4">
+              <View className="px-6 py-4 border-t" style={{ borderColor: 'rgba(232,192,122,0.3)' }}>
+                <Text className="block text-sm font-medium text-white mb-2">给故人留句话（可选）</Text>
+                <View className="rounded-2xl p-4" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
                   <Textarea
-                    style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
+                    style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', color: '#fff' }}
                     placeholder="写下您的思念..."
+                    placeholderStyle="color:#8ea9b4"
                     value={giftMessage}
                     onInput={(e) => setGiftMessage(e.detail.value)}
                     maxlength={200}
                   />
-                  <Text className="block text-xs text-slate-400 mt-1 text-right">{giftMessage.length}/200</Text>
+                  <Text className="block text-xs text-[#e8c07a]/60 mt-1 text-right">{giftMessage.length}/200</Text>
                 </View>
               </View>
             )}
 
             {/* 确认按钮 */}
-            <View className="px-6 py-4 border-t border-[#e5ddd0]">
+            <View className="px-6 py-4 border-t" style={{ borderColor: 'rgba(232,192,122,0.3)' }}>
               <Button
-                className={`!rounded-full !py-3 ${selectedGift ? '!bg-[#7bac8f] !text-white' : '!bg-[#eee7db] !text-[#a89a85]'}`}
+                className={`!rounded-full !py-3 ${selectedGift ? '' : '!text-[#a89a85]'}`}
+                style={selectedGift ? { backgroundColor: '#e8c07a', color: '#2e1f0f' } : { backgroundColor: 'rgba(255,255,255,0.1)', color: '#7e99a3' }}
                 onClick={handleSendGift}
                 disabled={!selectedGift || isSendingGift}
               >
@@ -888,31 +933,34 @@ const DetailPage = () => {
       {/* 删除确认弹窗 */}
       {showDeleteModal && (
         <View
-          className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50"
-          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)' }}
           onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}
         >
-          <View className="bg-white rounded-2xl mx-6 w-full max-w-sm overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <View className="bg-[#7bac8f] px-6 py-4">
+          <View className="rounded-2xl mx-6 w-full max-w-sm overflow-hidden shadow-2xl"
+            style={{ backgroundColor: '#112933', border: '1px solid rgba(232,192,122,0.3)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <View className="px-6 py-4 text-center" style={{ backgroundColor: 'rgba(232,192,122,0.15)' }}>
               <Text className="block text-lg font-bold text-white text-center">确认删除</Text>
             </View>
             <View className="px-6 py-6">
-              <Text className="block text-base text-slate-600 text-center leading-relaxed">确定要删除这条留言吗？</Text>
-              <Text className="block text-sm text-slate-400 text-center mt-2">删除后无法恢复</Text>
+              <Text className="block text-base text-white/85 text-center leading-relaxed">确定要删除这条留言吗？</Text>
+              <Text className="block text-sm text-white/50 text-center mt-2">删除后无法恢复</Text>
             </View>
-            <View className="flex border-t border-[#e5ddd0]">
-              <View className="flex-1 py-4 bg-[#f3ead9] flex items-center justify-center" onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}>
-                <Text className="block text-base text-slate-600 text-center font-medium">取消</Text>
+            <View className="flex border-t" style={{ borderColor: 'rgba(232,192,122,0.3)' }}>
+              <View className="flex-1 py-4 flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }} onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }}>
+                <Text className="block text-base text-white/80 text-center font-medium">取消</Text>
               </View>
-              <View className="w-px bg-[#e5ddd0]" />
-              <View className="flex-1 py-4 bg-[#7bac8f] flex items-center justify-center" onClick={confirmDeleteComment}>
-                <Text className="block text-base text-white text-center font-medium">确定</Text>
+              <View className="w-px" style={{ backgroundColor: 'rgba(232,192,122,0.3)' }} />
+              <View className="flex-1 py-4 flex items-center justify-center" style={{ backgroundColor: 'rgba(232,192,122,0.9)' }} onClick={confirmDeleteComment}>
+                <Text className="block text-base text-[#2e1f0f] text-center font-medium">确定</Text>
               </View>
             </View>
           </View>
         </View>
       )}
-    </View>
+    </StarsBackground>
   );
 };
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Network } from '@/network';
 import { Auth } from '@/auth';
 import { User } from 'lucide-react-taro';
+import { StarsBackground } from '@/components/StarsBackground';
 
 interface NewMemorial {
   name: string;
@@ -66,15 +67,15 @@ const SlideDatePicker = ({ label, value, onChange, placeholder = '请选择日�
 
   return (
     <View className="flex-1">
-      <Text className="block text-sm font-medium text-slate-700 mb-2">{label}</Text>
+      <Text className="block text-sm font-medium text-white/85 mb-2">{label}</Text>
       <Picker
         mode="multiSelector"
         range={[years, months, days]}
         value={[Math.max(0, yearIndex), Math.max(0, monthIndex), Math.max(0, dayIndex)]}
         onChange={handlePickerChange}
       >
-        <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
-          <Text className={`${value ? 'text-slate-700' : 'text-slate-400'}`}>
+        <View className="rounded-xl px-4 py-3" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+          <Text className={`${value ? 'text-white' : 'text-[#7e99a3]'}`}>
             {displayText}
           </Text>
         </View>
@@ -460,10 +461,10 @@ const FormPage = () => {
   };
 
   return (
-    <View className="min-h-screen bg-[#eef3e4] pb-6">
+    <StarsBackground dim="light">
       {/* 头部 */}
-      <View className="bg-white px-4 py-5 border-b border-[#dbe8dd]">
-        <Text className="block text-2xl font-bold text-[#3f5d50]">
+      <View className="px-4 pt-14 pb-5" style={{ borderBottom: '1px solid rgba(232,192,122,0.25)' }}>
+        <Text className="block text-2xl font-bold text-white">
           {isEditMode ? '编辑' : '添加故人'}
         </Text>
       </View>
@@ -471,44 +472,48 @@ const FormPage = () => {
       {/* 加载状态 */}
       {loading && (
         <View className="flex flex-col items-center justify-center py-20">
-          <View className="w-12 h-12 border-4 border-[#cfe0d3] border-t-[#6f9b86] rounded-full animate-spin" />
-          <Text className="block text-sm text-slate-400 mt-4">加载中...</Text>
+          <View className="w-12 h-12 border-4 border-[#e8c07a]/30 border-t-[#e8c07a] rounded-full animate-spin" />
+          <Text className="block text-sm text-white/60 mt-4">加载中...</Text>
         </View>
       )}
 
       {/* 表单 */}
       {!loading && (
         <View className="px-4 py-6">
-          <View className="bg-white rounded-2xl p-6 shadow-sm">
+          <View className="rounded-2xl p-6"
+            style={{ backgroundColor: 'rgba(18,42,53,0.82)', border: '1px solid rgba(232,192,122,0.3)' }}
+          >
             {/* 头像预览 */}
             <View className="flex flex-col items-center mb-6">
-              <View className="w-40 h-40 rounded-2xl bg-gradient-to-br from-[#dbe8dd] to-[#eef3e4] flex items-center justify-center overflow-hidden mb-4 shadow-sm border border-[#cfe0d3]">
+              <View className="w-40 h-40 rounded-2xl flex items-center justify-center overflow-hidden mb-4"
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(232,192,122,0.4)' }}
+              >
                 {avatarUrl ? (
                   <Image src={avatarUrl} className="w-full h-full" mode="aspectFill" onClick={handlePreviewAvatar} />
                 ) : (
                   <View className="flex flex-col items-center gap-2">
-                    <User color="#94a3b8" size={64} />
-                    <Text className="text-sm text-slate-400">暂无头像</Text>
+                    <User color="#8ea9b4" size={64} />
+                    <Text className="text-sm text-white/50">暂无头像</Text>
                   </View>
                 )}
               </View>
               {avatarUrl ? (
-                <Text className="text-base font-semibold text-[#6f9b86] underline cursor-pointer" onClick={handleUploadAvatar}>
+                <Text className="text-base font-semibold text-[#e8c07a] underline cursor-pointer" onClick={handleUploadAvatar}>
                   {isUploading ? '上传中...' : '更换头像'}
                 </Text>
               ) : (
-                <Text className="text-base font-semibold text-[#6f9b86] underline cursor-pointer" onClick={generateAvatar}>
+                <Text className="text-base font-semibold text-[#e8c07a] underline cursor-pointer" onClick={generateAvatar}>
                   {isGenerating ? '生成中...' : 'AI 生成头像'}
                 </Text>
               )}
-              <Text className="block text-xs text-slate-400 mt-2 text-center">
+              <Text className="block text-xs text-white/40 mt-2 text-center">
                 {avatarUrl ? '点击更换头像' : '点击生成或上传头像'}
               </Text>
             </View>
 
             {/* 照片上传 */}
             <View className="mb-6">
-              <Text className="block text-sm font-medium text-slate-700 mb-2">生活照片（可选，最多9张）</Text>
+              <Text className="block text-sm font-medium text-white/85 mb-2">生活照片（可选，最多9张）</Text>
               <View className="grid grid-cols-3 gap-2">
                 {photos.map((photo, index) => (
                   <View key={index} className="relative aspect-square">
@@ -519,9 +524,12 @@ const FormPage = () => {
                   </View>
                 ))}
                 {photos.length < 9 && (
-                  <View className="aspect-square bg-[#eef3e4] rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-[#cfe0d3]" onClick={handleUploadPhotos}>
-                    <Text className="text-3xl text-[#a8cbb8] font-light">+</Text>
-                    <Text className="text-xs text-slate-400 mt-1">添加照片</Text>
+                  <View className="aspect-square rounded-lg flex flex-col items-center justify-center"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '2px dashed rgba(232,192,122,0.4)' }}
+                    onClick={handleUploadPhotos}
+                  >
+                    <Text className="text-3xl text-[#e8c07a] font-light">+</Text>
+                    <Text className="text-xs text-white/50 mt-1">添加照片</Text>
                   </View>
                 )}
               </View>
@@ -531,11 +539,13 @@ const FormPage = () => {
             <View className="flex flex-col gap-4">
               {/* 姓名 */}
               <View>
-                <Text className="block text-sm font-medium text-slate-700 mb-2">姓名 *</Text>
-                <View className="bg-[#eef3e4] rounded-xl px-4 py-3">
+                <Text className="block text-sm font-medium text-white/85 mb-2">姓名 *</Text>
+                <View className="rounded-xl px-4 py-3" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
                   <Input
-                    className="w-full bg-transparent text-slate-700 placeholder-slate-400"
+                    className="w-full bg-transparent"
+                    style={{ color: '#fff' }}
                     placeholder="请输入姓名"
+                    placeholderStyle="color:#7e99a3"
                     value={formData.name}
                     onInput={(e) => handleInputChange('name', e.detail.value)}
                   />
@@ -544,15 +554,16 @@ const FormPage = () => {
 
               {/* 性别 */}
               <View>
-                <Text className="block text-sm font-medium text-slate-700 mb-2">性别</Text>
+                <Text className="block text-sm font-medium text-white/85 mb-2">性别</Text>
                 <View className="flex gap-3">
                   {GENDER_OPTIONS.map((option) => (
                     <View
                       key={option}
-                      className={`flex-1 py-3 px-4 rounded-xl text-center cursor-pointer transition-colors ${formData.gender === option ? 'bg-[#6f9b86]' : 'bg-[#eef3e4]'}`}
+                      className="flex-1 py-3 px-4 rounded-xl text-center cursor-pointer transition-colors"
+                      style={{ backgroundColor: formData.gender === option ? '#e8c07a' : 'rgba(255,255,255,0.08)' }}
                       onClick={() => handleInputChange('gender', option)}
                     >
-                      <Text className={formData.gender === option ? 'text-white' : 'text-slate-700'}>{option}</Text>
+                      <Text className={formData.gender === option ? 'text-[#2e1f0f] font-semibold' : 'text-white/80'}>{option}</Text>
                     </View>
                   ))}
                 </View>
@@ -577,48 +588,53 @@ const FormPage = () => {
               {/* 简介 */}
               <View>
                 <View className="flex justify-between items-center mb-2">
-                  <Text className="block text-sm font-medium text-slate-700">简介</Text>
-                  <Text className="text-xs font-semibold text-[#6f9b86] underline cursor-pointer" onClick={() => handlePolish('description')}>AI润色</Text>
+                  <Text className="block text-sm font-medium text-white/85">简介</Text>
+                  <Text className="text-xs font-semibold text-[#e8c07a] underline cursor-pointer" onClick={() => handlePolish('description')}>AI润色</Text>
                 </View>
-                <View className="bg-[#eef3e4] rounded-xl p-4">
+                <View className="rounded-xl p-4" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
                   <Textarea
-                    style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
+                    style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', color: '#fff' }}
                     placeholder="请输入简介..."
+                    placeholderStyle="color:#7e99a3"
                     value={formData.description}
                     onInput={(e) => handleInputChange('description', e.detail.value)}
                     maxlength={600}
                   />
-                  <Text className="block text-xs text-slate-400 mt-1 text-right">{formData.description.length}/600</Text>
+                  <Text className="block text-xs text-[#e8c07a]/50 mt-1 text-right">{formData.description.length}/600</Text>
                 </View>
               </View>
 
               {/* 主要成就 */}
               <View>
                 <View className="flex justify-between items-center mb-2">
-                  <Text className="block text-sm font-medium text-slate-700">主要成就</Text>
-                  <Text className="text-xs font-semibold text-[#6f9b86] underline cursor-pointer" onClick={() => handlePolish('achievements')}>AI润色</Text>
+                  <Text className="block text-sm font-medium text-white/85">主要成就</Text>
+                  <Text className="text-xs font-semibold text-[#e8c07a] underline cursor-pointer" onClick={() => handlePolish('achievements')}>AI润色</Text>
                 </View>
-                <View className="bg-[#eef3e4] rounded-xl p-4">
+                <View className="rounded-xl p-4" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
                   <Textarea
-                    style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent' }}
+                    style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', color: '#fff' }}
                     placeholder="请输入主要成就，用逗号分隔..."
+                    placeholderStyle="color:#7e99a3"
                     value={formData.achievements}
                     onInput={(e) => handleInputChange('achievements', e.detail.value)}
                     maxlength={1000}
                   />
-                  <Text className="block text-xs text-slate-400 mt-1 text-right">{formData.achievements.length}/1000</Text>
+                  <Text className="block text-xs text-[#e8c07a]/50 mt-1 text-right">{formData.achievements.length}/1000</Text>
                 </View>
               </View>
 
               {/* 提交按钮 */}
-              <Button className="bg-[#6f9b86] text-white rounded-full py-3 shadow-md mt-2" onClick={handleSubmit} disabled={isSaving}>
+              <Button className="rounded-full py-3 shadow-md mt-2"
+                style={{ backgroundColor: '#e8c07a', color: '#2e1f0f' }}
+                onClick={handleSubmit} disabled={isSaving}
+              >
                 <Text>{isSaving ? '保存中...' : (isEditMode ? '保存修改' : '保存故人')}</Text>
               </Button>
             </View>
           </View>
         </View>
       )}
-    </View>
+    </StarsBackground>
   );
 };
 

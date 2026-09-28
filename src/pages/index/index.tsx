@@ -19,9 +19,9 @@ const ELDER_MALE =
 const ELDER_FEMALE =
   'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_875f3290-29ac-4e8d-97d7-fb78c8501238.jpeg?sign=1822036747-72dcb1b772-0-7ac9f978933a6ec6827cd76c9273a25046c89de94d735bf68a75b9ac27999ab9';
 
-// 藏青蓝星空纪念背景（对象存储网络图：半透磨砂模块 + 金色描边 + 星芒光带）
+// 藏青蓝星空纪念背景（对象存储网络图：上半区纪念标识+金色光带点缀，下半区纯深蓝供内容展示）
 const BG_IMAGE =
-  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/images/home-bg-v2_844ba8fa.png?sign=1793112184-101be512d0-0-ce18762fd873441affd2597ee35cb2c7b71f55c2a4e583e5be010ac7b27a879d';
+  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/images/home-bg-v3_8951ca4d.png?sign=1793161490-def9b034af-0-03e34474f578ca213fd4b5ee8aadb8947753115ea1a9ccc32902e40c8aaa3f43';
 
 interface Memorial {
   id: string;

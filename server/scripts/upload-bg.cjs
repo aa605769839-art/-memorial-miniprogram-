@@ -10,10 +10,10 @@ const storage = new S3Storage({
 });
 
 async function main() {
-  const buffer = readFileSync("/tmp/bg_home2.png");
+  const buffer = readFileSync("/tmp/bg_home3.png");
   const key = await storage.uploadFile({
     fileContent: buffer,
-    fileName: "images/home-bg-v2.png",
+    fileName: "images/home-bg-v3.png",
     contentType: "image/png",
   });
   console.log("KEY=" + key);

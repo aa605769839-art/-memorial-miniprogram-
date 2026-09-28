@@ -4,6 +4,7 @@ import { PhotosService } from '../photos/photos.service';
 import { GiftsService } from '../gifts/gifts.service';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
 import { AuthGuard } from '../auth/auth.guard';
+import { LLMClient, Config } from 'coze-coding-dev-sdk';
 
 @Controller('memorials')
 export class MemorialsController {
@@ -25,45 +26,24 @@ export class MemorialsController {
     }
 
     try {
-      const apiUrl = process.env.LLM_API_URL;
-      const apiKey = process.env.LLM_API_KEY;
-      const model = process.env.LLM_MODEL;
+      const config = new Config();
+      const client = new LLMClient(config);
 
-      if (!apiUrl || !apiKey) {
-        throw new HttpException('AI润色服务未配置，请设置 LLM_API_URL / LLM_API_KEY 环境变量', HttpStatus.SERVICE_UNAVAILABLE);
-      }
+      const response = await client.invoke(
+        [
+          {
+            role: 'system',
+            content: '你是一位专业的文本润色专家，擅长让文字更加优美、感人、富有纪念意义。保持原意不变，仅优化语言表达和排版格式。'
+          },
+          {
+            role: 'user',
+            content: `请帮我润色以下文本：\n\n${body.text}`
+          }
+        ],
+        { model: 'doubao-seed-2-0-lite-260215', temperature: 0.8 }
+      );
 
-      const response = await fetch(`${apiUrl.replace(/\/$/, '')}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: model || 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: '你是一位专业的文本润色专家，擅长让文字更加优美、感人、富有纪念意义。保持原意不变，仅优化语言表达和排版格式。'
-            },
-            {
-              role: 'user',
-              content: `请帮我润色以下文本：\n\n${body.text}`
-            }
-          ],
-          temperature: 0.8
-        }),
-        signal: AbortSignal.timeout(20000)
-      });
-
-      if (!response.ok) {
-        const errText = await response.text().catch(() => '');
-        console.error('LLM润色失败:', response.status, errText);
-        throw new HttpException('AI润色服务暂不可用，请稍后再试', HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-
-      const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-      const polishedText = data.choices?.[0]?.message?.content?.trim();
+      const polishedText = response.content?.trim();
       if (!polishedText) {
         throw new HttpException('AI润色服务无有效返回，请稍后再试', HttpStatus.INTERNAL_SERVER_ERROR);
       }

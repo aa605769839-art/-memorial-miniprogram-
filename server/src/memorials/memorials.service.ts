@@ -3,14 +3,69 @@ import { eq, desc, and, gte } from 'drizzle-orm';
 import { db } from '../storage/database/drizzle';
 import { memorials, photos, comments } from '../storage/database/shared/schema';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
+import { AvatarService } from './avatar.service';
+
+export interface AvatarCandidate {
+  id: string;
+  name?: string | null;
+  gender?: string | null;
+  birthDate?: string | null;
+  deathDate?: string | null;
+  description?: string | null;
+  achievements?: string[] | string | null;
+  avatarUrl: string | null;
+}
 
 @Injectable()
 export class MemorialsService {
+  constructor(private readonly avatarService: AvatarService) {}
+
+  /** 判断头像是否有效 */
+  private isAvatarValid(url?: string | null): boolean {
+    return AvatarService.isValidAvatar(url);
+  }
+
+  /** 更新故人头像（不回传自增字段） */
+  private async updateAvatar(memorialId: string, avatarUrl: string) {
+    await db.update(memorials)
+      .set({ avatarUrl, updatedAt: new Date() })
+      .where(eq(memorials.id, memorialId));
+  }
+
+  /** 异步为缺失/脏头像的故人补生成并回写 */
+  private async backfillAvatarAsync(m: AvatarCandidate) {
+    try {
+      if (this.isAvatarValid(m.avatarUrl)) return;
+      const url = await this.avatarService.generate(m);
+      if (url && url !== m.avatarUrl) {
+        await this.updateAvatar(m.id, url);
+      }
+    } catch (error) {
+      console.error('backfillAvatarAsync 失败 id=' + m.id, error);
+    }
+  }
+
+  /** 同步生成并回写（可用于详情页），失败保留原值 */
+  private async ensureAvatarSync(m: AvatarCandidate): Promise<string | null> {
+    if (this.isAvatarValid(m.avatarUrl)) return m.avatarUrl;
+    const url = await this.avatarService.generate(m);
+    if (url && url !== m.avatarUrl) {
+      await this.updateAvatar(m.id, url).catch(() => {});
+    }
+    return url || m.avatarUrl;
+  }
+
   async findAll(userId?: string) {
     let query = db.select().from(memorials);
 
     if (userId) {
       const rows = await query.where(eq(memorials.userId, userId)).orderBy(desc(memorials.createdAt));
+      // 对缺失头像的故人做异步补全（不阻塞列表返回）
+      rows.forEach((r) => {
+        if (!this.isAvatarValid(r.avatarUrl)) {
+          this.backfillAvatarAsync(r as unknown as AvatarCandidate).catch(() => {});
+        }
+      });
       return rows;
     }
     return query.orderBy(desc(memorials.createdAt));
@@ -29,6 +84,13 @@ export class MemorialsService {
 
   async findOneWithPhotos(id: string) {
     const memorial = await this.findOne(id);
+    // 详情页同步兜底头像
+    if (memorial && !this.isAvatarValid(memorial.avatarUrl)) {
+      const url = await this.ensureAvatarSync(memorial as unknown as AvatarCandidate);
+      if (url && memorial.avatarUrl !== url) {
+        (memorial as any).avatarUrl = url;
+      }
+    }
     const photoList = await this.findPhotos(id);
     return {
       ...(memorial ?? {}),

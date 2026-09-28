@@ -532,19 +532,25 @@ const DetailPage = () => {
       <View className="pt-16">
         {/* 居中圆形头像 */}
         <View className="flex flex-col items-center px-6">
-          <View className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden mb-4"
-            style={{ backgroundColor: 'rgba(255,255,255,0.12)', border: '1px solid rgba(232,192,122,0.5)' }}
+          <View className="w-32 h-32 rounded-full flex items-center justify-center mb-4"
+            style={{
+              padding: 2.5,
+              background: 'linear-gradient(160deg, rgba(244,217,160,0.95), rgba(217,168,83,0.6) 45%, rgba(120,90,40,0.4) 100%)',
+              boxShadow: '0 0 18px rgba(240,200,125,0.35)',
+            }}
           >
-            {mem.avatarUrl ? (
-              <Image
-                src={mem.avatarUrl}
-                className="w-full h-full"
-                mode="aspectFill"
-                onClick={handlePreviewAvatar}
-              />
-            ) : (
-              <User color="#e8c07a" size={56} />
-            )}
+            <View className="w-full h-full rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'rgba(13,30,40,0.6)' }}>
+              {mem.avatarUrl ? (
+                <Image
+                  src={mem.avatarUrl}
+                  className="w-full h-full"
+                  mode="aspectFill"
+                  onClick={handlePreviewAvatar}
+                />
+              ) : (
+                <User color="#f0c87d" size={56} />
+              )}
+            </View>
           </View>
 
           {/* 姓名 + 性别 */}

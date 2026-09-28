@@ -106,29 +106,45 @@ const PeoplePage = () => {
             {memorials.map((m) => (
               <View
                 key={m.id}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm"
+                className="rounded-3xl overflow-hidden shadow-sm"
                 onClick={() => goDetail(m.id)}
+                style={{
+                  padding: 1,
+                  background: 'linear-gradient(160deg, rgba(240,200,125,0.95), rgba(217,168,83,0.55) 40%, rgba(120,90,40,0.35) 100%)',
+                }}
               >
-                <View className="aspect-square relative flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#eef3e4' }}>
-                  {m.avatarUrl ? (
-                    <Image src={m.avatarUrl} className="w-full h-full" mode="aspectFill" />
-                  ) : (
-                    <View className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: '#dbe8dd' }}>
-                      <User color="#7da98f" size={32} strokeWidth={1.5} />
-                    </View>
-                  )}
-                </View>
-                <View className="p-3 bg-white">
-                  <Text className="block text-base font-bold text-[#3f5d50] truncate mb-1">
-                    {m.name}
-                  </Text>
-                  <View className="flex items-center justify-between">
-                    {age(m.birthDate, m.deathDate) && (
-                      <Text className="text-sm text-[#a89f8d]">享年{age(m.birthDate, m.deathDate)}岁</Text>
+                <View className="bg-white/5 rounded-3xl overflow-hidden" style={{ backgroundColor: 'rgba(13,30,40,0.55)' }}>
+                  <View className="aspect-square relative flex items-center justify-center overflow-hidden">
+                    {m.avatarUrl ? (
+                      <View
+                        className="w-[92%] h-[92%] rounded-full overflow-hidden"
+                        style={{
+                          padding: 2,
+                          background: 'linear-gradient(180deg,#f4d9a0,#c99f55)',
+                        }}
+                      >
+                        <View className="w-full h-full rounded-full overflow-hidden">
+                          <Image src={m.avatarUrl} className="w-full h-full" mode="aspectFill" />
+                        </View>
+                      </View>
+                    ) : (
+                      <View className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: '1px solid rgba(244,217,160,0.6)', backgroundColor: 'rgba(217,168,83,0.15)' }}>
+                        <User color="#f0c87d" size={32} strokeWidth={1.5} />
+                      </View>
                     )}
-                    <View className="flex items-center gap-1">
-                      <Eye size={14} color="#a89f8d" />
-                      <Text className="text-xs text-[#a89f8d]">{m.visitCount}</Text>
+                  </View>
+                  <View className="p-3 bg-transparent">
+                    <Text className="block text-base font-bold text-[#fff5e6] truncate mb-1">
+                      {m.name}
+                    </Text>
+                    <View className="flex items-center justify-between">
+                      {age(m.birthDate, m.deathDate) && (
+                        <Text className="text-sm text-[#d9bf8f]">享年{age(m.birthDate, m.deathDate)}岁</Text>
+                      )}
+                      <View className="flex items-center gap-1">
+                        <Eye size={14} color="#d9bf8f" />
+                        <Text className="text-xs text-[#d9bf8f]">{m.visitCount}</Text>
+                      </View>
                     </View>
                   </View>
                 </View>

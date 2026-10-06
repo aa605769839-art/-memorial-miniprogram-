@@ -292,29 +292,29 @@ const ProfilePage = () => {
                   </View>
                 )}
               </View>
-              <View className="flex-1">
-                <Text className="block text-3xl font-extrabold text-white mb-2" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+              <View className="flex-1 min-w-0">
+                <Text className="block text-3xl font-extrabold text-white mb-2 whitespace-nowrap" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
                   {displayName}
                 </Text>
                 <View className="flex flex-wrap gap-2">
-                  <View className="rounded-full px-3 py-1 flex items-center gap-1"
+                  <View className="rounded-full px-3 py-1 flex items-center gap-1 flex-shrink-0"
                     style={{ backgroundColor: 'rgba(246,240,224,0.18)', border: '1px solid rgba(232,192,122,0.4)' }}
                   >
                     <ShieldCheck color="#e8c07a" size={13} strokeWidth={3} />
-                    <Text className="text-[#f0d9a8] text-xs font-medium">社区成员</Text>
+                    <Text className="text-[#f0d9a8] text-xs font-medium whitespace-nowrap">社区成员</Text>
                   </View>
                   {isAdmin && (
-                    <View className="rounded-full px-3 py-1 flex items-center gap-1"
+                    <View className="rounded-full px-3 py-1 flex items-center gap-1 flex-shrink-0"
                       style={{ backgroundColor: 'rgba(232,192,122,0.2)', border: '1px solid rgba(232,192,122,0.5)' }}
                     >
                       <Medal color="#e8c07a" size={13} strokeWidth={2.4} />
-                      <Text className="text-[#e8c07a] text-xs font-medium">管理员</Text>
+                      <Text className="text-[#e8c07a] text-xs font-medium whitespace-nowrap">管理员</Text>
                     </View>
                   )}
                 </View>
               </View>
               <Button
-                className="rounded-full px-3 py-1 text-xs mr-0"
+                className="rounded-full px-3 py-1 text-xs mr-0 flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg,#e8c07a,#d9a84c)', color: '#2e1f0f', border: '1px solid rgba(232,192,122,0.6)', height: 'auto', lineHeight: '1.4', padding: '0 0' }}
                 onClick={handleEdit}
               >
@@ -327,19 +327,19 @@ const ProfilePage = () => {
           <View className="flex flex-row mt-2">
             <View className="flex-1 flex flex-col items-center py-3">
               <Gift color="#e8c07a" size={22} strokeWidth={1.8} />
-              <Text className="block text-xs text-[#e8c07a]/60 mt-2">创建纪念册</Text>
+              <Text className="block text-xs text-[#e8c07a]/60 mt-2 whitespace-nowrap">创建纪念册</Text>
               <Text className="block text-2xl font-extrabold text-white mt-1">{isAdmin ? '2' : '—'}</Text>
             </View>
             <View className="w-px my-3" style={{ backgroundColor: 'rgba(232,192,122,0.2)' }} />
             <View className="flex-1 flex flex-col items-center py-3">
               <BookOpen color="#7fc3ce" size={22} strokeWidth={1.8} />
-              <Text className="block text-xs text-[#7fc3ce]/60 mt-2">参与纪念</Text>
+              <Text className="block text-xs text-[#7fc3ce]/60 mt-2 whitespace-nowrap">参与纪念</Text>
               <Text className="block text-2xl font-extrabold text-white mt-1">—</Text>
             </View>
             <View className="w-px my-3" style={{ backgroundColor: 'rgba(232,192,122,0.2)' }} />
             <View className="flex-1 flex flex-col items-center py-3">
               <Cross color="#7fc3ce" size={22} strokeWidth={1.8} />
-              <Text className="block text-xs text-[#7fc3ce]/60 mt-2">亲友成员</Text>
+              <Text className="block text-xs text-[#7fc3ce]/60 mt-2 whitespace-nowrap">亲友成员</Text>
               <Text className="block text-2xl font-extrabold text-white mt-1">—</Text>
             </View>
           </View>
@@ -387,11 +387,11 @@ const ProfilePage = () => {
                 >
                   <ShieldCheck color="#7fc3ce" size={20} />
                 </View>
-                <View className="flex-1">
-                  <Text className="block text-white/90 font-semibold">
+                <View className="flex-1 min-w-0">
+                  <Text className="block text-white/90 font-semibold whitespace-nowrap">
                     {loginUser.nickname || loginUser.username}
                   </Text>
-                  <Text className="block text-xs text-[#7fc3ce]/60">
+                  <Text className="block text-xs text-[#7fc3ce]/60 whitespace-nowrap">
                     {isAdmin ? '管理员账号' : '普通用户'}
                   </Text>
                 </View>

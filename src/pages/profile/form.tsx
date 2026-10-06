@@ -204,6 +204,7 @@ const FormPage = () => {
       success: async (res) => {
         const tempFilePath = res.tempFilePaths[0];
         setIsUploading(true);
+        Taro.showLoading({ title: '头像上传中...', mask: true });
         try {
           const uploadRes = await uploadCrossPlatform({ filePath: tempFilePath, category: 'avatars' });
 
@@ -211,11 +212,19 @@ const FormPage = () => {
             const urls = resolveUploadUrls(uploadRes.data || '');
             if (urls.length > 0) {
               setAvatarUrl(urls[0]);
+              Taro.hideLoading();
               Taro.showToast({ title: '上传成功', icon: 'success' });
+            } else {
+              Taro.hideLoading();
+              Taro.showToast({ title: '上传失败', icon: 'none' });
             }
+          } else {
+            Taro.hideLoading();
+            Taro.showToast({ title: '上传失败', icon: 'none' });
           }
         } catch (error) {
           console.error('Failed to upload avatar:', error);
+          Taro.hideLoading();
           Taro.showToast({ title: '上传失败', icon: 'none' });
         } finally {
           setIsUploading(false);
@@ -312,6 +321,7 @@ const FormPage = () => {
           uploadCrossPlatform({ filePath, category: 'photos' })
         );
 
+        Taro.showLoading({ title: '照片上传中...', mask: true });
         try {
           const results = await Promise.all(uploadPromises);
           const uploadedUrls: string[] = [];
@@ -321,12 +331,16 @@ const FormPage = () => {
             }
           });
 
+          Taro.hideLoading();
           if (uploadedUrls.length > 0) {
             setPhotos(prev => [...prev, ...uploadedUrls]);
             Taro.showToast({ title: `成功上传${uploadedUrls.length}张照片`, icon: 'success' });
+          } else {
+            Taro.showToast({ title: '上传失败', icon: 'none' });
           }
         } catch (error) {
           console.error('Failed to upload photos:', error);
+          Taro.hideLoading();
           Taro.showToast({ title: '上传失败', icon: 'none' });
         }
       }

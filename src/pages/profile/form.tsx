@@ -213,19 +213,19 @@ const FormPage = () => {
             if (urls.length > 0) {
               setAvatarUrl(urls[0]);
               Taro.hideLoading();
-              Taro.showToast({ title: '上传成功', icon: 'success' });
+              setTimeout(() => Taro.showToast({ title: '上传成功', icon: 'success' }), 80);
             } else {
               Taro.hideLoading();
-              Taro.showToast({ title: '上传失败', icon: 'none' });
+              setTimeout(() => Taro.showToast({ title: '上传失败', icon: 'none' }), 80);
             }
           } else {
             Taro.hideLoading();
-            Taro.showToast({ title: '上传失败', icon: 'none' });
+            setTimeout(() => Taro.showToast({ title: '上传失败', icon: 'none' }), 80);
           }
         } catch (error) {
           console.error('Failed to upload avatar:', error);
           Taro.hideLoading();
-          Taro.showToast({ title: '上传失败', icon: 'none' });
+          setTimeout(() => Taro.showToast({ title: '上传失败', icon: 'none' }), 80);
         } finally {
           setIsUploading(false);
         }
@@ -341,7 +341,7 @@ const FormPage = () => {
         } catch (error) {
           console.error('Failed to upload photos:', error);
           Taro.hideLoading();
-          Taro.showToast({ title: '上传失败', icon: 'none' });
+          setTimeout(() => Taro.showToast({ title: '上传失败', icon: 'none' }), 80);
         }
       }
     });

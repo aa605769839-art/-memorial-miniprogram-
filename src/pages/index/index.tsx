@@ -41,6 +41,13 @@ const IndexPage = () => {
   const [participant, setParticipant] = useState(568);
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [mainMemorial, setMainMemorial] = useState<Memorial | null>(null);
+  const [brokenImgs, setBrokenImgs] = useState<Record<string, boolean>>({});
+
+  const markBroken = (url: string) => {
+    if (url && !brokenImgs[url]) {
+      setBrokenImgs((s) => ({ ...s, [url]: true }));
+    }
+  };
 
   useEffect(() => {
     fetchStats();
@@ -125,7 +132,12 @@ const IndexPage = () => {
             <View className="w-28 h-28 rounded-2xl overflow-hidden flex-shrink-0"
               style={{ border: '1px solid rgba(232,192,122,0.4)' }}
             >
-              <Image src={mainMemorial?.avatarUrl || ELDER_MALE} className="w-full h-full" mode="aspectFill" />
+              <Image
+                src={brokenImgs[(mainMemorial?.avatarUrl as string) || ''] ? (mainMemorial?.gender === '女' ? ELDER_FEMALE : ELDER_MALE) : (mainMemorial?.avatarUrl || ELDER_MALE)}
+                className="w-full h-full"
+                mode="aspectFill"
+                onError={() => markBroken((mainMemorial?.avatarUrl as string) || ELDER_MALE)}
+              />
             </View>
             {/* 右侧信息 */}
             <View className="flex-1 pl-4">
@@ -206,7 +218,12 @@ const IndexPage = () => {
               <View className="w-12 h-12 rounded-full overflow-hidden mx-3 my-3 flex-shrink-0"
                 style={{ border: '1px solid rgba(232,192,122,0.4)' }}
               >
-                <Image src={avatar} className="w-full h-full" mode="aspectFill" />
+                <Image
+                  src={brokenImgs[(m as Memorial).avatarUrl || fb.id] ? fb.avatar : (avatar || fb.avatar)}
+                  className="w-full h-full"
+                  mode="aspectFill"
+                  onError={() => markBroken((m as Memorial).avatarUrl || fb.id)}
+                />
               </View>
               <View className="flex-1 pr-3 py-3">
                 <View className="flex flex-row items-baseline">

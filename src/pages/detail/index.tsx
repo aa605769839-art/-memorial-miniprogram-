@@ -780,7 +780,7 @@ const DetailPage = () => {
         <View style={{ flex: 1 }}>
           <Button
             className="!rounded-full !py-3 !border-0 flex items-center justify-center gap-2 shadow-md"
-            style={{ backgroundColor: 'linear-gradient(90deg,#e8c07a,#d9a84c)', color: '#2e1f0f' }}
+            style={{ background: 'linear-gradient(90deg,#e8c07a,#d9a84c)', color: '#2e1f0f' }}
             onClick={() => {
               fetchGiftConfigs();
               setShowGiftModal(true);

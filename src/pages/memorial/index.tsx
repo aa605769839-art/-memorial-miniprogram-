@@ -46,7 +46,7 @@ const MemorialPage = () => {
   const badge = (index: number) => {
     if (index === 0) return { color: '#c9a86a', text: '1' };
     if (index === 1) return { color: '#9ca3af', text: '2' };
-    if (index === 2) return { color: '#b45309', text: '3' };
+    if (index === 2) return { color: '#d97706', text: '3' };
     return { color: '#d6d3c4', text: `${index + 1}` };
   };
 

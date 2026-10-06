@@ -53,7 +53,7 @@ const RankingPage = () => {
   const getRankBadge = (index: number) => {
     if (index === 0) return { color: '#fbbf24', text: '1' }; // gold
     if (index === 1) return { color: '#9ca3af', text: '2' }; // silver
-    if (index === 2) return { color: '#b45309', text: '3' }; // bronze
+    if (index === 2) return { color: '#d97706', text: '3' }; // bronze
     return { color: '#a8a29e', text: `${index + 1}` }; // gray
   };
 

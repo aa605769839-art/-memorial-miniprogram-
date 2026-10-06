@@ -8,6 +8,8 @@ export default defineAppConfig({
     'pages/ranking/index',
     'pages/profile/form',
     'pages/profile/memorials',
+    'pages/profile/family',
+    'pages/profile/calendar',
     'pages/admin/gift-configs/index'
   ],
   window: {

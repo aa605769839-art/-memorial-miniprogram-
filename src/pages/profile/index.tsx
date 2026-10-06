@@ -15,7 +15,8 @@ import {
   Medal,
   Gift,
   Cross,
-  Flower2
+  Flower2,
+  CalendarDays
 } from 'lucide-react-taro';
 import { Network } from '@/network';
 import { Auth, type LoginUser } from '@/auth';
@@ -255,9 +256,10 @@ const ProfilePage = () => {
   // 功能列表（参考图语义映射到真实入口）
   const menuItems = [
     { icon: Cross, color: '#48A8A8', label: '我的电子墓碑', onClick: () => goTo('/pages/profile/memorials') },
+    { icon: Users, color: '#48A8A8', label: '家属管理', onClick: () => goTo('/pages/profile/family') },
+    { icon: CalendarDays, color: '#C9A86A', label: '纪念日历', onClick: () => goTo('/pages/profile/calendar') },
     { icon: BookOpen, color: '#48A8A8', label: '我的故事', onClick: () => goTo('/pages/profile/memorials') },
     { icon: Flower2, color: '#C9A86A', label: '我的献花记录', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
-    { icon: Users, color: '#48A8A8', label: '家属管理', onClick: () => goTo('/pages/profile/memorials') },
     { icon: HeartHandshake, color: '#48A8A8', label: '暖心服务', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
     { icon: Settings, color: '#48A8A8', label: '设置与帮助', onClick: () => Taro.showToast({ title: '晚星纪念 v1.0', icon: 'none' }) }
   ];

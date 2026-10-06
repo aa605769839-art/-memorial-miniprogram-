@@ -17,14 +17,27 @@ export const memorials = pgTable(
     id: varchar("id", { length: 36 })
       .primaryKey()
       .default(sql`gen_random_uuid()`),
-    userId: varchar("user_id", { length: 128 }).notNull(), // 创建者ID
+    userId: varchar("user_id", { length: 128 }).notNull(), // 创建者ID（主管理员）
     name: varchar("name", { length: 128 }).notNull(),
+    nickName: varchar("nick_name", { length: 128 }), // 别名
     gender: varchar("gender", { length: 10 }),
+    nationality: varchar("nationality", { length: 32 }), // 民族
     birthDate: timestamp("birth_date", { withTimezone: true, mode: 'string' }),
     deathDate: timestamp("death_date", { withTimezone: true, mode: 'string' }),
+    nativePlace: varchar("native_place", { length: 128 }), // 籍贯
+    occupation: varchar("occupation", { length: 128 }), // 生前职业
+    burialPlace: varchar("burial_place", { length: 255 }), // 安葬地点
+    epitaph: text("epitaph"), // 墓志铭
+    biography: text("biography"), // 追忆文稿（生平长文）
     avatarUrl: text("avatar_url"),
+    coverImg: text("cover_img"), // 封面大图
     description: text("description"),
     achievements: jsonb("achievements"),
+    templateId: integer("template_id").default(1), // 墓碑模板
+    privacyType: integer("privacy_type").default(1), // 1公开 2仅家属 3密码访问
+    accessPassword: varchar("access_password", { length: 64 }), // 密码访问模式的密码
+    allowAnonymousMsg: boolean("allow_anonymous_msg").default(true), // 是否允许匿名留言
+    isDeleted: boolean("is_deleted").default(false), // 逻辑删除
     mourningCount: integer("mourning_count").notNull().default(0),
     visitCount: integer("visit_count").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -191,6 +204,28 @@ export const users = pgTable(
   ]
 );
 
+// 家属成员表（墓碑三级权限）
+export const memorialMembers = pgTable(
+  "memorial_members",
+  {
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    memorialId: varchar("memorial_id", { length: 36 }).notNull(),
+    userId: varchar("user_id", { length: 128 }).notNull(),
+    role: integer("role").notNull().default(4), // 1主管理员 2家属管理员 3可编辑 4仅浏览
+    nickname: varchar("nickname", { length: 64 }),
+    inviteStatus: integer("invite_status").notNull().default(1), // 1待确认 2已接受 3已拒绝
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("memorial_members_memorial_id_idx").on(table.memorialId),
+    index("memorial_members_user_id_idx").on(table.userId),
+  ]
+);
+
 // Zod schemas for validation
 const { createInsertSchema: createCoercedInsertSchema } = createSchemaFactory({
   coerce: { date: true },
@@ -199,23 +234,49 @@ const { createInsertSchema: createCoercedInsertSchema } = createSchemaFactory({
 export const insertMemorialSchema = createCoercedInsertSchema(memorials).pick({
   userId: true,
   name: true,
+  nickName: true,
   gender: true,
+  nationality: true,
   birthDate: true,
   deathDate: true,
+  nativePlace: true,
+  occupation: true,
+  burialPlace: true,
+  epitaph: true,
+  biography: true,
   avatarUrl: true,
+  coverImg: true,
   description: true,
   achievements: true,
+  templateId: true,
+  privacyType: true,
+  accessPassword: true,
+  allowAnonymousMsg: true,
+  isDeleted: true,
 });
 
 export const updateMemorialSchema = createCoercedInsertSchema(memorials)
   .pick({
     name: true,
+    nickName: true,
     gender: true,
+    nationality: true,
     birthDate: true,
     deathDate: true,
+    nativePlace: true,
+    occupation: true,
+    burialPlace: true,
+    epitaph: true,
+    biography: true,
     avatarUrl: true,
+    coverImg: true,
     description: true,
     achievements: true,
+    templateId: true,
+    privacyType: true,
+    accessPassword: true,
+    allowAnonymousMsg: true,
+    isDeleted: true,
   })
   .partial();
 
@@ -271,6 +332,19 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 
 export type Photo = typeof photos.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
+
+// MemorialMember types
+export type MemorialMember = typeof memorialMembers.$inferSelect;
+
+export const insertMemorialMemberSchema = createCoercedInsertSchema(memorialMembers).pick({
+  memorialId: true,
+  userId: true,
+  role: true,
+  nickname: true,
+  inviteStatus: true,
+});
+
+export type InsertMemorialMember = z.infer<typeof insertMemorialMemberSchema>;
 
 export type Gift = typeof gifts.$inferSelect;
 export type InsertGift = z.infer<typeof insertGiftSchema>;

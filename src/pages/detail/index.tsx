@@ -17,6 +17,7 @@ import {
   Eye,
   Heart,
   ArrowLeft,
+  Share2,
 } from 'lucide-react-taro';
 
 // H5环境下从URL hash获取参数
@@ -51,10 +52,10 @@ const pick = (obj: any, camel: string, snake?: string) => {
   return undefined;
 };
 
-// 判断是否为图片URL
+// 判断是否为图片 URL（礼物图标 emoji 或图片）
 const isImageUrl = (icon: string | null | undefined): boolean => {
   if (!icon) return false;
-  return icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('//');
+  return /^(https?:\/\/|data:image|\/)\S+\.(png|jpe?g|webp|gif|svg)(\?\S*)?$/i.test(icon.trim());
 };
 
 // 礼物图标组件
@@ -175,11 +176,83 @@ const DetailPage = () => {
     };
   }, [memorial]);
 
+  // 密码访问模式：弹窗输入密码校验
+  const promptAccessPassword = async (memId: string) => {
+    return new Promise<void>((resolve) => {
+      const options: any = {
+        title: '需要访问密码',
+        content: '该纪念空间受密码保护，请输入访问密码',
+        editable: true,
+        placeholderText: '请输入6位访问密码',
+        confirmText: '验证',
+        cancelText: '取消',
+        success: async (res) => {
+          if (res.confirm) {
+            const inputValue = (res as any).content;
+            if (!inputValue) {
+              Taro.showToast({ title: '请输入访问密码', icon: 'none' });
+              resolve();
+              return;
+            }
+            try {
+              const vRes: any = await Network.request({
+                url: `/api/memorials/${memId}/verify-password`,
+                method: 'POST',
+                data: { password: inputValue },
+              });
+              if (handleApiResponse(vRes)?.ok) {
+                Taro.setStorageSync(`mem_auth_${memId}`, '1');
+                Taro.showToast({ title: '密码正确', icon: 'success' });
+              } else {
+                Taro.showModal({
+                  title: '密码错误',
+                  content: '访问密码不正确',
+                  showCancel: false,
+                  success: () => resolve(),
+                });
+                return;
+              }
+            } catch (e: any) {
+              Taro.showToast({ title: e?.message || '密码校验失败', icon: 'none' });
+            }
+          } 
+          resolve();
+        },
+        fail: () => resolve(),
+      };
+      Taro.showModal(options);
+    });
+  };
+
   // 获取故人详情
   const fetchMemorial = useCallback(async () => {
     if (!id) return;
     try {
       setLoading(true);
+
+      // 第一步：隐私分级校验
+      const privacyRes: any = await Network.request({ url: `/api/memorials/${id}/privacy`, method: 'GET' }).catch(() => null);
+      const privacy = handleApiResponse(privacyRes);
+      if (!privacy) {
+        setLoading(false);
+        Taro.showToast({ title: '故友不存在', icon: 'none' });
+        return;
+      }
+      const privacyType = privacy.privacyType ?? privacy.privacy_type ?? 1;
+
+      // 密码访问模式：本地已放行则跳过，否则要求输入密码
+      if (privacyType === 3) {
+        const authed = Taro.getStorageSync(`mem_auth_${id}`);
+        if (!authed) {
+          setLoading(false);
+          await promptAccessPassword(id);
+          if (!Taro.getStorageSync(`mem_auth_${id}`)) {
+            Taro.navigateBack();
+            return;
+          }
+        }
+      }
+
       const res = await Network.request({
         url: `/api/memorials/${id}`,
         method: 'GET'
@@ -304,6 +377,28 @@ const DetailPage = () => {
     } catch (error) {
       console.error('Failed to visit:', error);
       Taro.showToast({ title: '拜访失败', icon: 'none' });
+    }
+  };
+
+  // 分享墓碑（复制链接）
+  const handleShare = async () => {
+    const base = (process.env.TARO_APP_BASE_DOMAIN as string) || '';
+    const shareUrl = id
+      ? `${base}/memorial/#/pages/detail/index?id=${id}`
+      : `${base}/memorial/`;
+    try {
+      Taro.setClipboardData({
+        data: shareUrl,
+        success: () => {
+          Taro.showToast({ title: '链接已复制，可分享给亲友', icon: 'success' });
+        },
+        fail: () => {
+          // H5 降级提示
+          Taro.showModal({ title: '分享链接', content: shareUrl, showCancel: true, confirmText: '复制' });
+        }
+      });
+    } catch (error) {
+      console.error('share failed', error);
     }
   };
 
@@ -702,6 +797,16 @@ const DetailPage = () => {
             onClick={handleVisit}
           >
             <Text>拜访</Text>
+          </Button>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button
+            className="!rounded-full !py-3 !border-0 flex items-center justify-center gap-2"
+            style={{ backgroundColor: 'rgba(127,195,206,0.18)', color: '#7fc3ce' }}
+            onClick={handleShare}
+          >
+            <Share2 size={17} />
+            <Text>分享</Text>
           </Button>
         </View>
       </View>

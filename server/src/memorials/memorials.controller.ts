@@ -19,6 +19,12 @@ export class MemorialsController {
     return this.memorialsService.findAll(userId);
   }
 
+  // 纪念日列表（供纪念日历）
+  @Get('anniversaries')
+  async anniversaries(@Query('userId') userId?: string) {
+    return this.memorialsService.listAnniversaries(userId);
+  }
+
   @Post('polish-text')
   async polishText(@Body() body: { text: string }) {
     if (!body.text || body.text.trim().length === 0) {
@@ -59,6 +65,35 @@ export class MemorialsController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.memorialsService.findOneWithPhotos(id);
+  }
+
+  // 获取墓碑隐私元信息（用于前端权限判定与密码输入）
+  @Get(':id/privacy')
+  async getPrivacy(@Param('id') id: string) {
+    const meta = await this.memorialsService.getPrivacyMeta(id);
+    if (!meta) {
+      throw new HttpException('故友不存在', HttpStatus.NOT_FOUND);
+    }
+    return meta;
+  }
+
+  // 校验访问密码（密码访问模式的密码）
+  @Post(':id/verify-password')
+  async verifyPassword(@Param('id') id: string, @Body() body: { password: string }) {
+    if (!body.password) {
+      throw new HttpException('请输入访问密码', HttpStatus.BAD_REQUEST);
+    }
+    const ok = await this.memorialsService.verifyAccessPassword(id, body.password);
+    if (!ok) {
+      throw new HttpException('访问密码错误', HttpStatus.FORBIDDEN);
+    }
+    return { ok: true };
+  }
+
+  // 登记访问
+  @Post(':id/visit')
+  async registerVisit(@Param('id') id: string, @Body() body: { visitorName?: string }) {
+    return this.memorialsService.registerVisit(id, body.visitorName);
   }
 
   @Get(':id/comments')

@@ -137,17 +137,10 @@ export default defineConfig<'vite'>(async (merge, _env) => {
             };
           },
         },
-        // 仅小程序端启用：该插件会把 CSS 类名中的 `/` 转义为 `_f`（如 text-white/85 → text-white_f85），
-        // H5 端 JSX class 保持原样会导致类名与 CSS 选择器错配（带透明度的类全部失效），
-        // 且 H5 CSS 产物为纯 rem，不依赖该插件的 rem2rpx，故 h5 构建必须排除。
-        ...(process.env.TARO_ENV === 'weapp' || process.env.TARO_ENV === 'tt'
-          ? [
-              UnifiedViteWeappTailwindcssPlugin({
-                rem2rpx: true,
-                cssEntries: [path.resolve(__dirname, '../src/app.css')],
-              }),
-            ]
-          : []),
+        UnifiedViteWeappTailwindcssPlugin({
+          rem2rpx: true,
+          cssEntries: [path.resolve(__dirname, '../src/app.css')],
+        }),
         ...(process.env.TARO_ENV === 'tt'
           ? [
               {

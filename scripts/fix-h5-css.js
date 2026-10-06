@@ -76,6 +76,41 @@ function rpxToRem(css) {
   });
 }
 
+/**
+ * 还原被 weapp-tailwindcss 转义的含 `/` 透明度类为原生选择器，并追加一份规则。
+ * weapp-tailwindcss（自适应到 H5 构建）会把类名中的非法字符转义（来自 @weapp-core/escape 的
+ * MappingChars2String，均为两字符 `_`+小写/大写标记）：
+ *   `/` -> `_f`（后接透明度数字，如 text-white/85 -> text-white_f85）
+ *   `[` -> `_b`、`]` -> `_B`、`#` -> `_h`（如 text-[#e8c07a]/70 -> text-_b_he8c07a_B_f70）
+ * 而 Taro H5 构建的 JSX class 保持原样（text-white/85），导致 CSS 选择器与 DOM 类名错配、
+ * 这些带透明度的类全部失效（文字/边框变黑或消失）。此处为每个被转义选择器生成等价的原生
+ * `\/` 选择器规则并追加，使 H5 DOM 能正确命中。
+ */
+function restoreEscapedClasses(css) {
+  const re = /\.([^{}:,>\s]+)\{([^}]*)\}/g;
+  const additions = [];
+  let m;
+  while ((m = re.exec(css)) !== null) {
+    const sel = m[1];
+    if (!/(_f\d+)|_b|_B|_h/.test(sel)) continue;
+    const native = sel
+      .replace(/_f(\d+)/g, '/$1')
+      .replace(/_b/g, '[')
+      .replace(/_B/g, ']')
+      .replace(/_h/g, '#');
+    if (native === sel) continue;
+    const escaped = native
+      .replace(/\\/g, '\\\\')
+      .replace(/\//g, '\\/')
+      .replace(/#/g, '\\#')
+      .replace(/\[/g, '\\[')
+      .replace(/\]/g, '\\]');
+    additions.push(`.${escaped}{${m[2]}}`);
+  }
+  if (!additions.length) return css;
+  return css + '\n' + additions.join('\n');
+}
+
 function fixCss(file) {
   let css = fs.readFileSync(file, 'utf8');
 
@@ -92,6 +127,9 @@ function fixCss(file) {
   if (!css.includes('@property --tw-gradient-stops')) {
     css = PROPERTY_BLOCK + '\n' + css;
   }
+
+  // 4) 还原 weapp-tailwindcss 转义的透明度类为原生选择器（H5 JSX class 保持原样需匹配）
+  css = restoreEscapedClasses(css);
 
   fs.writeFileSync(file, css);
   console.log(`[fix-h5-css] patched: ${path.basename(file)}`);

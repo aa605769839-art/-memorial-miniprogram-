@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { db } from '../storage/database/drizzle';
-import { memorialMembers, memorials } from '../storage/database/shared/schema';
+import { memorialMembers, memorials, users } from '../storage/database/shared/schema';
 
 /** 角色：1主管理员 2家属管理员 3可编辑 4仅浏览 */
 export const ROLE = { OWNER: 1, ADMIN: 2, EDITOR: 3, VIEWER: 4 } as const;
@@ -58,7 +58,27 @@ export class MembersService {
       throw new HttpException('缺少邀请对象', HttpStatus.BAD_REQUEST);
     }
 
-    const targetUserId = body.userId || body.username!;
+    // 通过 userId 或 username 定位真实用户
+    let targetUserId = body.userId || '';
+    if (!targetUserId && body.username) {
+      const [u] = await db.select({ id: users.id })
+        .from(users)
+        .where(eq(users.username, body.username))
+        .limit(1);
+      if (!u) {
+        throw new HttpException('该账号不存在，请先让 TA 注册后再邀请', HttpStatus.NOT_FOUND);
+      }
+      targetUserId = u.id;
+    } else if (body.userId) {
+      const [u] = await db.select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, body.userId))
+        .limit(1);
+      if (!u) {
+        throw new HttpException('该用户不存在', HttpStatus.NOT_FOUND);
+      }
+      targetUserId = u.id;
+    }
     // 防止把自己降级
     if (targetUserId === operatorUserId) {
       throw new HttpException('不能邀请自己', HttpStatus.BAD_REQUEST);

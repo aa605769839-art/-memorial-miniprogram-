@@ -15,12 +15,11 @@ export class UploadService {
     const endpointUrl = process.env.BUCKET_ENDPOINT_URL || process.env.COZE_BUCKET_ENDPOINT_URL;
     const bucketName = process.env.BUCKET_NAME || process.env.COZE_BUCKET_NAME;
     if (endpointUrl && bucketName) {
+      // 使用无参构造：SDK 自动读取平台注入的 COZE_BUCKET_* 并通过受控集成身份完成 S3 签名，
+      // 无需显式维护 AK/SK。
       this.storage = new S3Storage({
         endpointUrl,
-        accessKey: process.env.BUCKET_ACCESS_KEY || process.env.COZE_BUCKET_ACCESS_KEY || '',
-        secretKey: process.env.BUCKET_SECRET_KEY || process.env.COZE_BUCKET_SECRET_KEY || '',
         bucketName,
-        region: process.env.BUCKET_REGION || process.env.COZE_BUCKET_REGION || 'cn-beijing',
       });
     }
   }

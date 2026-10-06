@@ -1,7 +1,8 @@
 import { View, Text, Image, Button, Input, Textarea, Picker, Switch } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
-import { Network } from '@/network';
+import { Network } from '@/network'
+import { uploadCrossPlatform, resolveUploadUrls } from '@/utils/upload';
 import { Auth } from '@/auth';
 import { User } from 'lucide-react-taro';
 import { StarsBackground } from '@/components/StarsBackground';
@@ -204,16 +205,12 @@ const FormPage = () => {
         const tempFilePath = res.tempFilePaths[0];
         setIsUploading(true);
         try {
-          const uploadRes = await Network.uploadFile({
-            url: '/api/upload',
-            filePath: tempFilePath,
-            name: 'file'
-          });
+          const uploadRes = await uploadCrossPlatform({ filePath: tempFilePath, category: 'avatars' });
 
           if (uploadRes.statusCode === 200) {
-            const data = JSON.parse(uploadRes.data);
-            if (data.code === 200) {
-              setAvatarUrl(data.data.url);
+            const urls = resolveUploadUrls(uploadRes.data || '');
+            if (urls.length > 0) {
+              setAvatarUrl(urls[0]);
               Taro.showToast({ title: '上传成功', icon: 'success' });
             }
           }
@@ -310,13 +307,9 @@ const FormPage = () => {
       sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
       success: async (res) => {
-        const tempFilePaths = res.tempFilePaths;
+        const tempFilePaths = res.tempFilePaths.slice(0, 9 - photos.length);
         const uploadPromises = tempFilePaths.map(filePath =>
-          Network.uploadFile({
-            url: '/api/upload',
-            filePath,
-            name: 'file'
-          })
+          uploadCrossPlatform({ filePath, category: 'photos' })
         );
 
         try {
@@ -324,10 +317,7 @@ const FormPage = () => {
           const uploadedUrls: string[] = [];
           results.forEach(result => {
             if (result.statusCode === 200) {
-              const data = JSON.parse(result.data);
-              if (data.code === 200) {
-                uploadedUrls.push(data.data.url);
-              }
+              uploadedUrls.push(...resolveUploadUrls(result.data || ''));
             }
           });
 

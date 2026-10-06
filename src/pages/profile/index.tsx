@@ -19,6 +19,7 @@ import {
   CalendarDays
 } from 'lucide-react-taro';
 import { Network } from '@/network';
+import { uploadCrossPlatform } from '@/utils/upload';
 import { Auth, type LoginUser } from '@/auth';
 import { StarsBackground } from '@/components/StarsBackground';
 
@@ -86,15 +87,11 @@ const ProfilePage = () => {
         Taro.showLoading({ title: '上传中...' });
 
         try {
-          const uploadRes = await Network.uploadFile({
-            url: '/api/upload',
-            filePath: res.tempFilePaths[0],
-            name: 'file'
-          });
+          const uploadRes = await uploadCrossPlatform({ filePath: res.tempFilePaths[0], category: 'avatars' });
 
-          const data = JSON.parse(uploadRes.data);
+          const data = uploadRes.data ? JSON.parse(uploadRes.data) : null;
 
-          if (data.code === 200 && data.data.url) {
+          if (uploadRes.statusCode === 200 && data && data.code === 200 && data.data.url) {
             // 只更新临时头像，不保存到 storage
             setTempAvatar(data.data.url);
             Taro.showToast({

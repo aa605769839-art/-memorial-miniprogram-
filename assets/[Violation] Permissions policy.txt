@@ -1,0 +1,317 @@
+[Violation] Permissions policy violation: unload is not allowed in this document.
+[Violation] Permissions policy violation: unload is not allowed in this document.
+[Violation] Permissions policy violation: unload is not allowed in this document.
+[Violation] Permissions policy violation: unload is not allowed in this document.
+[Violation] Permissions policy violation: unload is not allowed in this document.
+[Violation] Permissions policy violation: unload is not allowed in this document.
+[Violation] Permissions policy violation: unload is not allowed in this document.
+  Logger  @coze-arch/flags  Load FG from context start at 152.30000000074506ms and spend 59.69999999925494ms
+  Logger  info  app inited
+  Logger  info  app init
+  Logger  info  page_view 
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.list
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.search
+  Logger  info  coding_work_space_action 
+  Logger  builder-chat-websocket-channel  channel  websocketManager init 
+  Logger  info  coze_custom_tti 
+  Logger  info  coze_custom_tti 
+  Logger  info  coze_custom_tti 
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.list
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.search
+  Logger  info  coze_custom_tti 
+  Logger  info  coding_work_space_action 
+  Logger  builder-chat-websocket-channel  channel  websocketManager init 
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: sandbox.project_status
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.retrieve
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.retrieve
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.retrieve
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.retrieve
+ [SDK] 1791286619453        0 already inited
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: sandbox.project_status
+  Logger  ide  ws  [WsService]开始连接
+  Logger  ide  ws  [WsService]new Websocket1791286622537
+  Logger  ide  ws  Event: ws_start_connect 
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.version.latest
+  Logger  ide  ws  Event: ws_open 
+  Logger  ide  ws  [WsService]🎉 JSON-RPC 连接已建立
+  Logger  ide  ws  [WsService]🚀 开始重放队列消息, 数量:4
+  Logger  ide  ws  [WsService]开始连接
+  Logger  ide  ws  [WsService]new Websocket1791286622954
+  Logger  ide  ws  Event: ws_start_connect 
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: repo_version.commit.version.latest
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: preview.status
+  Logger  info  coding_work_space_action 
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: file.read
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: web.is_server_start
+  Logger  ide  ws  [WsService][sendRequest] 当前未连接，进入队列等待发送: log.get_app_log
+  Logger  ide  ws  Event: ws_open 
+  Logger  ide  ws  [WsService]🎉 JSON-RPC 连接已建立
+  Logger  ide  ws  [WsService]🚀 开始重放队列消息, 数量:12
+  Logger  info  coding_work_space_action 
+  Logger  info  coding_work_space_action 
+  Logger  info  coding_work_space_action 
+  Logger  info  coding_chatbox_action 
+  Logger  info  coding_chatbox_action 
+  Logger  info  query_submit 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_chatbox_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  page_view 
+ Unrecognized feature: 'vr'.
+ Unrecognized feature: 'ambient-light-sensor'.
+ Unrecognized feature: 'battery'.
+  Logger  general-web  timing  Event: iframe_first_render 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_chatbox_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_chatbox_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_chatbox_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_chatbox_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+  Logger  info  coding_query_page_action 
+ CozeHtmlEditorRenderer loaded
+ [DevTools] iframe bridge injected (development mode only)
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_chatbox_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_chatbox_action Object
+index.f5c53aae.js:1  Logger  info  query_submit Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_chatbox_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+index.f5c53aae.js:1  Logger  info  coding_query_page_action Object
+b7e0a96a-901f-470e-a3aa-c7f0c744d659-5000.dev.coze.site/#/pages/profile/form:1 Access to XMLHttpRequest at 'https://b7e0a96a-901f-470e-a3aa-c7f0c744d659.dev.coze.site/api/upload' from origin 'https://b7e0a96a-901f-470e-a3aa-c7f0c744d659-5000.dev.coze.site' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'. The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.
+index.ts:441 Failed to upload photos: Object
+(anonymous) @ index.ts:441
+b7e0a96a-901f-470e-a3aa-c7f0c744d659.dev.coze.site/api/upload:1  Failed to load resource: net::ERR_FAILED
+b7e0a96a-901f-470e-a3aa-c7f0c744d659-5000.dev.coze.site/#/pages/profile/form:1 Access to XMLHttpRequest at 'https://b7e0a96a-901f-470e-a3aa-c7f0c744d659.dev.coze.site/api/upload' from origin 'https://b7e0a96a-901f-470e-a3aa-c7f0c744d659-5000.dev.coze.site' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'. The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.
+index.ts:441 Failed to upload photos: Object
+(anonymous) @ index.ts:441
+b7e0a96a-901f-470e-a3aa-c7f0c744d659.dev.coze.site/api/upload:1  Failed to load resource: net::ERR_FAILED

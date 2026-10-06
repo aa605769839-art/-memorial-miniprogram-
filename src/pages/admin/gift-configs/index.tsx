@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Pencil, ArrowUp, ArrowDown, X } from 'lucide-react-taro';
 import { Network } from '@/network';
+import { uploadCrossPlatform } from '@/utils/upload';
 import { Auth } from '@/auth';
 import { StarsBackground } from '@/components/StarsBackground';
 
@@ -262,14 +263,14 @@ const GiftConfigPage = () => {
         
         // 上传图片
         const baseUrl = getApiBase();
-        const uploadRes = await Network.uploadFile({
+        const uploadRes = await uploadCrossPlatform({
           url: `${baseUrl}/api/upload`,
           filePath: tempFilePath,
           name: 'file',
         });
 
-        const data = JSON.parse(uploadRes.data);
-        if (data.code === 200 && data.data?.url) {
+        const data = uploadRes.data ? JSON.parse(uploadRes.data) : null;
+        if (uploadRes.statusCode === 200 && data && data.code === 200 && data.data?.url) {
           setFormData({ ...formData, icon: data.data.url });
           Taro.showToast({ title: '上传成功', icon: 'success' });
         } else {

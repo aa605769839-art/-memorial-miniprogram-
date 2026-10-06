@@ -227,11 +227,11 @@ const IndexPage = () => {
               </View>
               <View className="flex-1 pr-3 py-3">
                 <View className="flex flex-row items-baseline">
-                  <Text className="text-[15px] font-bold" style={{ color: '#e8c07a' }}>{name}</Text>
-                  <Text className="ml-2 text-[11px]" style={{ color: 'rgba(232,192,122,0.75)' }}>{tag}</Text>
+                  <Text className="text-lg font-bold" style={{ color: '#e8c07a' }}>{name}</Text>
+                  <Text className="ml-2 text-xs" style={{ color: 'rgba(232,192,122,0.78)' }}>{tag}</Text>
                 </View>
-                <Text className="block text-xs mt-1" style={{ color: 'rgba(216,226,228,0.75)' }} numberOfLines={1}>{desc}</Text>
-                <Text className="block mt-1 text-[10px]" style={{ color: 'rgba(170,185,188,0.6)' }}>{time}</Text>
+                <Text className="block text-sm mt-1.5" style={{ color: 'rgba(216,226,228,0.8)' }} numberOfLines={1}>{desc}</Text>
+                <Text className="block mt-1.5 text-xs" style={{ color: 'rgba(170,185,188,0.65)' }}>{time}</Text>
               </View>
             </View>
           );

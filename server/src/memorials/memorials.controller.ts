@@ -19,6 +19,35 @@ export class MemorialsController {
     return this.memorialsService.findAll(userId);
   }
 
+  // V2.0 首页轻量统计
+  @Get('home/summary')
+  async homeSummary() {
+    return this.memorialsService.getHomeSummary();
+  }
+
+  // V2.0 首页近期纪念日（未来 N 天）
+  @Get('home/upcoming-anniversaries')
+  async upcomingAnniversaries(
+    @Query('userId') userId?: string,
+    @Query('days') days?: string
+  ) {
+    return this.memorialsService.getUpcomingAnniversaries(userId, days ? parseInt(days, 10) : 7);
+  }
+
+  // V2.0 首页推荐流（分页排序）
+  @Get('home/recommend')
+  async homeRecommend(
+    @Query('userId') userId?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string
+  ) {
+    return this.memorialsService.findHomeRecommend(
+      userId,
+      page ? parseInt(page, 10) : 1,
+      pageSize ? parseInt(pageSize, 10) : 10
+    );
+  }
+
   // 纪念日列表（供纪念日历）
   @Get('anniversaries')
   async anniversaries(@Query('userId') userId?: string) {

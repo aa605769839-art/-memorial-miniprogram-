@@ -111,3 +111,20 @@ SELECT * FROM (VALUES
   ('风筝', '🪁', 'text-sky-500', 30, 4, true)
 ) AS v(name, icon, color, price, sort_order, is_enabled)
 WHERE NOT EXISTS (SELECT 1 FROM gift_configs);
+-- V2.0：墓碑允许访客上传线下悼念照片
+ALTER TABLE memorials ADD COLUMN IF NOT EXISTS allow_visitor_offline boolean NOT NULL DEFAULT false;
+
+-- V2.0：线下悼念照片表
+CREATE TABLE IF NOT EXISTS memorial_offline_photo (
+    id varchar(36) PRIMARY KEY,
+    memorial_id varchar(36) NOT NULL,
+    user_id varchar(128) NOT NULL,
+    nick varchar(128) DEFAULT '',
+    photo_url text NOT NULL,
+    worship_date timestamp,
+    message text,
+    created_at timestamp NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS mem_offline_photo_memorial_idx ON memorial_offline_photo (memorial_id);
+CREATE INDEX IF NOT EXISTS mem_offline_photo_user_idx ON memorial_offline_photo (user_id);
+CREATE INDEX IF NOT EXISTS mem_offline_photo_created_idx ON memorial_offline_photo (created_at);

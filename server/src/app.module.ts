@@ -10,9 +10,10 @@ import { GiftsModule } from './gifts/gifts.module';
 import { GiftConfigsModule } from './gift-configs/gift-configs.module';
 import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
+import { OfflinePhotosModule } from './offline-photos/offline-photos.module';
 
 @Module({
-  imports: [MemorialsModule, InteractionsModule, RankingsModule, UploadModule, PhotosModule, GiftsModule, GiftConfigsModule, AdminModule, AuthModule],
+  imports: [MemorialsModule, InteractionsModule, RankingsModule, UploadModule, PhotosModule, GiftsModule, GiftConfigsModule, AdminModule, AuthModule, OfflinePhotosModule],
   controllers: [AppController],
   providers: [AppService],
 })

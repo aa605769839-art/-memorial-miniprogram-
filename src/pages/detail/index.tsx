@@ -18,7 +18,10 @@ import {
   Heart,
   ArrowLeft,
   Share2,
+  Camera,
 } from 'lucide-react-taro';
+import { trackEvent } from '@/utils/track';
+import OfflineTribute from './offline-tribute';
 
 // H5环境下从URL hash获取参数
 const getHashParams = () => {
@@ -143,8 +146,15 @@ const DetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
-
-  // 礼物相关状态
+  // 悼念模式：线上 / 线下（记忆上次选择）
+  const [mode, setMode] = useState<'online' | 'offline'>(() =>
+    Taro.getStorageSync('memMode') === 'offline' ? 'offline' : 'online'
+  );
+  const modeSwitch = (m: 'online' | 'offline') => {
+    setMode(m);
+    Taro.setStorageSync('memMode', m);
+    trackEvent('tomb_mode_switch', { memorialId: id, mode: m });
+  };
   const [showGiftModal, setShowGiftModal] = useState(false);
   const [giftConfigs, setGiftConfigs] = useState<GiftConfig[]>([]);
   const [selectedGift, setSelectedGift] = useState<GiftConfig | null>(null);
@@ -692,6 +702,43 @@ const DetailPage = () => {
         </View>
       </View>
 
+      {/* 线上 / 线下悼念模式切换 */}
+      <View className="mt-5 mx-4 flex flex-row items-center gap-2">
+        <View
+          className={`flex-1 rounded-full py-2 flex items-center justify-center gap-1.5 ${mode === 'online' ? '' : 'opacity-55'}`}
+          style={{
+            backgroundColor: mode === 'online' ? 'rgba(232,192,122,0.22)' : 'rgba(255,255,255,0.06)',
+            border: mode === 'online' ? '1px solid #e8c07a' : '1px solid rgba(255,255,255,0.12)',
+          }}
+          onClick={() => modeSwitch('online')}
+        >
+          <Flower2 size={16} color={mode === 'online' ? '#e8c07a' : '#8ea9b4'} />
+          <Text className="block text-sm font-medium text-white">线上悼念</Text>
+        </View>
+        <View
+          className={`flex-1 rounded-full py-2 flex items-center justify-center gap-1.5 ${mode === 'offline' ? '' : 'opacity-55'}`}
+          style={{
+            backgroundColor: mode === 'offline' ? 'rgba(127,195,206,0.22)' : 'rgba(255,255,255,0.06)',
+            border: mode === 'offline' ? '1px solid #7fc3ce' : '1px solid rgba(255,255,255,0.12)',
+          }}
+          onClick={() => modeSwitch('offline')}
+        >
+          <Camera size={16} color={mode === 'offline' ? '#7fc3ce' : '#8ea9b4'} />
+          <Text className="block text-sm font-medium text-white">线下悼念</Text>
+        </View>
+      </View>
+
+      {mode === 'offline' && (
+        <OfflineTribute
+          memorialId={id}
+          isCreator={isCreator}
+          allowVisitorOffline={(memorial as any)?.allowVisitorOffline}
+          onVisitorChange={(v) =>
+            setMemorial((prev) => (prev ? ({ ...prev, allowVisitorOffline: v } as any) : prev))
+          }
+        />
+      )}
+
       {/* 简介和成就 */}
       {(mem.description || (mem.achievements && mem.achievements.length > 0)) && (
         <View className="mt-5 mx-4 rounded-3xl px-6 py-5"
@@ -728,7 +775,7 @@ const DetailPage = () => {
       )}
 
       {/* 生活照片 */}
-      {mem.photos && mem.photos.length > 0 && (
+      {mode === 'online' && mem.photos && mem.photos.length > 0 && (
         <View className="mt-5 mx-4 rounded-3xl px-6 py-5"
           style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(232,192,122,0.25)' }}
         >
@@ -812,6 +859,7 @@ const DetailPage = () => {
       </View>
 
       {/* 留言区域 */}
+      {mode === 'online' && (
       <View className="mt-5 mx-4 rounded-3xl px-6 py-5 mb-4"
         style={{ backgroundColor: 'rgba(20,42,55,0.5)', border: '1px solid rgba(232,192,122,0.35)', backdropFilter: 'blur(14px)' }}
       >
@@ -960,6 +1008,7 @@ const DetailPage = () => {
           </View>
         </View>
       </View>
+      )}
 
       {/* 礼物选择弹窗 */}
       {showGiftModal && (

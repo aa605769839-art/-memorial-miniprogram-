@@ -37,6 +37,7 @@ export const memorials = pgTable(
     privacyType: integer("privacy_type").default(1), // 1公开 2仅家属 3密码访问
     accessPassword: varchar("access_password", { length: 64 }), // 密码访问模式的密码
     allowAnonymousMsg: boolean("allow_anonymous_msg").default(true), // 是否允许匿名留言
+    allowVisitorOffline: boolean("allow_visitor_offline").default(false), // 是否允许访客上传线下悼念照片（默认仅家属）
     isDeleted: boolean("is_deleted").default(false), // 逻辑删除
     mourningCount: integer("mourning_count").notNull().default(0),
     visitCount: integer("visit_count").notNull().default(0),
@@ -49,6 +50,30 @@ export const memorials = pgTable(
     index("memorials_created_at_idx").on(table.createdAt),
     index("memorials_mourning_count_idx").on(table.mourningCount),
     index("memorials_user_id_idx").on(table.userId),
+  ]
+);
+
+// 线下悼念照片表（V2.0）
+export const memorialOfflinePhoto = pgTable(
+  "memorial_offline_photo",
+  {
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    memorialId: varchar("memorial_id", { length: 36 }).notNull(), // 墓碑ID
+    userId: varchar("user_id", { length: 128 }).notNull(), // 上传者ID
+    nick: varchar("nick", { length: 128 }), // 上传者昵称
+    photoUrl: text("photo_url").notNull(), // 照片URL
+    worshipDate: timestamp("worship_date", { withTimezone: true, mode: 'string' }), // 祭扫日期
+    message: text("message"), // 悼念寄语
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("mem_offline_photo_memorial_idx").on(table.memorialId),
+    index("mem_offline_photo_user_idx").on(table.userId),
+    index("mem_offline_photo_created_idx").on(table.createdAt),
   ]
 );
 
@@ -332,6 +357,18 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 
 export type Photo = typeof photos.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
+
+// Offline photo types
+export const insertOfflinePhotoSchema = createCoercedInsertSchema(memorialOfflinePhoto).pick({
+  memorialId: true,
+  userId: true,
+  nick: true,
+  photoUrl: true,
+  worshipDate: true,
+  message: true,
+});
+export type OfflinePhoto = typeof memorialOfflinePhoto.$inferSelect;
+export type InsertOfflinePhoto = z.infer<typeof insertOfflinePhotoSchema>;
 
 // MemorialMember types
 export type MemorialMember = typeof memorialMembers.$inferSelect;

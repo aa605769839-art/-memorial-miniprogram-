@@ -1,96 +1,201 @@
 import { View, Text, Image } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { usePullDownRefresh, useReachBottom } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { Network } from '@/network';
 import { StarsBackground } from '@/components/StarsBackground';
+import { Auth } from '@/auth';
+import { trackEvent } from '@/utils/track';
 import {
   Cross,
   CalendarDays,
   HeartHandshake,
   Archive,
-  Bell,
-  Flame,
   Sun,
-  UserRound
+  UserRound,
+  Users,
+  Flower2,
+  Sparkles,
+  ChevronRight,
+  RefreshCw,
+  Inbox
 } from 'lucide-react-taro';
 
-// 老人肖像走 TOS 对象存储
-const ELDER_MALE =
-  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_99407d53-7ceb-4084-a666-0804bb070cec.jpeg?sign=1822036751-3ff48bae20-0-8f3de7f683b12bb244c51ec8963dca0c88e5d329c01c58328650428341448061';
-const ELDER_FEMALE =
-  'https://coze-coding-project.tos.coze.site/coze_storage_7688625912493146158/image/generate_image_875f3290-29ac-4e8d-97d7-fb78c8501238.jpeg?sign=1822036747-72dcb1b772-0-7ac9f978933a6ec6827cd76c9273a25046c89de94d735bf68a75b9ac27999ab9';
-
-interface Memorial {
+interface RecommendItem {
   id: string;
   name: string;
   gender?: string;
   avatarUrl: string | null;
+  birthDate?: string | null;
+  deathDate?: string | null;
+  occupation?: string | null;
+  biography?: string | null;
+  isDeleted?: boolean;
+  tags?: { type: string; label: string }[];
+  preview?: string;
+  mourningCount?: number;
+  visitCount?: number;
 }
 
-// 推荐祭拜故人动态（无真实流时兜底）
-const FALLBACK_RECOMMEND = [
-  { id: 'a', name: '张怀德', tag: '爷爷·逝世五周年', desc: '家人整理了他的象棋棋谱，供大家缅怀。', time: '2分钟前', avatar: ELDER_MALE },
-  { id: 'b', name: '陈慧兰', tag: '外婆·生日纪念', desc: '今天是她的生日，我们都很想念她。', time: '15分钟前', avatar: ELDER_FEMALE },
-  { id: 'c', name: '王建国', tag: '爷爷·逝世三周年', desc: '他生前最爱的院子开满了月季。', time: '1小时前', avatar: ELDER_MALE },
-  { id: 'd', name: '刘桂兰', tag: '奶奶·生日纪念', desc: '家人一起回忆她在厨房忙碌的身影。', time: '3小时前', avatar: ELDER_FEMALE }
-];
+interface UpcomingItem {
+  memorialId: string;
+  name: string;
+  gender?: string;
+  avatarUrl?: string | null;
+  type: string;
+  label: string;
+  daysLeft: number;
+  date: string;
+}
 
 const IndexPage = () => {
-  const [todayCount, setTodayCount] = useState(128);
-  const [visitCount, setVisitCount] = useState(1284);
-  const [participant, setParticipant] = useState(568);
-  const [memorials, setMemorials] = useState<Memorial[]>([]);
-  const [mainMemorial, setMainMemorial] = useState<Memorial | null>(null);
+  const [summary, setSummary] = useState({ totalMemorials: 0, todayGifts: 0, familyCount: 0, todayWorship: 0 });
+  const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
+  const [list, setList] = useState<RecommendItem[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [brokenImgs, setBrokenImgs] = useState<Record<string, boolean>>({});
+  const [worshiping, setWorshiping] = useState<string | null>(null);
 
   const markBroken = (url: string) => {
-    if (url && !brokenImgs[url]) {
-      setBrokenImgs((s) => ({ ...s, [url]: true }));
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
-    try {
-      const res = await Network.request({ url: '/api/memorials', method: 'GET' });
-      if (res.data?.code === 200) {
-        const list = res.data.data || [];
-        setMemorials(list);
-        if (list.length > 0) {
-          const first = list[0];
-          setMainMemorial(first);
-          setTodayCount(100 + list.length * 7 + (list.length % 11));
-          setParticipant(500 + list.length * 18 + (list.length % 5));
-          // 献花数 = 拜访数加和（有则用真实，无则估）
-          const visits = list.reduce((s: number, m: Memorial & { visitCount?: number }) => s + (m.visitCount || 0), 0);
-          if (visits > 0) setVisitCount(visits);
-        }
-      }
-    } catch (e) {
-      console.error('stats fail', e);
-    }
+    if (url && !brokenImgs[url]) setBrokenImgs((s) => ({ ...s, [url]: true }));
   };
 
   const goDetail = (id: string) => Taro.navigateTo({ url: `/pages/detail/index?id=${id}` });
-  const goPeople = (id?: string) => {
-    if (id) return goDetail(id);
-    Taro.switchTab({ url: '/pages/people/index' });
-  };
-  // 四宫格入口映射
-  const goEntrance = (key: string) => {
-    if (key === 'tomb') return goPeople();
-    if (key === 'calendar') return goPeople();
-    if (key === 'service') Taro.switchTab({ url: '/pages/profile/index' });
-    if (key === 'family') Taro.switchTab({ url: '/pages/people/index' });
+
+  // 各数据源并行加载
+  const fetchAll = async (_drop = true) => {
+    const userId = Auth.getUser()?.id || '';
+    try {
+      const [summaryRes, upcomingRes] = await Promise.all([
+        Network.request({ url: '/api/memorials/home/summary', method: 'GET' }).catch(() => null),
+        Network.request({
+          url: `/api/memorials/home/upcoming-anniversaries?userId=${encodeURIComponent(userId)}&days=7`,
+          method: 'GET',
+        }).catch(() => null),
+      ]);
+      const sBody: any = summaryRes?.data || summaryRes;
+      if (sBody?.code === 200) setSummary(sBody.data);
+      const uBody: any = upcomingRes?.data || upcomingRes;
+      if (uBody?.code === 200) {
+        const arr = Array.isArray(uBody.data) ? uBody.data : [];
+        setUpcoming(arr.slice(0, 5));
+      }
+    } catch {
+      /* 忽略 */
+    }
+    await loadRecommend(1, true);
   };
 
-  // 主卡故人
-  const mainName = mainMemorial?.name || '李淑芬';
-  const mainTag = '逝世三周年';
-  const mainRelation = '奶奶';
+  const loadRecommend = async (targetPage = 1, reset = false) => {
+    if (loading) return;
+    setLoading(true);
+    const userId = Auth.getUser()?.id || '';
+    try {
+      const res: any = await Network.request({
+        url: `/api/memorials/home/recommend?userId=${encodeURIComponent(userId)}&page=${targetPage}&pageSize=8`,
+        method: 'GET',
+      });
+      const body = res?.data || res;
+      if (body?.code === 200) {
+        const data = body.data || {};
+        const items: RecommendItem[] = data.list || [];
+        setList((prev) => (reset ? items : [...prev, ...items]));
+        setPage(targetPage);
+        setHasMore(!!data.hasMore);
+      } else {
+        setHasMore(false);
+      }
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+      if (refreshing) setRefreshing(false);
+    }
+  };
+
+  // 下拉刷新
+  usePullDownRefresh(async () => {
+    setRefreshing(true);
+    await fetchAll(true);
+    Taro.stopPullDownRefresh();
+  });
+
+  // 触底加载更多
+  useReachBottom(() => {
+    if (hasMore && !loading && !refreshing) {
+      loadRecommend(page + 1);
+    }
+  });
+
+  useEffect(() => {
+    fetchAll(true);
+  }, []);
+
+  // 快捷献花
+  const quickWorship = async (item: RecommendItem, e: any) => {
+    e.stopPropagation?.();
+    trackEvent('home_quick_worship', { memorialId: item.id });
+    if (worshiping) return;
+    setWorshiping(item.id);
+    const user = Auth.getUser();
+    const userProfile: any = Taro.getStorageSync('userProfile');
+    const senderName = user?.nickname || userProfile?.name || '访客';
+    try {
+      const res: any = await Network.request({
+        url: '/api/gifts',
+        method: 'POST',
+        data: {
+          memorialId: item.id,
+          giftType: 'flower',
+          giftName: '鲜花',
+          giftIcon: '',
+          senderName,
+          message: '',
+        },
+      });
+      const body = res?.data || res;
+      if (body?.code === 200) {
+        Taro.showToast({ title: '献花成功', icon: 'success' });
+        setList((prev) => prev.map((it) => (it.id === item.id ? { ...it, mourningCount: (it.mourningCount || 0) + 1 } : it)));
+      } else {
+        Taro.showToast({ title: body?.msg || '献花失败', icon: 'none' });
+      }
+    } catch {
+      Taro.showToast({ title: '网络异常，请稍后重试', icon: 'none' });
+    } finally {
+      setWorshiping(null);
+    }
+  };
+
+  // 近期纪念日点击
+  const goRecent = (item: UpcomingItem) => {
+    trackEvent('home_recent_click', { memorialId: item.memorialId });
+    goDetail(item.memorialId);
+  };
+
+  // 2×2 功能入口
+  const goEntrance = (key: string) => {
+    if (key === 'tomb') Taro.navigateTo({ url: '/pages/profile/form' });
+    else if (key === 'calendar') Taro.navigateTo({ url: '/pages/profile/calendar' });
+    else if (key === 'family') Taro.navigateTo({ url: '/pages/profile/family' });
+    else if (key === 'service') Taro.switchTab({ url: '/pages/profile/index' });
+  };
+
+  const entrances = [
+    { key: 'tomb', icon: <Cross color="#e8c07a" size={22} strokeWidth={1.8} />, label: '创建墓碑', color: 'rgba(232,192,122,0.12)' },
+    { key: 'calendar', icon: <CalendarDays color="#7fc3ce" size={22} strokeWidth={1.8} />, label: '纪念日历', color: 'rgba(127,195,206,0.12)' },
+    { key: 'family', icon: <Users color="#f0c87d" size={22} strokeWidth={1.8} />, label: '家属管理', color: 'rgba(240,200,125,0.12)' },
+    { key: 'service', icon: <HeartHandshake color="#c9a86a" size={22} strokeWidth={1.8} />, label: '暖心服务', color: 'rgba(201,168,106,0.12)' },
+  ];
+
+  const stats = [
+    { icon: <Cross color="#e8c07a" size={16} strokeWidth={1.8} />, value: summary.totalMemorials, label: '纪念墓碑', color: '#e8c07a' },
+    { icon: <Sun color="#f0c87d" size={16} strokeWidth={1.8} />, value: summary.todayGifts, label: '今日献花', color: '#f0c87d' },
+    { icon: <UserRound color="#7fc3ce" size={16} strokeWidth={1.8} />, value: summary.familyCount, label: '家属参与', color: '#7fc3ce' },
+    { icon: <Flower2 color="#c9a86a" size={16} strokeWidth={1.8} />, value: summary.todayWorship, label: '今日祭拜', color: '#c9a86a' },
+  ];
 
   return (
     <StarsBackground>
@@ -104,165 +209,191 @@ const IndexPage = () => {
             专业的老人社区与电子墓碑服务平台
           </Text>
         </View>
-        <View
-          className="w-10 h-10 rounded-full flex items-center justify-center mt-1"
-          style={{ border: '1px solid rgba(255,255,255,0.5)' }}
-        >
-          <Bell color="#ffffff" size={19} strokeWidth={1.8} />
+        <View className="flex flex-row items-center gap-2">
+          {refreshing && <RefreshCw color="#e8c07a" size={16} className="animate-spin" />}
+          <View className="w-10 h-10 rounded-full flex items-center justify-center mt-1"
+            style={{ border: '1px solid rgba(255,255,255,0.5)' }}
+            onClick={async () => { await fetchAll(true); }}
+          >
+            <RefreshCw color="#ffffff" size={19} strokeWidth={1.8} />
+          </View>
         </View>
       </View>
 
-      {/* 今日纪念大卡片 */}
-      <View className="px-5 mt-4">
+      {/* 顶部统计窄条（轻量化 4 项） */}
+      <View className="px-5 mt-3">
         <View
-          className="rounded-[22px] px-5 pt-4 pb-5 relative overflow-hidden"
+          className="rounded-3xl px-3 py-4 flex flex-row"
           style={{
-            backgroundColor: 'rgba(20,46,57,0.88)',
-            border: '1px solid rgba(232,192,122,0.45)',
-            boxShadow: '0 0 0 1px rgba(232,192,122,0.08), 0 10px 30px rgba(0,0,0,0.35), inset 0 0 30px rgba(232,192,122,0.05)'
+            backgroundColor: 'rgba(20,46,57,0.82)',
+            border: '1px solid rgba(232,192,122,0.25)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
           }}
         >
-          {/* 右下光纹 */}
-          <View
-            className="absolute -right-8 -bottom-10 w-40 h-40 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(114,198,205,0.28) 0%, transparent 70%)' }}
-          />
-          <View className="flex flex-row">
-            {/* 逝者照片 */}
-            <View className="w-28 h-28 rounded-2xl overflow-hidden flex-shrink-0"
-              style={{ border: '1px solid rgba(232,192,122,0.4)' }}
-            >
-              <Image
-                src={brokenImgs[(mainMemorial?.avatarUrl as string) || ''] ? (mainMemorial?.gender === '女' ? ELDER_FEMALE : ELDER_MALE) : (mainMemorial?.avatarUrl || ELDER_MALE)}
-                className="w-full h-full"
-                mode="aspectFill"
-                onError={() => markBroken((mainMemorial?.avatarUrl as string) || ELDER_MALE)}
-              />
+          {stats.map((s, i) => (
+            <View key={s.label} className="flex-1 flex flex-col items-center">
+              <View className="flex flex-row items-center gap-1">
+                {s.icon}
+                <Text className="text-lg font-bold" style={{ color: s.color }}>{s.value.toLocaleString()}</Text>
+              </View>
+              <Text className="mt-1 text-[11px]" style={{ color: 'rgba(200,212,214,0.75)' }}>{s.label}</Text>
+              {i < 3 && <View className="absolute right-0 top-2 bottom-2 w-px" style={{ backgroundColor: 'rgba(232,192,122,0.18)' }} />}
             </View>
-            {/* 右侧信息 */}
-            <View className="flex-1 pl-4">
-              <View className="flex flex-row items-baseline">
-                <Text className="text-[26px] font-bold" style={{ color: '#e8c07a' }}>{mainName}</Text>
-                <Text className="ml-1.5 text-sm" style={{ color: 'rgba(232,192,122,0.75)' }}>{mainRelation}</Text>
-              </View>
-              <View
-                className="self-start mt-2 rounded-full px-3 py-1"
-                style={{ backgroundColor: 'rgba(11,30,41,0.9)', border: '1px solid rgba(232,192,122,0.35)' }}
-              >
-                <Text className="text-xs" style={{ color: '#e8c07a' }}>{mainTag}</Text>
-              </View>
-              <View className="mt-3 flex flex-row items-baseline">
-                <Text className="text-sm mr-1" style={{ color: 'rgba(232,192,122,0.85)' }}>今日有</Text>
-                <Text className="text-[30px] font-extrabold" style={{ color: '#f0c87d' }}>{todayCount}</Text>
-                <Text className="text-sm ml-1" style={{ color: 'rgba(232,192,122,0.85)' }}>位亲人被想起</Text>
-              </View>
-            </View>
-          </View>
-          {/* 前去祭拜按钮 */}
-          <View
-            className="mt-4 rounded-full py-2.5 flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(90deg,#f0c87d,#d9a853)',
-              border: '1px solid rgba(255,224,164,0.7)',
-              boxShadow: '0 6px 18px rgba(217,168,83,0.4)'
-            }}
-            onClick={() => goPeople(mainMemorial?.id)}
-          >
-            <Text className="text-base font-bold text-white tracking-wide">前去祭拜</Text>
-          </View>
+          ))}
         </View>
       </View>
 
-      {/* 今日服务概览 */}
+      {/* 功能入口 2×2 */}
       <View className="px-5 mt-6">
-        <Text className="block text-base mb-3" style={{ color: '#e8c07a' }}>今日服务概览</Text>
-        <View className="flex flex-row gap-2.5">
-          <View className="flex-1 rounded-2xl py-4 flex flex-col items-center" style={{ backgroundColor: 'rgba(20,46,57,0.8)' }}>
-            <View className="flex flex-row items-end">
-              <Cross color="#e8c07a" size={15} strokeWidth={2} />
-              <Cross color="#e8c07a" size={15} strokeWidth={2} />
-            </View>
-            <Text className="mt-2 text-xl font-bold" style={{ color: '#e8c07a' }}>{mainMemorial ? memorials.length : 326}</Text>
-            <Text className="text-[11px] mt-0.5" style={{ color: 'rgba(232,192,122,0.7)' }}>纪念墓碑</Text>
-          </View>
-          <View className="flex-1 rounded-2xl py-4 flex flex-col items-center" style={{ backgroundColor: 'rgba(20,46,57,0.8)' }}>
-            <Sun color="#e8c07a" size={19} strokeWidth={1.9} />
-            <Text className="mt-2 text-xl font-bold" style={{ color: '#e8c07a' }}>{visitCount.toLocaleString()}</Text>
-            <Text className="text-[11px] mt-0.5" style={{ color: 'rgba(232,192,122,0.7)' }}>今日献花</Text>
-          </View>
-          <View className="flex-1 rounded-2xl py-4 flex flex-col items-center" style={{ backgroundColor: 'rgba(20,46,57,0.8)' }}>
-            <UserRound color="#e8c07a" size={19} strokeWidth={1.9} />
-            <Text className="mt-2 text-xl font-bold" style={{ color: '#e8c07a' }}>{participant.toLocaleString()}</Text>
-            <Text className="text-[11px] mt-0.5" style={{ color: 'rgba(232,192,122,0.7)' }}>家属参与</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* 推荐今日祭拜的故人 */}
-      <View className="px-5 mt-6">
-        <Text className="block text-base mb-3" style={{ color: '#e8c07a' }}>推荐今日祭拜的故人</Text>
-        {(memorials.length > 0 ? memorials.slice(0, 4) : FALLBACK_RECOMMEND).map((m, i) => {
-          const fb = FALLBACK_RECOMMEND[i];
-          const name = (m as Memorial).name || fb.name;
-          const tag = fb ? fb.tag : '家属纪念';
-          const desc = fb ? fb.desc : (m as Memorial).name + '的纪念空间收到新的问候';
-          const time = fb ? fb.time : (i < 3 ? i * 15 + 2 + '分钟前' : '1小时前');
-          const avatar = (m as Memorial).avatarUrl || fb.avatar;
-          return (
+        <View className="grid grid-cols-2 gap-2.5">
+          {entrances.map((e) => (
             <View
-              key={(m as Memorial).id || fb.id}
-              className="mb-2.5 rounded-2xl flex flex-row items-center"
-              style={{ backgroundColor: 'rgba(20,46,57,0.8)' }}
-              onClick={() => goPeople((m as Memorial).id)}
+              key={e.key}
+              className="rounded-2xl py-4 flex flex-row items-center justify-center gap-2"
+              style={{ backgroundColor: e.color, border: '1px solid rgba(232,192,122,0.18)' }}
+              onClick={() => goEntrance(e.key)}
             >
-              <View className="w-12 h-12 rounded-full overflow-hidden mx-3 my-3 flex-shrink-0"
-                style={{ border: '1px solid rgba(232,192,122,0.4)' }}
-              >
-                <Image
-                  src={brokenImgs[(m as Memorial).avatarUrl || fb.id] ? fb.avatar : (avatar || fb.avatar)}
-                  className="w-full h-full"
-                  mode="aspectFill"
-                  onError={() => markBroken((m as Memorial).avatarUrl || fb.id)}
-                />
-              </View>
-              <View className="flex-1 pr-3 py-3">
-                <View className="flex flex-row items-baseline">
-                  <Text className="text-lg font-bold" style={{ color: '#e8c07a' }}>{name}</Text>
-                  <Text className="ml-2 text-xs" style={{ color: 'rgba(232,192,122,0.78)' }}>{tag}</Text>
-                </View>
-                <Text className="block text-sm mt-1.5" style={{ color: 'rgba(216,226,228,0.8)' }} numberOfLines={1}>{desc}</Text>
-                <Text className="block mt-1.5 text-xs" style={{ color: 'rgba(170,185,188,0.65)' }}>{time}</Text>
-              </View>
+              {e.icon}
+              <Text className="text-sm font-medium" style={{ color: '#f0d9a8' }}>{e.label}</Text>
             </View>
-          );
-        })}
+          ))}
+        </View>
       </View>
 
-      {/* 常用服务 */}
+      {/* 近期纪念日（未来 7 天） */}
       <View className="px-5 mt-6">
-        <Text className="block text-base mb-3" style={{ color: '#e8c07a' }}>常用服务</Text>
-        <View className="flex flex-row justify-between px-1">
-          <View className="flex flex-col items-center" onClick={() => goEntrance('tomb')}>
-            <Cross color="#e8c07a" size={24} strokeWidth={1.8} />
-            <Text className="text-xs mt-2" style={{ color: 'rgba(232,192,122,0.92)' }}>创建墓碑</Text>
-          </View>
-          <View className="flex flex-col items-center" onClick={() => goEntrance('calendar')}>
-            <CalendarDays color="#e8c07a" size={24} strokeWidth={1.8} />
-            <Text className="text-xs mt-2" style={{ color: 'rgba(232,192,122,0.92)' }}>纪念日历</Text>
-          </View>
-          <View className="flex flex-col items-center" onClick={() => goEntrance('service')}>
-            <HeartHandshake color="#e8c07a" size={24} strokeWidth={1.8} />
-            <Text className="text-xs mt-2" style={{ color: 'rgba(232,192,122,0.92)' }}>暖心服务</Text>
-          </View>
-          <View className="flex flex-col items-center" onClick={() => goEntrance('family')}>
-            <Archive color="#e8c07a" size={24} strokeWidth={1.8} />
-            <Text className="text-xs mt-2" style={{ color: 'rgba(232,192,122,0.92)' }}>家属管理</Text>
-          </View>
+        <View className="flex flex-row items-center justify-between mb-3">
+          <Text className="block text-base font-medium" style={{ color: '#e8c07a' }}>近期纪念日</Text>
+          <Text className="text-xs" style={{ color: 'rgba(200,212,214,0.7)' }}>未来 7 天</Text>
         </View>
+        {upcoming.length === 0 ? (
+          <View
+            className="rounded-2xl py-4 px-4 flex flex-row items-center"
+            style={{ backgroundColor: 'rgba(20,46,57,0.7)', border: '1px solid rgba(232,192,122,0.15)' }}
+          >
+            <Sparkles color="#7fc3ce" size={16} strokeWidth={1.8} />
+            <Text className="ml-2 text-xs" style={{ color: 'rgba(200,212,214,0.7)' }}>
+              近 7 天暂无纪念日，愿故人安好
+            </Text>
+          </View>
+        ) : (
+          upcoming.map((it) => (
+            <View
+              key={it.memorialId + it.type + it.daysLeft}
+              className="mb-2 rounded-2xl px-4 py-3 flex flex-row items-center"
+              style={{ backgroundColor: 'rgba(20,46,57,0.8)', border: '1px solid rgba(232,192,122,0.2)' }}
+              onClick={() => goRecent(it)}
+            >
+              <View className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: it.daysLeft === 0 ? '#f0c87d' : '#7fc3ce' }} />
+              <View className="flex-1">
+                <View className="flex flex-row items-center">
+                  <Text className="text-base font-bold" style={{ color: '#f0d9a8' }}>{it.name}</Text>
+                  <Text className="ml-2 text-xs rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(127,195,206,0.18)', color: '#7fc3ce' }}>{it.label}</Text>
+                </View>
+                <Text className="block mt-1 text-xs" style={{ color: 'rgba(200,212,214,0.7)' }}>{it.date}</Text>
+              </View>
+              <View className="flex flex-row items-center">
+                <Text className="text-sm font-semibold" style={{ color: '#e8c07a' }}>
+                  {it.daysLeft === 0 ? '今天' : `${it.daysLeft} 天后`}
+                </Text>
+                <ChevronRight color="rgba(200,212,214,0.6)" size={16} />
+              </View>
+            </View>
+          ))
+        )}
+      </View>
+
+      {/* 推荐纪念空间 */}
+      <View className="px-5 mt-6">
+        <Text className="block text-base font-medium mb-3" style={{ color: '#e8c07a' }}>推荐纪念空间</Text>
+        {list.length === 0 && !loading ? (
+          <View className="rounded-2xl py-10 flex flex-col items-center justify-center"
+            style={{ backgroundColor: 'rgba(20,46,57,0.7)' }}
+          >
+            <Inbox color="rgba(200,212,214,0.5)" size={40} strokeWidth={1.5} />
+            <Text className="mt-3 text-xs" style={{ color: 'rgba(200,212,214,0.7)' }}>暂无纪念空间，敬请期待</Text>
+            <View className="mt-4 rounded-full px-4 py-2" style={{ backgroundColor: 'rgba(232,192,122,0.15)' }}
+              onClick={() => loadRecommend(1, true)}
+            >
+              <Text className="text-xs" style={{ color: '#e8c07a' }}>重新加载</Text>
+            </View>
+          </View>
+        ) : (
+          list.map((m) => {
+            const todayTag = (m.tags || []).find((t) => t.type === 'today');
+            const upcomingTag = (m.tags || []).find((t) => t.type === 'upcoming');
+            const mineTag = (m.tags || []).find((t) => t.type === 'mine');
+            const bioTag = (m.tags || []).find((t) => t.type === 'bio' || t.type === 'occupation');
+            return (
+              <View
+                key={m.id}
+                className="mb-2.5 rounded-2xl p-3.5"
+                style={{ backgroundColor: 'rgba(20,46,57,0.82)', border: '1px solid rgba(232,192,122,0.22)' }}
+                onClick={() => goDetail(m.id)}
+              >
+                <View className="flex flex-row items-center">
+                  <View className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                    style={{ border: '1px solid rgba(232,192,122,0.4)' }}
+                  >
+                    <Image
+                      src={m.avatarUrl || ''}
+                      className="w-full h-full"
+                      mode="aspectFill"
+                      onError={() => markBroken(m.avatarUrl || '')}
+                    />
+                  </View>
+                  <View className="flex-1 ml-3 min-w-0">
+                    <View className="flex flex-row items-center flex-wrap gap-1.5">
+                      <Text className="text-lg font-bold whitespace-nowrap" style={{ color: '#f0d9a8' }}>{m.name}</Text>
+                      {todayTag && (
+                        <Text className="text-[10px] whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(240,200,125,0.25)', color: '#f0c87d' }}>{todayTag.label}</Text>
+                      )}
+                      {upcomingTag && (
+                        <Text className="text-[10px] whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(127,195,206,0.2)', color: '#7fc3ce' }}>{upcomingTag.label}</Text>
+                      )}
+                      {mineTag && (
+                        <Text className="text-[10px] whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(232,192,122,0.18)', color: '#e8c07a' }}>{mineTag.label}</Text>
+                      )}
+                    </View>
+                    {bioTag && (
+                      <Text className="block mt-1 text-[11px]" style={{ color: 'rgba(200,212,214,0.7)' }}>{bioTag.label}</Text>
+                    )}
+                    {m.preview && (
+                      <Text className="block mt-1 text-xs leading-relaxed" style={{ color: 'rgba(180,196,200,0.78)' }} numberOfLines={1}>{m.preview}</Text>
+                    )}
+                  </View>
+                  <View className="flex-shrink-0 ml-2" onClick={(e) => quickWorship(m, e)}>
+                    <View className="rounded-full px-3 py-1.5 flex flex-row items-center gap-1"
+                      style={{ background: 'linear-gradient(90deg,#f0c87d,#d9a853)', opacity: worshiping === m.id ? 0.6 : 1 }}
+                    >
+                      <Flower2 color="#2e1f0f" size={14} strokeWidth={2} />
+                      <Text className="text-xs font-bold text-[#2e1f0f]">献花</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            );
+          })
+        )}
+        {/* 加载更多 */}
+        {list.length > 0 && (
+          <View className="pt-2 pb-4 flex items-center justify-center">
+            {loading ? (
+              <View className="flex flex-row items-center gap-2">
+                <View className="w-4 h-4 rounded-full border-2 border-[#e8c07a]/30 border-t-[#e8c07a] animate-spin" />
+                <Text className="text-xs" style={{ color: 'rgba(200,212,214,0.7)' }}>加载中...</Text>
+              </View>
+            ) : !hasMore ? (
+              <Text className="text-xs" style={{ color: 'rgba(200,212,214,0.5)' }}>—— 到底啦 ——</Text>
+            ) : (
+              <Text className="text-xs" style={{ color: 'rgba(200,212,214,0.5)' }}>上滑加载更多</Text>
+            )}
+          </View>
+        )}
       </View>
 
       {/* 平台安心服务提示卡 */}
-      <View className="px-5 mt-6 pb-8">
+      <View className="px-5 mt-2 pb-10">
         <View
           className="rounded-2xl px-4 py-4 flex flex-row items-center"
           style={{ backgroundColor: 'rgba(20,46,57,0.8)', border: '1px solid rgba(138,192,204,0.25)' }}
@@ -270,7 +401,7 @@ const IndexPage = () => {
           <View className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{ backgroundColor: 'rgba(138,192,204,0.15)' }}
           >
-            <Flame color="#7fc3ce" size={20} strokeWidth={1.8} />
+            <Archive color="#7fc3ce" size={20} strokeWidth={1.8} />
           </View>
           <View className="flex-1 ml-3">
             <Text className="block text-sm font-semibold mb-1" style={{ color: '#e8c07a' }}>平台安心服务</Text>

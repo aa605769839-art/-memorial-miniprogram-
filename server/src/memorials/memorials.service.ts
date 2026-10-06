@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { eq, desc, and, gte } from 'drizzle-orm';
+import { eq, desc, and, gte, sql } from 'drizzle-orm';
 import { db } from '../storage/database/drizzle';
-import { memorials, photos, comments } from '../storage/database/shared/schema';
+import { memorials, photos, comments, gifts, mourningRecords, memorialMembers } from '../storage/database/shared/schema';
 import { InsertMemorial, UpdateMemorial } from '../storage/database/shared/schema';
 import { AvatarService } from './avatar.service';
 
@@ -270,5 +270,151 @@ export class MemorialsService {
       }
     });
     return events;
+  }
+
+  // ================= V2.0 首页聚合 =================
+
+  /** 下一届纪念日（下一年度若本年度已过），返回距今天数（今日为 0） */
+  private nextAnniversary(dateStr: string | null): { daysLeft: number } | null {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    let cand = new Date(now.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    if (cand < today) cand = new Date(now.getFullYear() + 1, d.getMonth(), d.getDate()).getTime();
+    return { daysLeft: Math.round((cand - today) / 86400000) };
+  }
+
+  /** 首页轻量统计：纪念墓碑总数 / 今日献花数 / 家属参与数 / 今日祭拜人次 */
+  async getHomeSummary() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const memCount = await db
+      .select({ c: sql<number>`count(*)` })
+      .from(memorials)
+      .where(eq(memorials.isDeleted ?? false, false));
+
+    const giftCount = await db
+      .select({ c: sql<number>`count(*)` })
+      .from(gifts)
+      .where(gte(gifts.createdAt, today));
+
+    const memberCount = await db
+      .select({ c: sql<number>`count(distinct ${memorialMembers.userId})` })
+      .from(memorialMembers);
+
+    const mournCount = await db
+      .select({ c: sql<number>`count(*)` })
+      .from(mourningRecords)
+      .where(gte(mourningRecords.createdAt, today));
+
+    return {
+      totalMemorials: Number(memCount[0]?.c ?? 0),
+      todayGifts: Number(giftCount[0]?.c ?? 0),
+      familyCount: Number(memberCount[0]?.c ?? 0),
+      todayWorship: Number(mournCount[0]?.c ?? 0),
+    };
+  }
+
+  /** 近期纪念日：user=本人关联 / 兜底公开墓碑，未来 N 天内的生辰/忌日 */
+  async getUpcomingAnniversaries(userId?: string, days = 7) {
+    let rows;
+    if (userId) {
+      rows = await db.select().from(memorials)
+        .where(and(eq(memorials.userId, userId), eq(memorials.isDeleted, false)));
+    } else {
+      rows = await db.select().from(memorials).where(eq(memorials.isDeleted, false));
+    }
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const upper = new Date(today.getTime() + days * 86400000);
+
+    const out: any[] = [];
+    rows.forEach((mem) => {
+      const add = (type: 'birth' | 'death', dateStr: string | null) => {
+        if (!dateStr) return;
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return;
+        let cand = new Date(today.getFullYear(), d.getMonth(), d.getDate());
+        if (cand.getTime() < today.getTime()) cand = new Date(today.getFullYear() + 1, d.getMonth(), d.getDate());
+        if (cand.getTime() > upper.getTime()) return;
+        const daysLeft = Math.round((cand.getTime() - today.getTime()) / 86400000);
+        out.push({
+          memorialId: mem.id,
+          name: mem.name,
+          gender: mem.gender,
+          avatarUrl: mem.avatarUrl,
+          type,
+          label: type === 'birth' ? '生辰' : '忌日',
+          date: cand.toISOString().slice(0, 10),
+          daysLeft,
+        });
+      };
+      add('birth', mem.birthDate);
+      add('death', mem.deathDate);
+    });
+    out.sort((a, b) => a.daysLeft - b.daysLeft);
+    return out;
+  }
+
+  /** 依据生肖/生平推断卡片标签（简化为墓碑已有内容） */
+  private inferTags(mem: any): any[] {
+    const tags: any[] = [];
+    if (mem.biography) tags.push({ type: 'bio', label: '生平' });
+    if (mem.occupation) tags.push({ type: 'occupation', label: mem.occupation });
+    return tags.slice(0, 2);
+  }
+
+  private bioPreview(bio?: string | null): string {
+    if (!bio) return '';
+    return bio.length > 42 ? bio.slice(0, 42) + '…' : bio;
+  }
+
+  /**
+   * 首页推荐流（分页）：当日纪念日 → 本人关联 → 未来7日临近 → 近期新建公开。
+   */
+  async findHomeRecommend(userId?: string, page = 1, pageSize = 10) {
+    const rows = await db
+      .select()
+      .from(memorials)
+      .where(and(eq(memorials.privacyType ?? 1, 1), eq(memorials.isDeleted ?? false, false)));
+
+    const scored = rows.map((mem: any) => {
+      const birth = this.nextAnniversary(mem.birthDate);
+      const death = this.nextAnniversary(mem.deathDate);
+      let ann: { daysLeft: number; type: 'birth' | 'death' } | null = null;
+      if (birth && death) ann = death.daysLeft <= birth.daysLeft ? { ...death, type: 'death' } : { ...birth, type: 'birth' };
+      else if (birth) ann = { ...birth, type: 'birth' };
+      else if (death) ann = { ...death, type: 'death' };
+
+      let score = 100;
+      if (ann && ann.daysLeft === 0) score = 0;             // 当日纪念日
+      else if (userId && mem.userId === userId) score = 10; // 本人关联
+      else if (ann && ann.daysLeft <= 7) score = 30;        // 未来7日临近
+      return { mem, score, ann };
+    });
+
+    scored.sort(
+      (a, b) =>
+        a.score - b.score ||
+        new Date((b.mem as any).createdAt).getTime() - new Date((a.mem as any).createdAt).getTime()
+    );
+
+    const total = scored.length;
+    const start = (page - 1) * pageSize;
+    const pageRows = scored.slice(start, start + pageSize).map(({ mem, ann }) => {
+      const tags: any[] = [...this.inferTags(mem)];
+      if (ann && ann.daysLeft === 0) {
+        tags.unshift({ type: 'today', label: ann.type === 'birth' ? '今日生辰' : '今日忌日' });
+      } else if (ann && ann.daysLeft <= 7) {
+        tags.unshift({ type: 'upcoming', label: `${ann.type === 'birth' ? '生辰' : '忌日'} ${ann.daysLeft}天后` });
+      }
+      if (userId && mem.userId === userId) tags.unshift({ type: 'mine', label: '我创建的' });
+      return { ...mem, tags, preview: this.bioPreview(mem.biography) };
+    });
+
+    return { list: pageRows, page, pageSize, total, hasMore: start + pageRows.length < total };
   }
 }

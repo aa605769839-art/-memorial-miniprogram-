@@ -316,25 +316,29 @@ const ProfilePage = () => {
                 </View>
               </View>
               <Button
-                className="rounded-full flex-shrink-0"
+                className="flex-shrink-0"
                 style={{
-                  background: 'linear-gradient(135deg,#e8c07a,#d9a84c)',
-                  color: '#2e1f0f',
-                  border: '1px solid rgba(232,192,122,0.6)',
-                  height: 'auto',
-                  lineHeight: '1.5',
-                  padding: '6px 14px',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 0,
                   margin: 0,
+                  width: 'auto',
                   minWidth: 0,
-                  whiteSpace: 'nowrap',
+                  height: 'auto',
+                  lineHeight: 'normal',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px'
+                  boxShadow: 'none'
                 }}
                 onClick={handleEdit}
               >
-                <Pencil color="#2e1f0f" size={14} strokeWidth={2.2} />
-                <Text className="text-sm font-semibold">编辑资料</Text>
+                <View
+                  className="flex items-center gap-1 rounded-full px-3 py-1.5"
+                  style={{ background: 'linear-gradient(135deg,#e8c07a,#d9a84c)' }}
+                >
+                  <Pencil color="#2e1f0f" size={14} strokeWidth={2.2} />
+                  <Text className="text-sm font-semibold" style={{ color: '#2e1f0f' }}>编辑资料</Text>
+                </View>
               </Button>
             </View>
           </View>
@@ -412,25 +416,29 @@ const ProfilePage = () => {
                   </Text>
                 </View>
                 <Button
-                  className="rounded-full flex-shrink-0"
+                  className="flex-shrink-0"
                   style={{
-                    backgroundColor: 'rgba(232,192,122,0.15)',
-                    color: '#e8c07a',
-                    border: '1px solid rgba(232,192,122,0.4)',
-                    height: 'auto',
-                    lineHeight: '1.5',
-                    padding: '6px 14px',
+                    background: 'transparent',
+                    border: 'none',
+                    padding: 0,
                     margin: 0,
+                    width: 'auto',
                     minWidth: 0,
-                    whiteSpace: 'nowrap',
+                    height: 'auto',
+                    lineHeight: 'normal',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px'
+                    boxShadow: 'none'
                   }}
                   onClick={() => setConfirmLogout(true)}
                 >
-                  <LogOut color="#e8c07a" size={15} strokeWidth={2.2} />
-                  <Text className="text-sm font-semibold">退出登录</Text>
+                  <View
+                    className="flex items-center gap-1 rounded-full px-3 py-1.5"
+                    style={{ backgroundColor: 'rgba(232,192,122,0.15)', border: '1px solid rgba(232,192,122,0.4)' }}
+                  >
+                    <LogOut color="#e8c07a" size={15} strokeWidth={2.2} />
+                    <Text className="text-sm font-semibold" style={{ color: '#e8c07a' }}>退出登录</Text>
+                  </View>
                 </Button>
               </View>
               {isAdmin && (
@@ -461,24 +469,29 @@ const ProfilePage = () => {
                 </View>
               </View>
               <Button
-                className="rounded-full flex-shrink-0"
+                className="flex-shrink-0"
                 style={{
-                  background: 'linear-gradient(90deg,#e8c07a,#d9a84c)',
-                  color: '#2e1f0f',
-                  height: 'auto',
-                  lineHeight: '1.5',
-                  padding: '7px 16px',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 0,
                   margin: 0,
+                  width: 'auto',
                   minWidth: 0,
-                  whiteSpace: 'nowrap',
+                  height: 'auto',
+                  lineHeight: 'normal',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  boxShadow: 'none'
                 }}
                 onClick={openLogin}
               >
-                <LogIn color="#2e1f0f" size={16} strokeWidth={2.3} />
-                <Text className="text-sm font-semibold">登录 / 注册</Text>
+                <View
+                  className="flex items-center gap-1 rounded-full px-3.5 py-1.5"
+                  style={{ background: 'linear-gradient(90deg,#e8c07a,#d9a84c)' }}
+                >
+                  <LogIn color="#2e1f0f" size={16} strokeWidth={2.3} />
+                  <Text className="text-sm font-semibold" style={{ color: '#2e1f0f' }}>登录 / 注册</Text>
+                </View>
               </Button>
             </View>
           )}

@@ -9,7 +9,6 @@ import {
   Cross,
   CalendarDays,
   HeartHandshake,
-  Archive,
   Sun,
   UserRound,
   Users,
@@ -191,10 +190,10 @@ const IndexPage = () => {
   ];
 
   const stats = [
-    { icon: <Cross color="#e8c07a" size={16} strokeWidth={1.8} />, value: summary.totalMemorials, label: '纪念墓碑', color: '#e8c07a' },
-    { icon: <Sun color="#f0c87d" size={16} strokeWidth={1.8} />, value: summary.todayGifts, label: '今日献花', color: '#f0c87d' },
-    { icon: <UserRound color="#7fc3ce" size={16} strokeWidth={1.8} />, value: summary.familyCount, label: '家属参与', color: '#7fc3ce' },
-    { icon: <Flower2 color="#c9a86a" size={16} strokeWidth={1.8} />, value: summary.todayWorship, label: '今日祭拜', color: '#c9a86a' },
+    { icon: <Cross color="#e8c07a" size={20} strokeWidth={1.8} />, value: summary.totalMemorials, label: '纪念墓碑', color: '#e8c07a' },
+    { icon: <Sun color="#f0c87d" size={20} strokeWidth={1.8} />, value: summary.todayGifts, label: '今日献花', color: '#f0c87d' },
+    { icon: <UserRound color="#7fc3ce" size={20} strokeWidth={1.8} />, value: summary.familyCount, label: '家属参与', color: '#7fc3ce' },
+    { icon: <Flower2 color="#c9a86a" size={20} strokeWidth={1.8} />, value: summary.todayWorship, label: '今日祭拜', color: '#c9a86a' },
   ];
 
   return (
@@ -234,9 +233,9 @@ const IndexPage = () => {
             <View key={s.label} className="flex-1 flex flex-col items-center">
               <View className="flex flex-row items-center gap-1">
                 {s.icon}
-                <Text className="text-lg font-bold" style={{ color: s.color }}>{s.value.toLocaleString()}</Text>
+                <Text className="text-xl font-bold" style={{ color: s.color }}>{s.value.toLocaleString()}</Text>
               </View>
-              <Text className="mt-1 text-[11px]" style={{ color: 'rgba(200,212,214,0.75)' }}>{s.label}</Text>
+              <Text className="mt-1 text-sm" style={{ color: 'rgba(200,212,214,0.75)' }}>{s.label}</Text>
               {i < 3 && <View className="absolute right-0 top-2 bottom-2 w-px" style={{ backgroundColor: 'rgba(232,192,122,0.18)' }} />}
             </View>
           ))}
@@ -323,7 +322,7 @@ const IndexPage = () => {
             const todayTag = (m.tags || []).find((t) => t.type === 'today');
             const upcomingTag = (m.tags || []).find((t) => t.type === 'upcoming');
             const mineTag = (m.tags || []).find((t) => t.type === 'mine');
-            const bioTag = (m.tags || []).find((t) => t.type === 'bio' || t.type === 'occupation');
+            const intro = m.preview || m.biography || '';
             return (
               <View
                 key={m.id}
@@ -332,7 +331,7 @@ const IndexPage = () => {
                 onClick={() => goDetail(m.id)}
               >
                 <View className="flex flex-row items-center">
-                  <View className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                  <View className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0"
                     style={{ border: '1px solid rgba(232,192,122,0.4)' }}
                   >
                     <Image
@@ -346,28 +345,25 @@ const IndexPage = () => {
                     <View className="flex flex-row items-center flex-wrap gap-1.5">
                       <Text className="text-lg font-bold whitespace-nowrap" style={{ color: '#f0d9a8' }}>{m.name}</Text>
                       {todayTag && (
-                        <Text className="text-[10px] whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(240,200,125,0.25)', color: '#f0c87d' }}>{todayTag.label}</Text>
+                        <Text className="text-xs whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(240,200,125,0.25)', color: '#f0c87d' }}>{todayTag.label}</Text>
                       )}
                       {upcomingTag && (
-                        <Text className="text-[10px] whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(127,195,206,0.2)', color: '#7fc3ce' }}>{upcomingTag.label}</Text>
+                        <Text className="text-xs whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(127,195,206,0.2)', color: '#7fc3ce' }}>{upcomingTag.label}</Text>
                       )}
                       {mineTag && (
-                        <Text className="text-[10px] whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(232,192,122,0.18)', color: '#e8c07a' }}>{mineTag.label}</Text>
+                        <Text className="text-xs whitespace-nowrap rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(232,192,122,0.18)', color: '#e8c07a' }}>{mineTag.label}</Text>
                       )}
                     </View>
-                    {bioTag && (
-                      <Text className="block mt-1 text-[11px]" style={{ color: 'rgba(200,212,214,0.7)' }}>{bioTag.label}</Text>
-                    )}
-                    {m.preview && (
-                      <Text className="block mt-1 text-xs leading-relaxed" style={{ color: 'rgba(180,196,200,0.78)' }} numberOfLines={1}>{m.preview}</Text>
+                    {intro && (
+                      <Text className="block mt-1.5 text-[13px] leading-relaxed" style={{ color: 'rgba(180,196,200,0.85)' }} numberOfLines={2}>{intro}</Text>
                     )}
                   </View>
                   <View className="flex-shrink-0 ml-2" onClick={(e) => quickWorship(m, e)}>
-                    <View className="rounded-full px-3 py-1.5 flex flex-row items-center gap-1"
+                    <View className="rounded-full px-3.5 py-2 flex flex-row items-center gap-1"
                       style={{ background: 'linear-gradient(90deg,#f0c87d,#d9a853)', opacity: worshiping === m.id ? 0.6 : 1 }}
                     >
-                      <Flower2 color="#2e1f0f" size={14} strokeWidth={2} />
-                      <Text className="text-xs font-bold text-[#2e1f0f]">献花</Text>
+                      <Flower2 color="#2e1f0f" size={16} strokeWidth={2} />
+                      <Text className="text-sm font-bold text-[#2e1f0f]">献花</Text>
                     </View>
                   </View>
                 </View>
@@ -377,7 +373,7 @@ const IndexPage = () => {
         )}
         {/* 加载更多 */}
         {list.length > 0 && (
-          <View className="pt-2 pb-4 flex items-center justify-center">
+          <View className="pt-2 pb-10 flex items-center justify-center">
             {loading ? (
               <View className="flex flex-row items-center gap-2">
                 <View className="w-4 h-4 rounded-full border-2 border-[#e8c07a]/30 border-t-[#e8c07a] animate-spin" />
@@ -390,26 +386,6 @@ const IndexPage = () => {
             )}
           </View>
         )}
-      </View>
-
-      {/* 平台安心服务提示卡 */}
-      <View className="px-5 mt-2 pb-10">
-        <View
-          className="rounded-2xl px-4 py-4 flex flex-row items-center"
-          style={{ backgroundColor: 'rgba(20,46,57,0.8)', border: '1px solid rgba(138,192,204,0.25)' }}
-        >
-          <View className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: 'rgba(138,192,204,0.15)' }}
-          >
-            <Archive color="#7fc3ce" size={20} strokeWidth={1.8} />
-          </View>
-          <View className="flex-1 ml-3">
-            <Text className="block text-sm font-semibold mb-1" style={{ color: '#e8c07a' }}>平台安心服务</Text>
-            <Text className="block text-[11px] leading-relaxed" style={{ color: 'rgba(200,212,214,0.75)' }}>
-              统一身份记录、家属权限管理、重要日期提醒、温暖纪念空间
-            </Text>
-          </View>
-        </View>
       </View>
     </StarsBackground>
   );

@@ -367,9 +367,15 @@ export class MemorialsService {
     return tags.slice(0, 2);
   }
 
-  private bioPreview(bio?: string | null): string {
-    if (!bio) return '';
-    return bio.length > 42 ? bio.slice(0, 42) + '…' : bio;
+  private bioPreview(mem: any): string {
+    const src =
+      mem?.biography ||
+      mem?.description ||
+      (Array.isArray(mem?.achievements) ? mem.achievements.join('、') : '') ||
+      mem?.occupation ||
+      '';
+    if (!src) return '';
+    return src.length > 60 ? src.slice(0, 60) + '…' : src;
   }
 
   /**
@@ -412,7 +418,7 @@ export class MemorialsService {
         tags.unshift({ type: 'upcoming', label: `${ann.type === 'birth' ? '生辰' : '忌日'} ${ann.daysLeft}天后` });
       }
       if (userId && mem.userId === userId) tags.unshift({ type: 'mine', label: '我创建的' });
-      return { ...mem, tags, preview: this.bioPreview(mem.biography) };
+      return { ...mem, tags, preview: this.bioPreview(mem) };
     });
 
     return { list: pageRows, page, pageSize, total, hasMore: start + pageRows.length < total };

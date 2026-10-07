@@ -16,7 +16,9 @@ import {
   Gift,
   Cross,
   Flower2,
-  CalendarDays
+  CalendarDays,
+  Pencil,
+  LogOut
 } from 'lucide-react-taro';
 import { Network } from '@/network';
 import { uploadCrossPlatform } from '@/utils/upload';
@@ -314,11 +316,25 @@ const ProfilePage = () => {
                 </View>
               </View>
               <Button
-                className="rounded-full px-3 py-1 text-xs mr-0 flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg,#e8c07a,#d9a84c)', color: '#2e1f0f', border: '1px solid rgba(232,192,122,0.6)', height: 'auto', lineHeight: '1.4', padding: '0 0' }}
+                className="rounded-full flex-shrink-0"
+                style={{
+                  background: 'linear-gradient(135deg,#e8c07a,#d9a84c)',
+                  color: '#2e1f0f',
+                  border: '1px solid rgba(232,192,122,0.6)',
+                  height: 'auto',
+                  lineHeight: '1.5',
+                  padding: '6px 14px',
+                  margin: 0,
+                  minWidth: 0,
+                  whiteSpace: 'nowrap',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
                 onClick={handleEdit}
               >
-                编辑资料
+                <Pencil color="#2e1f0f" size={14} strokeWidth={2.2} />
+                <Text className="text-sm font-semibold">编辑资料</Text>
               </Button>
             </View>
           </View>
@@ -396,11 +412,25 @@ const ProfilePage = () => {
                   </Text>
                 </View>
                 <Button
-                  className="rounded-full px-4 py-1 text-sm"
-                  style={{ backgroundColor: 'rgba(232,192,122,0.15)', color: '#e8c07a', height: 'auto', lineHeight: '1.5' }}
+                  className="rounded-full flex-shrink-0"
+                  style={{
+                    backgroundColor: 'rgba(232,192,122,0.15)',
+                    color: '#e8c07a',
+                    border: '1px solid rgba(232,192,122,0.4)',
+                    height: 'auto',
+                    lineHeight: '1.5',
+                    padding: '6px 14px',
+                    margin: 0,
+                    minWidth: 0,
+                    whiteSpace: 'nowrap',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
                   onClick={() => setConfirmLogout(true)}
                 >
-                  退出
+                  <LogOut color="#e8c07a" size={15} strokeWidth={2.2} />
+                  <Text className="text-sm font-semibold">退出登录</Text>
                 </Button>
               </View>
               {isAdmin && (
@@ -431,11 +461,24 @@ const ProfilePage = () => {
                 </View>
               </View>
               <Button
-                className="rounded-full px-5 py-1 text-sm"
-                style={{ background: 'linear-gradient(90deg,#e8c07a,#d9a84c)', color: '#2e1f0f', height: 'auto', lineHeight: '1.5' }}
+                className="rounded-full flex-shrink-0"
+                style={{
+                  background: 'linear-gradient(90deg,#e8c07a,#d9a84c)',
+                  color: '#2e1f0f',
+                  height: 'auto',
+                  lineHeight: '1.5',
+                  padding: '7px 16px',
+                  margin: 0,
+                  minWidth: 0,
+                  whiteSpace: 'nowrap',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
                 onClick={openLogin}
               >
-                登录/注册
+                <LogIn color="#2e1f0f" size={16} strokeWidth={2.3} />
+                <Text className="text-sm font-semibold">登录 / 注册</Text>
               </Button>
             </View>
           )}

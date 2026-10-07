@@ -326,47 +326,54 @@ const IndexPage = () => {
             return (
               <View
                 key={m.id}
-                className="mb-3 rounded-3xl p-4"
-                style={{ backgroundColor: 'rgba(20,46,57,0.86)', border: '1px solid rgba(232,192,122,0.26)' }}
+                className="mb-3 rounded-3xl p-4 flex flex-row items-center"
+                style={{ backgroundColor: 'rgba(12,26,40,0.82)', border: '1px solid rgba(232,192,122,0.3)' }}
                 onClick={() => goDetail(m.id)}
               >
-                <View className="flex flex-row items-center">
-                  <View className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0"
-                    style={{ border: '1.5px solid rgba(232,192,122,0.45)' }}
-                  >
-                    <Image
-                      src={m.avatarUrl || ''}
-                      className="w-full h-full"
-                      mode="aspectFill"
-                      onError={() => markBroken(m.avatarUrl || '')}
+                <View className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0"
+                  style={{ border: '1.5px solid rgba(232,192,122,0.55)' }}
+                >
+                  <Image
+                    src={m.avatarUrl || ''}
+                    className="w-full h-full"
+                    mode="aspectFill"
+                    onError={() => markBroken(m.avatarUrl || '')}
+                  />
+                </View>
+                <View className="flex-1 ml-3.5 min-w-0">
+                  <View className="flex flex-row items-center">
+                    <Text className="text-xl font-bold whitespace-nowrap" style={{ color: '#f4dfb2' }}>{m.name}</Text>
+                    <View className="w-9 h-px flex-shrink-0 ml-2"
+                      style={{ background: 'linear-gradient(90deg,rgba(232,192,122,0),rgba(232,192,122,0.85),rgba(232,192,122,0))' }}
                     />
                   </View>
-                  <View className="flex-1 ml-3.5 min-w-0">
-                    <View className="flex flex-row items-center flex-wrap gap-2">
-                      <Text className="text-xl font-bold whitespace-nowrap" style={{ color: '#f4dfb2' }}>{m.name}</Text>
-                      {todayTag && (
-                        <Text className="text-sm whitespace-nowrap rounded-full px-2.5 py-0.5" style={{ backgroundColor: 'rgba(240,200,125,0.28)', color: '#f2ce8a' }}>{todayTag.label}</Text>
-                      )}
-                      {upcomingTag && (
-                        <Text className="text-sm whitespace-nowrap rounded-full px-2.5 py-0.5" style={{ backgroundColor: 'rgba(127,195,206,0.22)', color: '#8ad0d8' }}>{upcomingTag.label}</Text>
-                      )}
-                      {mineTag && (
-                        <Text className="text-sm whitespace-nowrap rounded-full px-2.5 py-0.5" style={{ backgroundColor: 'rgba(232,192,122,0.2)', color: '#e8c07a' }}>{mineTag.label}</Text>
-                      )}
-                    </View>
+                  <View className="flex flex-row items-center flex-wrap gap-2 mt-1.5">
+                    {todayTag && (
+                      <Text className="text-sm whitespace-nowrap rounded-full px-2.5 py-0.5" style={{ backgroundColor: 'rgba(240,200,125,0.28)', color: '#f2ce8a' }}>{todayTag.label}</Text>
+                    )}
+                    {upcomingTag && (
+                      <Text className="text-sm whitespace-nowrap rounded-full px-2.5 py-0.5" style={{ backgroundColor: 'rgba(127,195,206,0.22)', color: '#8ad0d8' }}>{upcomingTag.label}</Text>
+                    )}
+                    {mineTag && (
+                      <Text className="text-sm whitespace-nowrap rounded-full px-2.5 py-0.5" style={{ backgroundColor: 'rgba(232,192,122,0.2)', color: '#e8c07a' }}>{mineTag.label}</Text>
+                    )}
                   </View>
-                  <View className="flex-shrink-0 ml-2" onClick={(e) => quickWorship(m, e)}>
-                    <View className="rounded-full px-4 py-2.5 flex flex-row items-center gap-1.5"
-                      style={{ background: 'linear-gradient(90deg,#f0c87d,#d9a853)', opacity: worshiping === m.id ? 0.55 : 1 }}
-                    >
-                      <Flower2 color="#2e1f0f" size={20} strokeWidth={2} />
-                      <Text className="text-base font-bold text-[#2e1f0f]">献花</Text>
-                    </View>
+                  {intro && (
+                    <Text className="block mt-2 text-base leading-relaxed" style={{ color: 'rgba(195,206,210,0.92)' }} numberOfLines={2}>{intro}</Text>
+                  )}
+                </View>
+                <View className="flex-shrink-0 ml-2 self-center" onClick={(e) => quickWorship(m, e)}>
+                  <View className="w-16 h-16 rounded-full flex flex-col items-center justify-center gap-0.5"
+                    style={{
+                      background: 'linear-gradient(150deg,#f4d49a,#d9a853)',
+                      boxShadow: '0 4px 12px rgba(217,168,83,0.35)',
+                      opacity: worshiping === m.id ? 0.55 : 1
+                    }}
+                  >
+                    <Flower2 color="#2e1f0f" size={18} strokeWidth={2.2} />
+                    <Text className="font-bold" style={{ color: '#2e1f0f', fontSize: '12px' }}>献花</Text>
                   </View>
                 </View>
-                {intro && (
-                  <Text className="block mt-3 text-base leading-relaxed" style={{ color: 'rgba(190,204,208,0.9)' }} numberOfLines={2}>{intro}</Text>
-                )}
               </View>
             );
           })

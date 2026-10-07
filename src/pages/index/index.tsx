@@ -340,7 +340,7 @@ const IndexPage = () => {
                     onError={() => markBroken(m.avatarUrl || '')}
                   />
                 </View>
-                <View className="flex-1 ml-3.5 min-w-0">
+                <View className="flex-1 ml-5 min-w-0">
                   <View className="flex flex-row items-center">
                     <Text className="text-xl font-bold whitespace-nowrap" style={{ color: '#f4dfb2' }}>{m.name}</Text>
                     <View className="w-9 h-px flex-shrink-0 ml-2"
@@ -359,7 +359,7 @@ const IndexPage = () => {
                     )}
                   </View>
                   {intro && (
-                    <Text className="block mt-2 text-base leading-relaxed" style={{ color: 'rgba(195,206,210,0.92)' }} numberOfLines={2}>{intro}</Text>
+                    <Text className="block mt-2 text-sm leading-relaxed" style={{ color: 'rgba(200,210,214,0.95)' }} numberOfLines={2}>{intro}</Text>
                   )}
                 </View>
                 <View className="flex-shrink-0 ml-2 self-center" onClick={(e) => quickWorship(m, e)}>

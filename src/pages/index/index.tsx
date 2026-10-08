@@ -3,6 +3,7 @@ import Taro, { usePullDownRefresh, useReachBottom } from '@tarojs/taro';
 import { useState, useEffect, Component } from 'react';
 import { Network } from '@/network';
 import { StarsBackground } from '@/components/StarsBackground';
+import HomeTabBar from '@/components/HomeTabBar';
 import { Auth } from '@/auth';
 import { trackEvent } from '@/utils/track';
 import {
@@ -340,7 +341,7 @@ const IndexPage = () => {
         )}
         {/* 加载更多 */}
         {list.length > 0 && (
-          <View className="pt-2 pb-10 flex items-center justify-center">
+          <View className="pt-2 pb-28 flex items-center justify-center">
             {loading ? (
               <View className="flex flex-row items-center gap-2">
                 <View className="w-4 h-4 rounded-full border-2 border-[#e8c07a]/30 border-t-[#e8c07a] animate-spin" />
@@ -354,6 +355,7 @@ const IndexPage = () => {
           </View>
         )}
       </View>
+      <HomeTabBar />
     </StarsBackground>
   );
 };

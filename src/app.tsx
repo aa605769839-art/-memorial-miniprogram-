@@ -21,9 +21,35 @@ if (typeof window !== 'undefined') {
       /* ignore */
     }
   };
+  // 白屏自愈：捕获到脚本加载/求值失败（跨域 Script error）且页面空白时，
+  // 自动 reload 拉取最新资源（index.html no-store），清除旧缓存错配导致的加载失败。
+  const USESSION_KEY = 'mem_script_guard';
+  const tryRecover = () => {
+    try {
+      const now = Date.now();
+      const last = Number(sessionStorage.getItem(USESSION_KEY)) || 0;
+      if (now - last < 8000) {
+        return; // 避免死循环
+      }
+      sessionStorage.setItem(USESSION_KEY, String(now));
+      // 等浏览器完成渲染再判断是否真的空白
+      setTimeout(() => {
+        const len = document.body ? document.body.innerText.trim().length : 0;
+        if (len < 8) {
+          window.location.reload();
+        }
+      }, 400);
+    } catch (e) {
+      /* ignore */
+    }
+  };
   const prevErr = window.onerror;
   window.onerror = (message, source, lineno, colno, error) => {
-    report('app_global_error', `${message} @${source}:${lineno}:${colno} :: ${error?.stack || ''}`);
+    const msg = String(message || '');
+    if (msg.indexOf('Script error') >= 0) {
+      tryRecover();
+    }
+    report('app_global_error', `${msg} @${source}:${lineno}:${colno} :: ${error?.stack || ''}`);
     if (typeof prevErr === 'function') {
       prevErr.call(window, message, source, lineno, colno, error);
     }

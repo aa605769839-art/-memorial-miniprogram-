@@ -273,107 +273,73 @@ const ProfilePage = () => {
   return (
     <StarsBackground dim="light">
       {/* 顶部青蓝渐变头部 */}
-      <View className="px-5 pt-14 pb-16" style={{ background: 'linear-gradient(180deg, rgba(30,72,84,0.55) 0%, rgba(18,46,58,0.35) 100%)' }}>
-        <Text className="block text-white text-xl font-bold text-center">
-          个人中心
-        </Text>
-      </View>
+      <View className="px-5 pt-8 pb-12" style={{ background: 'linear-gradient(180deg, rgba(30,72,84,0.55) 0%, rgba(18,46,58,0.35) 100%)' }}>
+              </View>
 
       {/* 用户信息主卡片（上移覆盖头部） */}
-      <View className="px-4 -mt-14">
+      <View className="px-4 -mt-10">
         <View className="rounded-3xl overflow-hidden p-5"
           style={{ backgroundColor: 'rgba(18,42,53,0.85)', border: '1px solid rgba(232,192,122,0.4)' }}
         >
           {/* 卡片内渐变区 */}
           <View style={{ background: 'linear-gradient(135deg, rgba(64,110,120,0.6) 0%, rgba(40,80,95,0.5) 60%, rgba(60,50,30,0.4) 100%)' }} className="rounded-2xl p-5">
-            <View className="flex items-center gap-4">
-              <View className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+                        <View className="flex items-center gap-3">
+              <View className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
                 style={{ backgroundColor: 'rgba(143,212,218,0.3)', border: '2px solid rgba(232,192,122,0.6)' }}
               >
                 {userProfile.avatar ? (
                   <Image src={userProfile.avatar} className="w-full h-full" mode="aspectFill" />
                 ) : (
-                  <View
-                    className="w-full h-full flex items-center justify-center"
-                    style={{ background: 'linear-gradient(180deg,#6aa9b4,#3f8090)' }}
-                  >
-                    <User color="#ffffff" size={44} />
+                  <View className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#6aa9b4,#3f8090)' }}>
+                    <User color="#ffffff" size={28} />
                   </View>
                 )}
               </View>
               <View className="flex-1 min-w-0">
-                <Text className="block text-2xl font-extrabold text-white mb-2 whitespace-nowrap" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
-                  {displayName}
-                </Text>
-                <View className="flex flex-wrap gap-2">
-                  <View className="rounded-full px-3 py-1 flex items-center gap-1 flex-shrink-0"
-                    style={{ backgroundColor: 'rgba(246,240,224,0.18)', border: '1px solid rgba(232,192,122,0.4)' }}
-                  >
-                    <ShieldCheck color="#e8c07a" size={13} strokeWidth={3} />
+                <View className="flex items-center justify-between gap-2 flex-wrap min-w-0">
+                  <Text className="block text-xl font-extrabold text-white whitespace-nowrap flex-shrink-0" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+                    {displayName}
+                  </Text>
+                  {loginUser ? (
+                    <View className="flex items-center gap-1.5 flex-shrink-0">
+                      <Button style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto', minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none' }} onClick={handleEdit}>
+                        <View className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: 'transparent', border: '1px solid rgba(232,192,122,0.55)' }}>
+                          <Pencil color="#e8c07a" size={13} strokeWidth={2.2} />
+                          <Text className="text-xs font-semibold" style={{ color: '#e8c07a' }}>编辑资料</Text>
+                        </View>
+                      </Button>
+                      <Button style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto', minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none' }} onClick={() => setConfirmLogout(true)}>
+                        <View className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: 'transparent', border: '1px solid rgba(127,195,206,0.55)' }}>
+                          <LogOut color="#7fc3ce" size={13} strokeWidth={2.2} />
+                          <Text className="text-xs font-semibold" style={{ color: '#7fc3ce' }}>退出登录</Text>
+                        </View>
+                      </Button>
+                    </View>
+                  ) : (
+                    <View className="flex items-center flex-shrink-0">
+                      <Button style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto', minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none' }} onClick={openLogin}>
+                        <View className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: 'transparent', border: '1px solid rgba(232,192,122,0.6)' }}>
+                          <LogIn color="#e8c07a" size={13} strokeWidth={2.2} />
+                          <Text className="text-xs font-semibold" style={{ color: '#e8c07a' }}>登录 / 注册</Text>
+                        </View>
+                      </Button>
+                    </View>
+                  )}
+                </View>
+                <View className="mt-1.5 flex flex-wrap gap-1.5">
+                  <View className="rounded-full px-2.5 py-0.5 flex items-center gap-1 flex-shrink-0" style={{ backgroundColor: 'rgba(246,240,224,0.18)', border: '1px solid rgba(232,192,122,0.4)' }}>
+                    <ShieldCheck color="#e8c07a" size={12} strokeWidth={3} />
                     <Text className="text-[#f0d9a8] text-xs font-medium whitespace-nowrap">社区成员</Text>
                   </View>
                   {isAdmin && (
-                    <View className="rounded-full px-3 py-1 flex items-center gap-1 flex-shrink-0"
-                      style={{ backgroundColor: 'rgba(232,192,122,0.2)', border: '1px solid rgba(232,192,122,0.5)' }}
-                    >
-                      <Medal color="#e8c07a" size={13} strokeWidth={2.4} />
+                    <View className="rounded-full px-2.5 py-0.5 flex items-center gap-1 flex-shrink-0" style={{ backgroundColor: 'rgba(232,192,122,0.2)', border: '1px solid rgba(232,192,122,0.5)' }}>
+                      <Medal color="#e8c07a" size={12} strokeWidth={2.4} />
                       <Text className="text-[#e8c07a] text-xs font-medium whitespace-nowrap">管理员</Text>
                     </View>
                   )}
                 </View>
               </View>
-              {loginUser ? (
-                <>
-                  <Button
-                    className="flex-shrink-0"
-                    style={{
-                      background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto',
-                      minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none'
-                    }}
-                    onClick={handleEdit}
-                  >
-                    <View className="flex items-center gap-1 rounded-full px-3 py-1.5"
-                      style={{ background: 'transparent', border: '1px solid rgba(232,192,122,0.55)' }}
-                    >
-                      <Pencil color="#e8c07a" size={14} strokeWidth={2.2} />
-                      <Text className="text-sm font-semibold" style={{ color: '#e8c07a' }}>编辑资料</Text>
-                    </View>
-                  </Button>
-                  <Button
-                    className="flex-shrink-0"
-                    style={{
-                      background: 'transparent', border: 'none', padding: 0, margin: 0, marginLeft: 8, width: 'auto',
-                      minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none'
-                    }}
-                    onClick={() => setConfirmLogout(true)}
-                  >
-                    <View className="flex items-center gap-1 rounded-full px-3 py-1.5"
-                      style={{ background: 'transparent', border: '1px solid rgba(127,195,206,0.55)' }}
-                    >
-                      <LogOut color="#7fc3ce" size={14} strokeWidth={2.2} />
-                      <Text className="text-sm font-semibold" style={{ color: '#7fc3ce' }}>退出登录</Text>
-                    </View>
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  className="flex-shrink-0"
-                  style={{
-                    background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto',
-                    minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none'
-                  }}
-                  onClick={openLogin}
-                >
-                  <View className="flex items-center gap-1 rounded-full px-3.5 py-1.5"
-                    style={{ background: 'transparent', border: '1px solid rgba(232,192,122,0.6)' }}
-                  >
-                    <LogIn color="#e8c07a" size={14} strokeWidth={2.2} />
-                    <Text className="text-sm font-semibold" style={{ color: '#e8c07a' }}>登录 / 注册</Text>
-                  </View>
-                </Button>
-              )}
-            </View>
-          </View>
+            </View>          </View>
 
           {/* 数据统计栏 */}
           <View className="flex flex-row mt-2">

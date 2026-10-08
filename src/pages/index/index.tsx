@@ -75,7 +75,15 @@ const IndexPage = () => {
         }).catch(() => null),
       ]);
       const sBody: any = summaryRes?.data || summaryRes;
-      if (sBody?.code === 200) setSummary(sBody.data);
+      if (sBody?.code === 200 && sBody?.data) {
+        const d = sBody.data;
+        setSummary({
+          totalMemorials: Number(d.totalMemorials) || 0,
+          todayGifts: Number(d.todayGifts) || 0,
+          familyCount: Number(d.familyCount) || 0,
+          todayWorship: Number(d.todayWorship) || 0,
+        });
+      }
       const uBody: any = upcomingRes?.data || upcomingRes;
       if (uBody?.code === 200) {
         const arr = Array.isArray(uBody.data) ? uBody.data : [];

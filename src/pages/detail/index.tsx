@@ -97,6 +97,7 @@ interface Memorial {
   achievements: string[] | null;
   mourning_count: number;
   visit_count: number;
+  tribute_value?: number;
   photos?: Photo[];
   user_id?: string;
 }
@@ -181,6 +182,7 @@ const DetailPage = () => {
       achievements: pick(memorial, 'achievements'),
       visitCount: pick(memorial, 'visitCount', 'visit_count') ?? 0,
       mourningCount: pick(memorial, 'mourningCount', 'mourning_count') ?? 0,
+      tributeValue: pick(memorial, 'tributeValue', 'tribute_value') ?? 0,
       photos: pick(memorial, 'photos'),
       userId: pick(memorial, 'userId', 'user_id'),
     };
@@ -662,17 +664,19 @@ const DetailPage = () => {
             )}
           </View>
 
-          {/* 悼念人数 + 拜访数 */}
-          <View className="flex items-center justify-center gap-6 mb-2 rounded-full px-6 py-2"
-            style={{ backgroundColor: 'rgba(255,255,255,0.12)', border: '1px solid rgba(232,192,122,0.3)' }}
-          >
+          {/* 悼念人数 + 浏览数 + 悼念值（纯文字，无背景边框） */}
+          <View className="flex items-center justify-center gap-5 mb-2">
             <View className="flex items-center gap-1.5">
-              <Heart size={16} color="#e8c07a" />
+              <Heart size={14} color="#e8c07a" />
               <Text className="text-sm text-white font-medium">{mem.mourningCount} 次悼念</Text>
             </View>
             <View className="flex items-center gap-1.5">
-              <Eye size={16} color="#7fc3ce" />
-              <Text className="text-sm text-white font-medium">{mem.visitCount} 次拜访</Text>
+              <Eye size={14} color="#7fc3ce" />
+              <Text className="text-sm text-white font-medium">{mem.visitCount} 次浏览</Text>
+            </View>
+            <View className="flex items-center gap-1.5">
+              <Gift size={14} color="#e8c07a" />
+              <Text className="text-sm text-white font-medium">悼念值 {mem.tributeValue}</Text>
             </View>
           </View>
 
@@ -702,7 +706,7 @@ const DetailPage = () => {
           onClick={() => modeSwitch('online')}
         >
           <Flower2 size={16} color={mode === 'online' ? '#e8c07a' : '#8ea9b4'} />
-          <Text className="block text-sm font-medium text-white">线上悼念</Text>
+          <Text className="block text-sm font-medium text-white">悼念</Text>
         </View>
         <View
           className={`flex-1 rounded-full py-2 flex items-center justify-center gap-1.5 ${mode === 'offline' ? '' : 'opacity-55'}`}
@@ -713,7 +717,7 @@ const DetailPage = () => {
           onClick={() => modeSwitch('offline')}
         >
           <Camera size={16} color={mode === 'offline' ? '#7fc3ce' : '#8ea9b4'} />
-          <Text className="block text-sm font-medium text-white">线下悼念</Text>
+          <Text className="block text-sm font-medium text-white">拜访</Text>
         </View>
       </View>
 
@@ -840,18 +844,19 @@ const DetailPage = () => {
                       </View>
                       <Text className="block text-xs text-white/50">{formatTime(msg)}</Text>
                     </View>
-                    <View className="flex items-end gap-3">
-                      <View className="flex-shrink-0 flex items-center justify-center">
-                        <GiftIcon icon={pick(msg, 'gift_icon', 'giftIcon')} size="small" />
-                      </View>
-                      {pick(msg, 'message') && (
-                        <View className="flex-1 rounded-lg p-3"
-                          style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-                        >
-                          <Text className="block text-sm text-white/85 leading-relaxed">{pick(msg, 'message')}</Text>
+                    <View className="mt-2 pt-2 border-t flex flex-col items-center gap-1.5" style={{ borderColor: 'rgba(232,192,122,0.25)' }}>
+                        <View className="flex items-center justify-center">
+                          <GiftIcon icon={pick(msg, 'gift_icon', 'giftIcon')} size="normal" />
                         </View>
-                      )}
-                    </View>
+                        <Text className="block text-xs text-[#e8c07a]">消耗 {pick(msg, 'price') || 0} 积分</Text>
+                        {pick(msg, 'message') && (
+                          <View className="mt-1 w-full rounded-lg p-3"
+                            style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                          >
+                            <Text className="block text-sm text-white/85 leading-relaxed text-center">{pick(msg, 'message')}</Text>
+                          </View>
+                        )}
+                      </View>
                   </View>
                 );
               } else {
@@ -968,8 +973,8 @@ const DetailPage = () => {
       {/* 礼物选择弹窗 */}
       {showGiftModal && (
         <View
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50"
-          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          className="fixed inset-0 flex items-end z-50"
+          style={{ top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(8, 26, 38, 0.62)' }}
           onClick={(e: any) => {
             if (e.target === e.currentTarget) {
               setShowGiftModal(false);

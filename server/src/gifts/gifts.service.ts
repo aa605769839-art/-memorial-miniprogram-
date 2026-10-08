@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { eq, desc, count, inArray } from 'drizzle-orm';
+import { eq, desc, count, inArray, sql } from 'drizzle-orm';
 import { db } from '../storage/database/drizzle';
-import { gifts, memorials } from '../storage/database/shared/schema';
+import { gifts, memorials, giftConfigs } from '../storage/database/shared/schema';
 import { InsertGift } from '../storage/database/shared/schema';
 
 @Injectable()
@@ -75,6 +75,7 @@ export class GiftsService {
       gift_id: item.giftType,
       gift_name: item.giftName,
       gift_icon: item.giftIcon,
+      price: item.price ?? 0,
       sender: {
         name: item.senderName,
         avatar: item.senderAvatar,
@@ -84,17 +85,37 @@ export class GiftsService {
     }));
   }
 
-  // 创建礼物记录
+  // 创建礼物记录（同时在故人上累计悼念值，删除礼物不回退）
   async create(insertGift: InsertGift) {
+    // 根据 giftType（送礼时传的是 gift_config id）取积分
+    let price = 0;
+    if (insertGift.giftType) {
+      const [cfg] = await db.select({ price: giftConfigs.price })
+        .from(giftConfigs)
+        .where(eq(giftConfigs.id, insertGift.giftType))
+        .limit(1);
+      price = cfg?.price ?? 0;
+    }
     const row = await db.insert(gifts).values({
       memorialId: insertGift.memorialId!,
       giftType: insertGift.giftType!,
       giftName: insertGift.giftName!,
       senderName: insertGift.senderName || '访客',
+      price,
       ...(insertGift.giftIcon ? { giftIcon: insertGift.giftIcon } : {}),
       ...(insertGift.senderAvatar ? { senderAvatar: insertGift.senderAvatar } : {}),
       ...(insertGift.message ? { message: insertGift.message } : {}),
     }).returning();
+
+    // 悼念值累计（只增不减）
+    if (price > 0) {
+      await db.update(memorials)
+        .set({ tributeValue: sql`${memorials.tributeValue} + ${price}` })
+        .where(eq(memorials.id, insertGift.memorialId!))
+        .catch(() => {
+          /* 累计失败不阻断送礼 */
+        });
+    }
     return row[0];
   }
 }

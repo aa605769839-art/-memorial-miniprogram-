@@ -70,6 +70,8 @@ CREATE INDEX IF NOT EXISTS mem_offline_photo_memorial_idx ON memorial_offline_ph
 CREATE INDEX IF NOT EXISTS mem_offline_photo_user_idx ON memorial_offline_photo (user_id);
 CREATE INDEX IF NOT EXISTS mem_offline_photo_created_idx ON memorial_offline_photo (created_at);
 ALTER TABLE memorials ADD COLUMN IF NOT EXISTS allow_visitor_offline boolean NOT NULL DEFAULT false;
+ALTER TABLE memorials ADD COLUMN IF NOT EXISTS tribute_value integer NOT NULL DEFAULT 0;
+ALTER TABLE gifts ADD COLUMN IF NOT EXISTS price integer NOT NULL DEFAULT 0;
 `;
   try {
     await pool.query(ddl);

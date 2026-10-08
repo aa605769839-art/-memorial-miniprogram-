@@ -41,6 +41,7 @@ export const memorials = pgTable(
     isDeleted: boolean("is_deleted").default(false), // 逻辑删除
     mourningCount: integer("mourning_count").notNull().default(0),
     visitCount: integer("visit_count").notNull().default(0),
+    tributeValue: integer("tribute_value").notNull().default(0), // 悼念值（收到的所有悼念值积分累计，删除礼物不回退）
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -194,6 +195,7 @@ export const gifts = pgTable(
     giftType: varchar("gift_type", { length: 50 }).notNull(), // 礼物类型：flower, candle, wreath等
     giftName: varchar("gift_name", { length: 128 }).notNull(), // 礼物名称：鲜花、蜡烛、花圈
     giftIcon: text("gift_icon"), // 礼物图标URL
+    price: integer("price").notNull().default(0), // 礼物消耗积分（用于悼念值累计与展示）
     senderName: varchar("sender_name", { length: 128 }).notNull(), // 赠送者姓名
     senderAvatar: text("sender_avatar"), // 赠送者头像
     message: text("message"), // 留言信息

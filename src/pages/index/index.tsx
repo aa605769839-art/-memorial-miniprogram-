@@ -1,6 +1,6 @@
-import { View, Text, Image } from '@tarojs/components';
+import { View, Text, Image, Button } from '@tarojs/components';
 import Taro, { usePullDownRefresh, useReachBottom } from '@tarojs/taro';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Component } from 'react';
 import { Network } from '@/network';
 import { StarsBackground } from '@/components/StarsBackground';
 import { Auth } from '@/auth';
@@ -358,4 +358,36 @@ const IndexPage = () => {
   );
 };
 
-export default IndexPage;
+// 错误边界：兜底首页渲染异常，避免裸白屏并暴露真实错误
+class HomeBoundary extends Component<{ children: any }, { err: string }> {
+  state = { err: '' };
+  static getDerivedStateFromError(e: any) {
+    return { err: e?.message || String(e) };
+  }
+  componentDidCatch(e: any) {
+    console.error('HOME_PAGE_CRASH', e);
+  }
+  render() {
+    if (this.state.err) {
+      return (
+        <View className="flex flex-col items-center justify-center px-8"
+          style={{ minHeight: '100vh', backgroundColor: '#0a1920' }}
+        >
+          <Text className="block text-center text-white/80">纪念空间暂时加载失败</Text>
+          <Text className="block text-center text-white/50 text-xs mt-2" style={{ wordBreak: 'break-all' }}>{this.state.err}</Text>
+          <Button
+            onClick={() => Taro.reLaunch({ url: '/pages/index/index' })}
+            style={{ marginTop: 20, color: '#e8c07a', background: 'rgba(232,192,122,0.15)', borderRadius: 999 }}
+          >
+            重新加载
+          </Button>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function HomePage() {
+  return <HomeBoundary><IndexPage /></HomeBoundary>;
+}

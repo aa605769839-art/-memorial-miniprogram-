@@ -254,6 +254,10 @@ const ProfilePage = () => {
 
   // 功能列表（参考图语义映射到真实入口）
   const menuItems = [
+    { icon: Heart, color: '#C9A86A', label: '我的故友', onClick: handleAddMemorial }
+  ];
+  // 其余功能菜单项（我的故友已并入顶部菜单）
+  menuItems.push(
     { icon: Cross, color: '#48A8A8', label: '我的电子墓碑', onClick: () => goTo('/pages/profile/memorials') },
     { icon: Users, color: '#48A8A8', label: '家属管理', onClick: () => goTo('/pages/profile/family') },
     { icon: CalendarDays, color: '#C9A86A', label: '纪念日历', onClick: () => goTo('/pages/profile/calendar') },
@@ -261,7 +265,10 @@ const ProfilePage = () => {
     { icon: Flower2, color: '#C9A86A', label: '我的献花记录', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
     { icon: HeartHandshake, color: '#48A8A8', label: '暖心服务', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
     { icon: Settings, color: '#48A8A8', label: '设置与帮助', onClick: () => Taro.showToast({ title: '晚星纪念 v1.0', icon: 'none' }) }
-  ];
+  );
+  if (isAdmin) {
+    menuItems.push({ icon: Gift, color: '#C9A86A', label: '礼物配置管理', onClick: () => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' }) });
+  }
 
   return (
     <StarsBackground dim="light">
@@ -315,31 +322,56 @@ const ProfilePage = () => {
                   )}
                 </View>
               </View>
-              <Button
-                className="flex-shrink-0"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: 0,
-                  margin: 0,
-                  width: 'auto',
-                  minWidth: 0,
-                  height: 'auto',
-                  lineHeight: 'normal',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  boxShadow: 'none'
-                }}
-                onClick={handleEdit}
-              >
-                <View
-                  className="flex items-center gap-1 rounded-full px-3 py-1.5"
-                  style={{ background: 'linear-gradient(135deg,#e8c07a,#d9a84c)' }}
+              {loginUser ? (
+                <>
+                  <Button
+                    className="flex-shrink-0"
+                    style={{
+                      background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto',
+                      minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none'
+                    }}
+                    onClick={handleEdit}
+                  >
+                    <View className="flex items-center gap-1 rounded-full px-3 py-1.5"
+                      style={{ background: 'transparent', border: '1px solid rgba(232,192,122,0.55)' }}
+                    >
+                      <Pencil color="#e8c07a" size={14} strokeWidth={2.2} />
+                      <Text className="text-sm font-semibold" style={{ color: '#e8c07a' }}>编辑资料</Text>
+                    </View>
+                  </Button>
+                  <Button
+                    className="flex-shrink-0"
+                    style={{
+                      background: 'transparent', border: 'none', padding: 0, margin: 0, marginLeft: 8, width: 'auto',
+                      minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none'
+                    }}
+                    onClick={() => setConfirmLogout(true)}
+                  >
+                    <View className="flex items-center gap-1 rounded-full px-3 py-1.5"
+                      style={{ background: 'transparent', border: '1px solid rgba(127,195,206,0.55)' }}
+                    >
+                      <LogOut color="#7fc3ce" size={14} strokeWidth={2.2} />
+                      <Text className="text-sm font-semibold" style={{ color: '#7fc3ce' }}>退出登录</Text>
+                    </View>
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  className="flex-shrink-0"
+                  style={{
+                    background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto',
+                    minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none'
+                  }}
+                  onClick={openLogin}
                 >
-                  <Pencil color="#2e1f0f" size={14} strokeWidth={2.2} />
-                  <Text className="text-sm font-semibold" style={{ color: '#2e1f0f' }}>编辑资料</Text>
-                </View>
-              </Button>
+                  <View className="flex items-center gap-1 rounded-full px-3.5 py-1.5"
+                    style={{ background: 'transparent', border: '1px solid rgba(232,192,122,0.6)' }}
+                  >
+                    <LogIn color="#e8c07a" size={14} strokeWidth={2.2} />
+                    <Text className="text-sm font-semibold" style={{ color: '#e8c07a' }}>登录 / 注册</Text>
+                  </View>
+                </Button>
+              )}
             </View>
           </View>
 
@@ -396,126 +428,6 @@ const ProfilePage = () => {
         </View>
       </View>
 
-      {/* 登录/账号区域 */}
-      <View className="px-4 mt-5">
-        <View className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'rgba(18,42,53,0.75)', border: '1px solid rgba(232,192,122,0.25)' }}>
-          {loginUser ? (
-            <View className="px-5 py-4">
-              <View className="flex items-center gap-3">
-                <View className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: 'rgba(127,195,206,0.2)' }}
-                >
-                  <ShieldCheck color="#7fc3ce" size={20} />
-                </View>
-                <View className="flex-1 min-w-0">
-                  <Text className="block text-white/90 font-semibold whitespace-nowrap">
-                    {loginUser.nickname || loginUser.username}
-                  </Text>
-                  <Text className="block text-xs text-[#7fc3ce]/60 whitespace-nowrap">
-                    {isAdmin ? '管理员账号' : '普通用户'}
-                  </Text>
-                </View>
-                <Button
-                  className="flex-shrink-0"
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    padding: 0,
-                    margin: 0,
-                    width: 'auto',
-                    minWidth: 0,
-                    height: 'auto',
-                    lineHeight: 'normal',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    boxShadow: 'none'
-                  }}
-                  onClick={() => setConfirmLogout(true)}
-                >
-                  <View
-                    className="flex items-center gap-1 rounded-full px-3 py-1.5"
-                    style={{ backgroundColor: 'rgba(232,192,122,0.15)', border: '1px solid rgba(232,192,122,0.4)' }}
-                  >
-                    <LogOut color="#e8c07a" size={15} strokeWidth={2.2} />
-                    <Text className="text-sm font-semibold" style={{ color: '#e8c07a' }}>退出登录</Text>
-                  </View>
-                </Button>
-              </View>
-              {isAdmin && (
-                <View
-                  className="flex items-center justify-between mt-3 pt-3 border-t"
-                  style={{ borderColor: 'rgba(232,192,122,0.15)' }}
-                  onClick={() => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' })}
-                >
-                  <View className="flex items-center gap-2">
-                    <Gift color="#e8c07a" size={18} />
-                    <Text className="text-sm text-white/80">礼物配置管理</Text>
-                  </View>
-                  <ChevronRight color="#8ea9b4" size={18} />
-                </View>
-              )}
-            </View>
-          ) : (
-            <View className="px-5 py-4 flex items-center justify-between">
-              <View className="flex items-center gap-3">
-                <View className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: 'rgba(232,192,122,0.2)' }}
-                >
-                  <LogIn color="#e8c07a" size={20} />
-                </View>
-                <View>
-                  <Text className="block text-white/90 font-semibold">未登录</Text>
-                  <Text className="block text-xs text-[#8ea9b4]">登录后可创建与管理故友空间</Text>
-                </View>
-              </View>
-              <Button
-                className="flex-shrink-0"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: 0,
-                  margin: 0,
-                  width: 'auto',
-                  minWidth: 0,
-                  height: 'auto',
-                  lineHeight: 'normal',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  boxShadow: 'none'
-                }}
-                onClick={openLogin}
-              >
-                <View
-                  className="flex items-center gap-1 rounded-full px-3.5 py-1.5"
-                  style={{ background: 'linear-gradient(90deg,#e8c07a,#d9a84c)' }}
-                >
-                  <LogIn color="#2e1f0f" size={16} strokeWidth={2.3} />
-                  <Text className="text-sm font-semibold" style={{ color: '#2e1f0f' }}>登录 / 注册</Text>
-                </View>
-              </Button>
-            </View>
-          )}
-        </View>
-      </View>
-
-      {/* 我的故友入口 */}
-      <View className="px-4 mt-4">
-        <View
-          className="rounded-2xl flex items-center justify-between px-5 py-4"
-          style={{ backgroundColor: 'rgba(18,42,53,0.75)', border: '1px solid rgba(232,192,122,0.25)' }}
-          onClick={handleAddMemorial}
-        >
-          <View className="flex items-center gap-4">
-            <View className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: 'rgba(127,195,206,0.2)' }}
-            >
-              <Heart color="#7fc3ce" size={22} strokeWidth={1.8} />
-            </View>
-            <Text className="text-white/85 text-base">我的故友</Text>
-          </View>
-          <ChevronRight color="#8ea9b4" size={20} />
-        </View>
-      </View>
 
       {/* 编辑弹窗 */}
       {isEditing && (

@@ -274,7 +274,7 @@ const ProfilePage = () => {
     <StarsBackground dim="light">
       {/* 顶部青蓝渐变头部 */}
       <View className="px-5 pt-14 pb-16" style={{ background: 'linear-gradient(180deg, rgba(30,72,84,0.55) 0%, rgba(18,46,58,0.35) 100%)' }}>
-        <Text className="block text-white text-2xl font-bold text-center">
+        <Text className="block text-white text-xl font-bold text-center">
           个人中心
         </Text>
       </View>
@@ -302,7 +302,7 @@ const ProfilePage = () => {
                 )}
               </View>
               <View className="flex-1 min-w-0">
-                <Text className="block text-3xl font-extrabold text-white mb-2 whitespace-nowrap" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+                <Text className="block text-2xl font-extrabold text-white mb-2 whitespace-nowrap" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
                   {displayName}
                 </Text>
                 <View className="flex flex-wrap gap-2">
@@ -380,19 +380,19 @@ const ProfilePage = () => {
             <View className="flex-1 flex flex-col items-center py-3">
               <Gift color="#e8c07a" size={22} strokeWidth={1.8} />
               <Text className="block text-xs text-[#e8c07a]/60 mt-2 whitespace-nowrap">创建纪念册</Text>
-              <Text className="block text-2xl font-extrabold text-white mt-1">{isAdmin ? '2' : '—'}</Text>
+              <Text className="block text-xl font-extrabold text-white mt-1">{isAdmin ? '2' : '—'}</Text>
             </View>
             <View className="w-px my-3" style={{ backgroundColor: 'rgba(232,192,122,0.2)' }} />
             <View className="flex-1 flex flex-col items-center py-3">
               <BookOpen color="#7fc3ce" size={22} strokeWidth={1.8} />
               <Text className="block text-xs text-[#7fc3ce]/60 mt-2 whitespace-nowrap">参与纪念</Text>
-              <Text className="block text-2xl font-extrabold text-white mt-1">—</Text>
+              <Text className="block text-xl font-extrabold text-white mt-1">—</Text>
             </View>
             <View className="w-px my-3" style={{ backgroundColor: 'rgba(232,192,122,0.2)' }} />
             <View className="flex-1 flex flex-col items-center py-3">
               <Cross color="#7fc3ce" size={22} strokeWidth={1.8} />
               <Text className="block text-xs text-[#7fc3ce]/60 mt-2 whitespace-nowrap">亲友成员</Text>
-              <Text className="block text-2xl font-extrabold text-white mt-1">—</Text>
+              <Text className="block text-xl font-extrabold text-white mt-1">—</Text>
             </View>
           </View>
         </View>

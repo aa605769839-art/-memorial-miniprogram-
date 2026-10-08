@@ -263,7 +263,7 @@ const ProfilePage = () => {
     { icon: BookOpen, color: '#48A8A8', label: '我的故事', onClick: () => goTo('/pages/profile/memorials') },
     { icon: Flower2, color: '#C9A86A', label: '我的献花记录', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
     { icon: HeartHandshake, color: '#48A8A8', label: '暖心服务', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
-    { icon: Settings, color: '#48A8A8', label: '设置与帮助', onClick: () => { if (loginUser) { Taro.showActionSheet({ itemList: ['退出登录'], success: (r) => { if (r.tapIndex === 0) setConfirmLogout(true); }, fail: () => {} }); } else { Taro.showToast({ title: '晚星纪念 v1.0', icon: 'none' }); } } }
+    { icon: Settings, color: '#48A8A8', label: '设置与帮助', onClick: () => Taro.navigateTo({ url: '/pages/profile/settings' }) }
   );
   if (isAdmin) {
     menuItems.push({ icon: Gift, color: '#C9A86A', label: '礼物配置管理', onClick: () => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' }) });
@@ -302,8 +302,8 @@ const ProfilePage = () => {
                     </Text>
                     {loginUser && (
                       <Button style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto', minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none' }} onClick={handleEdit}>
-                        <View className="flex items-center justify-center" style={{ width: 30, height: 30, borderRadius: 999, background: 'rgba(232,192,122,0.16)', border: '1px solid rgba(232,192,122,0.45)' }}>
-                          <Pencil color="#e8c07a" size={15} strokeWidth={2.2} />
+                        <View className="flex items-center justify-center" style={{ width: 24, height: 24, borderRadius: 999, background: 'rgba(232,192,122,0.12)', border: '1px solid rgba(232,192,122,0.35)' }}>
+                          <Pencil color="#e8c07a" size={11} strokeWidth={2.5} />
                         </View>
                       </Button>
                     )}

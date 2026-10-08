@@ -10,6 +10,7 @@ export default defineAppConfig({
     'pages/profile/memorials',
     'pages/profile/family',
     'pages/profile/calendar',
+    'pages/profile/settings',
     'pages/admin/gift-configs/index'
   ],
   window: {

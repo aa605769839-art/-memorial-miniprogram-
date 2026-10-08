@@ -271,9 +271,16 @@ const ProfilePage = () => {
 
   return (
     <StarsBackground dim="none">
-      {/* 顶部青蓝渐变头部 */}
-      <View className="px-5 pt-8 pb-12" style={{ background: 'linear-gradient(180deg, rgba(30,72,84,0.55) 0%, rgba(18,46,58,0.35) 100%)' }}>
-              </View>
+      {/* 顶部青蓝渐变头部（取消了导航栏，这里补标题与状态栏安全间距） */}
+      <View
+        className="px-5 pb-12"
+        style={{
+          background: 'linear-gradient(180deg, rgba(30,72,84,0.55) 0%, rgba(18,46,58,0.35) 100%)',
+          paddingTop: (Taro.getSystemInfoSync().statusBarHeight || 0) + 12
+        }}
+      >
+        <Text className="block text-center text-xl font-bold text-white">我的</Text>
+      </View>
 
       {/* 用户信息主卡片（上移覆盖头部） */}
       <View className="px-4 -mt-10">

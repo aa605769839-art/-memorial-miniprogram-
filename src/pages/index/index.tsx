@@ -55,7 +55,6 @@ const IndexPage = () => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [brokenImgs, setBrokenImgs] = useState<Record<string, boolean>>({});
-  const [worshiping, setWorshiping] = useState<string | null>(null);
 
   const markBroken = (url: string) => {
     if (url && !brokenImgs[url]) setBrokenImgs((s) => ({ ...s, [url]: true }));
@@ -140,41 +139,6 @@ const IndexPage = () => {
     fetchAll(true);
   }, []);
 
-  // 快捷献花
-  const quickWorship = async (item: RecommendItem, e: any) => {
-    e.stopPropagation?.();
-    trackEvent('home_quick_worship', { memorialId: item.id });
-    if (worshiping) return;
-    setWorshiping(item.id);
-    const user = Auth.getUser();
-    const userProfile: any = Taro.getStorageSync('userProfile');
-    const senderName = user?.nickname || userProfile?.name || '访客';
-    try {
-      const res: any = await Network.request({
-        url: '/api/gifts',
-        method: 'POST',
-        data: {
-          memorialId: item.id,
-          giftType: 'flower',
-          giftName: '鲜花',
-          giftIcon: '',
-          senderName,
-          message: '',
-        },
-      });
-      const body = res?.data || res;
-      if (body?.code === 200) {
-        Taro.showToast({ title: '献花成功', icon: 'success' });
-        setList((prev) => prev.map((it) => (it.id === item.id ? { ...it, mourningCount: (it.mourningCount || 0) + 1 } : it)));
-      } else {
-        Taro.showToast({ title: body?.msg || '献花失败', icon: 'none' });
-      }
-    } catch {
-      Taro.showToast({ title: '网络异常，请稍后重试', icon: 'none' });
-    } finally {
-      setWorshiping(null);
-    }
-  };
 
   // 近期纪念日点击
   const goRecent = (item: UpcomingItem) => {
@@ -369,18 +333,6 @@ const IndexPage = () => {
                   {intro && (
                     <Text className="block mt-2 text-sm leading-relaxed" style={{ color: 'rgba(200,210,214,0.95)' }} numberOfLines={2}>{intro}</Text>
                   )}
-                </View>
-                <View className="flex-shrink-0 ml-2 self-center" onClick={(e) => quickWorship(m, e)}>
-                  <View className="w-16 h-16 rounded-full flex flex-col items-center justify-center gap-0.5"
-                    style={{
-                      background: 'linear-gradient(150deg,#f4d49a,#d9a853)',
-                      boxShadow: '0 4px 12px rgba(217,168,83,0.35)',
-                      opacity: worshiping === m.id ? 0.55 : 1
-                    }}
-                  >
-                    <Flower2 color="#2e1f0f" size={18} strokeWidth={2.2} />
-                    <Text className="font-bold" style={{ color: '#2e1f0f', fontSize: '12px' }}>献花</Text>
-                  </View>
                 </View>
               </View>
             );

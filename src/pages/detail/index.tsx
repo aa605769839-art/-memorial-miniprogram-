@@ -373,22 +373,6 @@ const DetailPage = () => {
     }
   };
 
-  // 拜访
-  const handleVisit = async () => {
-    if (!id) return;
-    try {
-      await Network.request({
-        url: '/api/visits',
-        method: 'POST',
-        data: { memorialId: id, visitorName: visitorName.trim() || '访客' }
-      });
-      Taro.showToast({ title: '拜访成功', icon: 'success' });
-      fetchMemorial();
-    } catch (error) {
-      console.error('Failed to visit:', error);
-      Taro.showToast({ title: '拜访失败', icon: 'none' });
-    }
-  };
 
   // 分享墓碑（复制链接）
   const handleShare = async () => {
@@ -621,16 +605,21 @@ const DetailPage = () => {
         <View className="p-2 bg-white/10 rounded-full" onClick={handleBack}>
           <ArrowLeft color="#ffffff" size={22} />
         </View>
-        {isCreator && (
-          <View className="flex gap-2">
+        <View className="flex gap-2">
+          {isCreator && (
             <View className="p-2 bg-white/10 rounded-full" onClick={handleEdit}>
               <Pencil color="#ffffff" size={22} />
             </View>
+          )}
+          {isCreator && (
             <View className="p-2 bg-white/10 rounded-full" onClick={handleDeleteMemorial}>
               <Trash2 color="#ffffff" size={22} />
             </View>
+          )}
+          <View className="p-2 bg-white/10 rounded-full" onClick={handleShare}>
+            <Share2 color="#ffffff" size={22} />
           </View>
-        )}
+        </View>
       </View>
 
       {/* 头像和基本信息 */}
@@ -807,57 +796,6 @@ const DetailPage = () => {
         </View>
       )}
 
-      {/* 底部操作按钮 */}
-      <View
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 40,
-          display: 'flex',
-          flexDirection: 'row',
-          gap: '12px',
-          padding: '12px',
-          backgroundColor: 'rgba(11,28,38,0.92)',
-          borderTop: '1px solid rgba(232,192,122,0.35)',
-          backdropFilter: 'blur(12px)'
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Button
-            className="!rounded-full !py-3 !border-0 flex items-center justify-center gap-2 shadow-md"
-            style={{ background: 'linear-gradient(90deg,#e8c07a,#d9a84c)', color: '#2e1f0f' }}
-            onClick={() => {
-              fetchGiftConfigs();
-              setShowGiftModal(true);
-            }}
-          >
-            <Gift size={18} color="#2e1f0f" />
-            <Text>悼念</Text>
-          </Button>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button
-            className="!rounded-full !py-3 !border-0"
-            style={{ backgroundColor: 'rgba(232,192,122,0.15)', color: '#e8c07a' }}
-            onClick={handleVisit}
-          >
-            <Text>拜访</Text>
-          </Button>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button
-            className="!rounded-full !py-3 !border-0 flex items-center justify-center gap-2"
-            style={{ backgroundColor: 'rgba(127,195,206,0.18)', color: '#7fc3ce' }}
-            onClick={handleShare}
-          >
-            <Share2 size={17} />
-            <Text>分享</Text>
-          </Button>
-        </View>
-      </View>
-
       {/* 留言区域 */}
       {mode === 'online' && (
       <View className="mt-5 mx-4 rounded-3xl px-6 py-5 mb-4"
@@ -881,10 +819,10 @@ const DetailPage = () => {
                 const senderName = pick((msg as any).sender, 'name');
                 const senderAvatar = pick((msg as any).sender, 'avatar');
                 return (
-                  <View key={msg.id} className="rounded-2xl p-4"
+                  <View key={msg.id} className="rounded-2xl p-3"
                     style={{ backgroundColor: 'rgba(232,192,122,0.12)', border: '1px solid rgba(232,192,122,0.4)' }}
                   >
-                    <View className="flex items-center justify-between mb-3">
+                    <View className="flex items-center justify-between mb-2">
                       <View className="flex items-center gap-2">
                         <View className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center"
                           style={{ backgroundColor: 'rgba(232,192,122,0.25)' }}
@@ -904,7 +842,7 @@ const DetailPage = () => {
                     </View>
                     <View className="flex items-end gap-3">
                       <View className="flex-shrink-0 flex items-center justify-center">
-                        <GiftIcon icon={pick(msg, 'gift_icon', 'giftIcon')} size="large" />
+                        <GiftIcon icon={pick(msg, 'gift_icon', 'giftIcon')} size="small" />
                       </View>
                       {pick(msg, 'message') && (
                         <View className="flex-1 rounded-lg p-3"
@@ -995,16 +933,33 @@ const DetailPage = () => {
             </View>
           </View>
 
-          {/* 发送按钮 */}
-          <View className="flex justify-end">
-            <Button
-              className="!rounded-full !px-6 !py-2 !border-0 flex items-center gap-2"
-              style={{ backgroundColor: '#e8c07a', color: '#2e1f0f' }}
-              onClick={handleComment}
-            >
-              <Send size={16} color="#2e1f0f" />
-              <Text>发送</Text>
-            </Button>
+          {/* 操作行：赠礼物 + 发送留言 */}
+          <View style={{ display: 'flex', flexDirection: 'row', gap: '10px', marginTop: '12px' }}>
+            <View style={{ flex: 1 }}>
+              <Button
+                className="!rounded-full !py-2 !border-0 flex items-center justify-center gap-1.5"
+                style={{ backgroundColor: 'rgba(232,192,122,0.16)', color: '#e8c07a' }}
+                onClick={() => {
+                  fetchGiftConfigs();
+                  setSelectedGift(null);
+                  setGiftMessage('');
+                  setShowGiftModal(true);
+                }}
+              >
+                <Gift size={16} color="#e8c07a" />
+                <Text>赠礼物</Text>
+              </Button>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                className="!rounded-full !px-6 !py-2 !border-0 flex items-center gap-2"
+                style={{ backgroundColor: '#e8c07a', color: '#2e1f0f' }}
+                onClick={handleComment}
+              >
+                <Send size={16} color="#2e1f0f" />
+                <Text>发送</Text>
+              </Button>
+            </View>
           </View>
         </View>
       </View>

@@ -270,7 +270,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <StarsBackground dim="light">
+    <StarsBackground dim="none">
       {/* 顶部青蓝渐变头部 */}
       <View className="px-5 pt-8 pb-12" style={{ background: 'linear-gradient(180deg, rgba(30,72,84,0.55) 0%, rgba(18,46,58,0.35) 100%)' }}>
               </View>

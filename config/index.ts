@@ -172,7 +172,11 @@ export default defineConfig<'vite'>(async (merge, _env) => {
       publicPath: BASE_PATH ? `${BASE_PATH}/` : './',
       staticDirectory: 'static',
       router: {
-        mode: 'hash',
+        mode: 'browser',
+        basename: BASE_PATH || '/',
+        customRoutes: {
+          '/pages/index/index': '/',
+        },
       },
       devServer: {
         port: 5000,

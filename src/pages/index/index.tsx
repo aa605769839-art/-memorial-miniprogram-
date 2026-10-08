@@ -366,6 +366,11 @@ class HomeBoundary extends Component<{ children: any }, { err: string }> {
   }
   componentDidCatch(e: any) {
     console.error('HOME_PAGE_CRASH', e);
+    try {
+      trackEvent('home_page_error', { msg: e?.message || String(e) });
+    } catch {
+      /* 上报失败静默 */
+    }
   }
   render() {
     if (this.state.err) {

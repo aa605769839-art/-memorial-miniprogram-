@@ -17,8 +17,7 @@ import {
   Cross,
   Flower2,
   CalendarDays,
-  Pencil,
-  LogOut
+  Pencil
 } from 'lucide-react-taro';
 import { Network } from '@/network';
 import { uploadCrossPlatform } from '@/utils/upload';
@@ -264,7 +263,7 @@ const ProfilePage = () => {
     { icon: BookOpen, color: '#48A8A8', label: '我的故事', onClick: () => goTo('/pages/profile/memorials') },
     { icon: Flower2, color: '#C9A86A', label: '我的献花记录', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
     { icon: HeartHandshake, color: '#48A8A8', label: '暖心服务', onClick: () => Taro.switchTab({ url: '/pages/memorial/index' }) },
-    { icon: Settings, color: '#48A8A8', label: '设置与帮助', onClick: () => Taro.showToast({ title: '晚星纪念 v1.0', icon: 'none' }) }
+    { icon: Settings, color: '#48A8A8', label: '设置与帮助', onClick: () => { if (loginUser) { Taro.showActionSheet({ itemList: ['退出登录'], success: (r) => { if (r.tapIndex === 0) setConfirmLogout(true); }, fail: () => {} }); } else { Taro.showToast({ title: '晚星纪念 v1.0', icon: 'none' }); } } }
   );
   if (isAdmin) {
     menuItems.push({ icon: Gift, color: '#C9A86A', label: '礼物配置管理', onClick: () => Taro.navigateTo({ url: '/pages/admin/gift-configs/index' }) });
@@ -297,25 +296,19 @@ const ProfilePage = () => {
               </View>
               <View className="flex-1 min-w-0">
                 <View className="flex items-center justify-between gap-2 flex-wrap min-w-0">
-                  <Text className="block text-xl font-extrabold text-white whitespace-nowrap flex-shrink-0" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
-                    {displayName}
-                  </Text>
-                  {loginUser ? (
-                    <View className="flex items-center gap-1.5 flex-shrink-0">
+                  <View className="flex items-center gap-1.5 min-w-0 flex-shrink-0">
+                    <Text className="block text-xl font-extrabold text-white whitespace-nowrap flex-shrink-0" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+                      {displayName}
+                    </Text>
+                    {loginUser && (
                       <Button style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto', minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none' }} onClick={handleEdit}>
-                        <View className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: 'transparent', border: '1px solid rgba(232,192,122,0.55)' }}>
-                          <Pencil color="#e8c07a" size={13} strokeWidth={2.2} />
-                          <Text className="text-xs font-semibold" style={{ color: '#e8c07a' }}>编辑资料</Text>
+                        <View className="flex items-center justify-center" style={{ width: 30, height: 30, borderRadius: 999, background: 'rgba(232,192,122,0.16)', border: '1px solid rgba(232,192,122,0.45)' }}>
+                          <Pencil color="#e8c07a" size={15} strokeWidth={2.2} />
                         </View>
                       </Button>
-                      <Button style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto', minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none' }} onClick={() => setConfirmLogout(true)}>
-                        <View className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: 'transparent', border: '1px solid rgba(127,195,206,0.55)' }}>
-                          <LogOut color="#7fc3ce" size={13} strokeWidth={2.2} />
-                          <Text className="text-xs font-semibold" style={{ color: '#7fc3ce' }}>退出登录</Text>
-                        </View>
-                      </Button>
-                    </View>
-                  ) : (
+                    )}
+                  </View>
+                  {!loginUser && (
                     <View className="flex items-center flex-shrink-0">
                       <Button style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, width: 'auto', minWidth: 0, height: 'auto', lineHeight: 'normal', display: 'inline-flex', alignItems: 'center', boxShadow: 'none' }} onClick={openLogin}>
                         <View className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: 'transparent', border: '1px solid rgba(232,192,122,0.6)' }}>
@@ -325,6 +318,7 @@ const ProfilePage = () => {
                       </Button>
                     </View>
                   )}
+
                 </View>
                 <View className="mt-1.5 flex flex-wrap gap-1.5">
                   <View className="rounded-full px-2.5 py-0.5 flex items-center gap-1 flex-shrink-0" style={{ backgroundColor: 'rgba(246,240,224,0.18)', border: '1px solid rgba(232,192,122,0.4)' }}>
